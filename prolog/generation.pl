@@ -54,12 +54,15 @@ requirements(Rs) :-
 
 req_with_slots(R, R-Slots) :- R = req(_,_,_,N), length(Slots, N).
 
+% упорядоченное множество групп
 groups(Groups) :-
         setof(C, S^N^T^group_subject_teacher_times(C,S,T,N), Groups).
 
+% упорядоченное множество преподавателей
 teachers(Teachers) :-
         setof(T, C^S^N^group_subject_teacher_times(C,S,T,N), Teachers).
 
+% упорядоченное множество комнат
 rooms(Rooms) :-
         findall(Room, room_alloc(Room,_C,_S,_Slot), Rooms0),
         sort(Rooms0, Rooms).
@@ -159,7 +162,7 @@ pairs_slots(Ps, Vs) :-
    Relate teachers and groups to list of days.
 
    Each day is a list of subjects (for groups), and a list of
-   class/subject terms (for teachers). The predicate days_variables/2
+   group/subject terms (for teachers). The predicate days_variables/2
    yields a list of days with the right dimensions, where each element
    is a free variable.
 
@@ -203,21 +206,23 @@ v_teacher(Rs, V, N0, N) :-
         N #= N0 + 1.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Print objects in roster.
+   Отображение объектов
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-print_classes(Rs) :-
+% Отрисовать расписания всех групп
+print_groups(Rs) :-
         groups(Cs),
-        phrase_to_stream(format_classes(Cs, Rs), user_output).
+        phrase_to_stream(format_groups(Cs, Rs), user_output).
 
-format_classes([], _) --> [].
-format_classes([Group|Groups], Rs) -->
+% Форматирование вывода для каждой группы
+format_groups([], _) --> [].
+format_groups([Group|Groups], Rs) -->
         { group_days(Rs, Group, Days0),
           transpose(Days0, Days) },
         format_("Group: ~w~2n", [Group]),
         weekdays_header,
         align_rows(Days),
-        format_classes(Groups, Rs).
+        format_groups(Groups, Rs).
 
 align_rows([]) --> "\n\n\n".
 align_rows([R|Rs]) -->
@@ -235,10 +240,12 @@ align_(group_subject(C,S)) --> align_(verbatim(C/S)).
 align_(subject(S))         --> align_(verbatim(S)).
 align_(verbatim(Element))  --> format_("~t~w~t~15+", [Element]).
 
+% Вывод расписаний преподавателей
 print_teachers(Rs) :-
         teachers(Ts),
         phrase_to_stream(format_teachers(Ts, Rs), user_output).
 
+% Форматирование вывода
 format_teachers([], _) --> [].
 format_teachers([T|Ts], Rs) -->
         { teacher_days(Rs, T, Days0),
@@ -248,6 +255,7 @@ format_teachers([T|Ts], Rs) -->
         align_rows(Days),
         format_teachers(Ts, Rs).
 
+% Форматирование дней недели
 weekdays_header -->
         { maplist(with_verbatim,
                   ['Mon','Tue','Wed','Thu','Fri','Sat'],
@@ -261,7 +269,7 @@ with_verbatim(T, verbatim(T)).
    ?- consult('reqs_example.pl'),
       requirements_variables(Rs, Vs),
       labeling([ff], Vs),
-      print_classes(Rs).
+      print_groups(Rs).
    %@ Group: 1a
    %@
    %@   Mon     Tue     Wed     Thu     Fri
