@@ -1,11 +1,8 @@
 package ru.nsu.timetable.controllers;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,53 +11,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.TimetableDTO;
-import ru.nsu.timetable.models.entities.Timetable;
-import ru.nsu.timetable.models.mappers.TimetableMapper;
 import ru.nsu.timetable.services.TimetableService;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/timetables")
+@RequestMapping("/api/v1/management")
 public class TimetableController {
     private final TimetableService timetableService;
-    private final TimetableMapper timetableMapper;
 
-    @Autowired
-    public TimetableController(TimetableService timetableService, TimetableMapper timetableMapper) {
-        this.timetableService = timetableService;
-        this.timetableMapper = timetableMapper;
-    }
-
-    @GetMapping
+    @GetMapping("/timetables")
     public List<TimetableDTO> getAllTimetables() {
-        return timetableService.getAllTimetables()
-                .stream()
-                .map(timetableMapper::toTimetableDTO)
-                .toList();
+        return timetableService.getAllTimetables();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TimetableDTO> getTimetableById(@PathVariable Long id) {
-        return timetableService.getTimetableById(id)
-                .map(timetableMapper::toTimetableDTO)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/timetables/{id}")
+    public TimetableDTO getTimetableById(@PathVariable Long id) {
+        return timetableService.getTimetableById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<TimetableDTO> createTimetable(@RequestBody TimetableDTO timetableDTO) {
-        Timetable timetable = timetableMapper.toTimetable(timetableDTO);
-        Timetable savedTimetable = timetableService.saveTimetable(timetable);
-        return ResponseEntity.created(URI.create("/timetables/" + savedTimetable.getId()))
-                .body(timetableMapper.toTimetableDTO(savedTimetable));
+    @PostMapping("/timetables")
+    public TimetableDTO createTimetable(@RequestBody TimetableDTO timetableDTO) {
+        return timetableService.saveTimetable(timetableDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTimetable(@PathVariable Long id) {
-        Optional<Timetable> timetable = timetableService.getTimetableById(id);
-        if (timetable.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/timetables/{id}")
+    public void deleteTimetable(@PathVariable Long id) {
         timetableService.deleteTimetable(id);
-        return ResponseEntity.noContent().build();
     }
 }

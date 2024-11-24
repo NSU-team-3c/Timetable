@@ -27,7 +27,7 @@ public class UserMapper {
         );
     }
 
-    public User toEntity(UserDTO userDTO) {
+    public User toUser(UserDTO userDTO) {
         User user = new User();
         user.setId(userDTO.id());
         user.setFullName(userDTO.fullName());

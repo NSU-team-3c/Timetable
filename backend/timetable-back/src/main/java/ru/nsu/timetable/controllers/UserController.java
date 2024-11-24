@@ -1,11 +1,8 @@
 package ru.nsu.timetable.controllers;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,53 +11,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.UserDTO;
-import ru.nsu.timetable.models.entities.User;
-import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.services.UserService;
 
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/management")
 public class UserController {
     private final UserService userService;
-    private final UserMapper userMapper;
 
-    @Autowired
-    public UserController(UserService userService, UserMapper userMapper) {
-        this.userService = userService;
-        this.userMapper = userMapper;
-    }
-
-    @GetMapping
+    @GetMapping("/users")
     public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers()
-                .stream()
-                .map(userMapper::toUserDTO)
-                .toList();
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(userMapper::toUserDTO)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/users/{id}")
+    public UserDTO getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        User user = userMapper.toEntity(userDTO);
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.created(URI.create("/users/" + savedUser.getId()))
-                .body(userMapper.toUserDTO(savedUser));
+    @PostMapping("/users")
+    public UserDTO createUser(@RequestBody UserDTO userDTO) {
+        return userService.saveUser(userDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
     }
 }

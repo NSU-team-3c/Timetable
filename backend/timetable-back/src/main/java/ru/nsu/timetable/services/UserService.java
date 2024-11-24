@@ -2,50 +2,64 @@ package ru.nsu.timetable.services;
 
 import java.util.*;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
+import ru.nsu.timetable.models.dto.UserDTO;
 import ru.nsu.timetable.models.entities.Operations;
 import ru.nsu.timetable.models.entities.Role;
 import ru.nsu.timetable.models.entities.User;
+import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.repositories.OperationsRepository;
 import ru.nsu.timetable.repositories.RoleRepository;
 import ru.nsu.timetable.repositories.UserRepository;
 
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final OperationsRepository operationsRepository;
 
-    @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository,
-                       PasswordEncoder encoder, OperationsRepository operationsRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.encoder = encoder;
-        this.operationsRepository = operationsRepository;
+    public List<UserDTO> getAllUsers() {
+        return userRepository
+                .findAll()
+                .stream()
+                .map(userMapper::toUserDTO)
+                .toList();
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public UserDTO getUserById(Long id) {
+        return userMapper.toUserDTO(getUser(id));
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public UserDTO saveUser(UserDTO userDTO) {
+        User user = userMapper.toUser(userDTO);
+        return userMapper.toUserDTO(userRepository.save(user));
     }
 
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+    }
+
+    private User getUser(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        } else {
+            return user.get();
+        }
     }
 
     public boolean existByEmailCheck(String email) {

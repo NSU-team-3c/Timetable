@@ -3,34 +3,52 @@ package ru.nsu.timetable.services;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.ResourceNotFoundException;
+import ru.nsu.timetable.models.dto.TimeSlotDTO;
 import ru.nsu.timetable.models.entities.TimeSlot;
+import ru.nsu.timetable.models.mappers.TimeSlotMapper;
 import ru.nsu.timetable.repositories.TimeSlotRepository;
 
+@RequiredArgsConstructor
 @Service
 public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
+    private final TimeSlotMapper timeSlotMapper;
 
-    @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository) {
-        this.timeSlotRepository = timeSlotRepository;
+    public List<TimeSlotDTO> getAllTimeSlots() {
+        return timeSlotRepository
+                .findAll()
+                .stream()
+                .map(timeSlotMapper::toTimeSlotDTO)
+                .toList();
     }
 
-    public List<TimeSlot> getAllTimeSlots() {
-        return timeSlotRepository.findAll();
+    public TimeSlotDTO getTimeSlotById(Long id) {
+        return timeSlotMapper.toTimeSlotDTO(getTimeSlot(id));
     }
 
-    public Optional<TimeSlot> getTimeSlotById(Long id) {
-        return timeSlotRepository.findById(id);
-    }
-
-    public TimeSlot saveTimeSlot(TimeSlot timeSlot) {
-        return timeSlotRepository.save(timeSlot);
+    public TimeSlotDTO saveTimeSlot(TimeSlotDTO timeSlotDTO) {
+        TimeSlot timeSlot = timeSlotMapper.toTimeSlot(timeSlotDTO);
+        return timeSlotMapper.toTimeSlotDTO(timeSlotRepository.save(timeSlot));
     }
 
     public void deleteTimeSlot(Long id) {
-        timeSlotRepository.deleteById(id);
+        if (timeSlotRepository.existsById(id)) {
+            timeSlotRepository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("TimeSlot with id " + id + " not found");
+        }
+    }
+
+    private TimeSlot getTimeSlot(Long id) {
+        Optional<TimeSlot> timeSlot = timeSlotRepository.findById(id);
+        if (timeSlot.isEmpty()) {
+            throw new ResourceNotFoundException("TimeSlot with id " + id + " not found");
+        } else {
+            return timeSlot.get();
+        }
     }
 }
 
