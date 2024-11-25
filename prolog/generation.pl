@@ -78,10 +78,11 @@ requirements_variables(Rs, Vars) :-
         teachers(Teachers),
         rooms(Rooms),
         maplist(constrain_teacher(Rs), Teachers),
-        maplist(constrain_class(Rs), Groups),
+        maplist(constrain_group(Rs), Groups),
         maplist(constrain_room(Rs), Rooms).
 
-slot_quotient(S, Q) :-
+% в каком дне недели располагается слот
+slot_day(S, Q) :-
         slots_per_day(SPD),
         Q #= S // SPD.
 
@@ -89,7 +90,7 @@ slot_quotient(S, Q) :-
 list_without_nths(Es0, Ws, Es) :-
         phrase(without_(Ws, 0, Es0), Es).
 
-without_([], _, Es) --> seq(Es).
+without_([], _, Es) --> seq(Es). 
 without_([W|Ws], Pos0, [E|Es]) -->
         { Pos #= Pos0 + 1,
           zcompare(R, W, Pos0) },
@@ -99,19 +100,18 @@ without_([W|Ws], Pos0, [E|Es]) -->
 without_at_pos0(=, _, [_|Ws], Ws) --> [].
 without_at_pos0(>, E, Ws0, Ws0) --> [E].
 
-%:- list_without_nths("abcd", [3], "abc").
-%:- list_without_nths("abcd", [1,2], "ad").
-
+% совместные пары (пары, которые идут подряд в расписании)
 slots_couplings(Slots, F-S) :-
         nth0(F, Slots, S1),
         nth0(S, Slots, S2),
         S2 #= S1 + 1,
-        slot_quotient(S1, Q),
-        slot_quotient(S2, Q).
+        slot_day(S1, Q),
+        slot_day(S2, Q).
 
+% прикрепление пары к слоту
 constrain_subject(req(Group,Subj,_Teacher,_Num)-Slots) :-
         strictly_ascending(Slots), % break symmetry
-        maplist(slot_quotient, Slots, Qs0),
+        maplist(slot_day, Slots, Qs0),
         findall(F-S, coupling(Group,Subj,F,S), Cs),
         maplist(slots_couplings(Slots), Cs),
         pairs_values(Cs, Seconds0),
@@ -122,7 +122,7 @@ constrain_subject(req(Group,Subj,_Teacher,_Num)-Slots) :-
 
 all_diff_from(Vs, F) :- maplist(#\=(F), Vs).
 
-constrain_class(Rs, Group) :-
+constrain_group(Rs, Group) :-
         tfilter(group_req(Group), Rs, Sub),
         pairs_slots(Sub, Vs),
         all_different(Vs),
@@ -135,7 +135,7 @@ constrain_teacher(Rs, Teacher) :-
         pairs_slots(Sub, Vs),
         all_different(Vs),
         findall(F, teacher_freeday(Teacher, F), Fs),
-        maplist(slot_quotient, Vs, Qs),
+        maplist(slot_day, Vs, Qs),
         maplist(all_diff_from(Qs), Fs).
 
 sameroom_var(Reqs, r(Group,Subject,Lesson), Var) :-
