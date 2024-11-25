@@ -18,35 +18,6 @@
 :- discontiguous(group_freeslot/2).
 
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-			 Posting constraints
-
-   The most important data structure in this CSP are pairs of the form
-
-      Req-Vs
-
-   where Req is a term of the form req(C,S,T,N) (see below), and Vs is
-   a list of length N. The elements of Vs are finite domain variables
-   that denote the *time slots* of the scheduled lessons of Req. We
-   call this list of Req-Vs pairs the requirements.
-
-   To break symmetry, the elements of Vs are constrained to be
-   strictly ascending (it follows that they are all_different/1).
-
-   Further, the time slots of each teacher are constrained to be
-   all_different/1.
-
-   For each requirement, the time slots divided by slots_per_day are
-   constrained to be strictly ascending to enforce distinct days,
-   except for coupled lessons.
-
-   The time slots of each class, and of lessons occupying the same
-   room, are constrained to be all_different/1.
-
-   Labeling is performed on all slot variables.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-
 requirements(Rs) :-
         Goal = group_subject_teacher_times(Group,Subject,Teacher,Number),
         setof(req(Group,Subject,Teacher,Number), Goal, Rs0),
@@ -64,10 +35,10 @@ teachers(Teachers) :-
 
 % упорядоченное множество комнат
 rooms(Rooms) :-
-        findall(Room, room_alloc(Room,_C,_S,_Slot), Rooms0),
+        findall(r(Room, C, S, Slot), room_alloc(Room,C,S,Slot), Rooms0),
         sort(Rooms0, Rooms).
 
-requirements_variables(Rs, Vars) :-
+requirements_variables(Rs, Vars, Rooms) :-
         requirements(Rs),
         pairs_slots(Rs, Vars),
         slots_per_week(SPW),
@@ -142,7 +113,7 @@ sameroom_var(Reqs, r(Group,Subject,Lesson), Var) :-
         memberchk(req(Group,Subject,_Teacher,_Num)-Slots, Reqs),
         nth0(Lesson, Slots, Var).
 
-constrain_room(Reqs, Room) :-
+constrain_room(Reqs, r(Room, C, S, Slot)) :- 
         findall(r(Group,Subj,Less), room_alloc(Room,Group,Subj,Less), RReqs),
         maplist(sameroom_var(Reqs), RReqs, Roomvars),
         all_different(Roomvars).
@@ -157,20 +128,6 @@ teacher_req(T0, req(_C,_S,T1,_N)-_, T) :- =(T0,T1,T).
 pairs_slots(Ps, Vs) :-
         pairs_values(Ps, Vs0),
         append(Vs0, Vs).
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Relate teachers and groups to list of days.
-
-   Each day is a list of subjects (for groups), and a list of
-   group/subject terms (for teachers). The predicate days_variables/2
-   yields a list of days with the right dimensions, where each element
-   is a free variable.
-
-   We use the atom 'free' to denote a free slot, and the compound terms
-   group_subject(C, S) and subject(S) to denote groups/subjects.
-   This clean symbolic distinction is used to support subjects
-   that are called 'free', and to improve generality and efficiency.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 days_variables(Days, Vs) :-
         slots_per_week(SPW),
@@ -193,12 +150,40 @@ v(Rs, V, N0, N) :-
         ),
         N #= N0 + 1.
 
+group_days_rooms(Rs, Rooms, Group, Days) :-
+        days_variables(Days, Vs),
+        tfilter(group_req(Group), Rs, Sub),
+        foldl(v_rooms(Sub, Rooms), Vs, 0, _).
+
+v_rooms(Rs, Rooms, V, N0, N) :-
+        (   member(req(Group,Subject,_,_)-Times, Rs),
+            member(r(Room, Group, Subject,_), Rooms),
+            member(N0, Times) -> V = subject_room(Subject, Room)
+        ;
+            member(req(Group,Subject,_,_)-Times, Rs),
+            member(N0, Times) -> V = subject(Subject)
+        ;   V = free
+        ),
+        N #= N0 + 1.
+
 teacher_days(Rs, Teacher, Days) :-
         days_variables(Days, Vs),
         tfilter(teacher_req(Teacher), Rs, Sub),
         foldl(v_teacher(Sub), Vs, 0, _).
 
 v_teacher(Rs, V, N0, N) :-
+        (   member(req(C,Subj,_,_)-Times, Rs),
+            member(N0, Times) -> V = group_subject(C, Subj)
+        ;   V = free
+        ),
+        N #= N0 + 1.
+
+teacher_rooms_days(Rs, Teacher, Days) :-
+        days_variables(Days, Vs),
+        tfilter(teacher_req(Teacher), Rs, Sub),
+        foldl(v_teacher(Sub), Vs, 0, _).
+
+v_teacher_rooms(Rs, Rooms, V, N0, N) :-
         (   member(req(C,Subj,_,_)-Times, Rs),
             member(N0, Times) -> V = group_subject(C, Subj)
         ;   V = free
@@ -214,10 +199,23 @@ print_groups(Rs) :-
         groups(Cs),
         phrase_to_stream(format_groups(Cs, Rs), user_output).
 
+print_groups(Rs, Rooms) :-
+        groups(Cs),
+        phrase_to_stream(format_groups_with_rooms(Cs, Rs, Rooms), user_output).
+
 % Форматирование вывода для каждой группы
 format_groups([], _) --> [].
 format_groups([Group|Groups], Rs) -->
         { group_days(Rs, Group, Days0),
+          transpose(Days0, Days) },
+        format_("Group: ~w~2n", [Group]),
+        weekdays_header,
+        align_rows(Days),
+        format_groups(Groups, Rs).
+
+format_groups_with_rooms([], _, _) --> [].
+format_groups_with_rooms([Group|Groups], Rs, Rooms) -->
+        { group_days_rooms(Rs,Rooms, Group, Days0),
           transpose(Days0, Days) },
         format_("Group: ~w~2n", [Group]),
         weekdays_header,
@@ -237,6 +235,7 @@ align_row([R|Rs]) -->
 
 align_(free)               --> align_(verbatim('')).
 align_(group_subject(C,S)) --> align_(verbatim(C/S)).
+align_(subject_room(C,R)) --> align_(verbatim(C/R)).
 align_(subject(S))         --> align_(verbatim(S)).
 align_(verbatim(Element))  --> format_("~t~w~t~15+", [Element]).
 

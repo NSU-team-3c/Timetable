@@ -62,7 +62,7 @@ group_subject_teacher_times('22215', math, "Васкевич В.Л.", 2).
 group_freeslot('22215', 1).
 
 % coupling('22215', teamPr, 0, 1).
-% room_alloc('304', '22215', teamPr, 1).
+room_alloc('304', '22215', teamPr, 1).
 % room_alloc('304', '22214', teamPr, 1).
 % room_alloc('304', '22213', teamPr, 1).
 
