@@ -1,0 +1,31 @@
+2024-11-27T00:02:00.944+07:00  INFO 91075 --- [timetable] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-11-27T00:02:01.036+07:00  INFO 91075 --- [timetable] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-11-27T00:02:01.057+07:00  INFO 91075 --- [timetable] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-11-27T00:02:12.178+07:00  INFO 92272 --- [timetable] [main] ru.nsu.timetable.TimetableApplication    : Starting TimetableApplication using Java 20.0.2 with PID 92272 (/Users/vovapetrov/Desktop/Files/3 курс/Timetable/backend/timetable-back/build/classes/java/main started by vovapetrov in /Users/vovapetrov/Desktop/Files/3 курс/Timetable/backend)
+2024-11-27T00:02:12.179+07:00  INFO 92272 --- [timetable] [main] ru.nsu.timetable.TimetableApplication    : No active profile set, falling back to 1 default profile: "default"
+2024-11-27T00:02:13.076+07:00  INFO 92272 --- [timetable] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-11-27T00:02:13.139+07:00  INFO 92272 --- [timetable] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 56 ms. Found 14 JPA repository interfaces.
+2024-11-27T00:02:13.616+07:00  INFO 92272 --- [timetable] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2024-11-27T00:02:13.628+07:00  INFO 92272 --- [timetable] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-11-27T00:02:13.629+07:00  INFO 92272 --- [timetable] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2024-11-27T00:02:13.676+07:00  INFO 92272 --- [timetable] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2024-11-27T00:02:13.676+07:00  INFO 92272 --- [timetable] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1463 ms
+2024-11-27T00:02:13.821+07:00  INFO 92272 --- [timetable] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-11-27T00:02:13.876+07:00  INFO 92272 --- [timetable] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2024-11-27T00:02:13.909+07:00  INFO 92272 --- [timetable] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2024-11-27T00:02:14.167+07:00  INFO 92272 --- [timetable] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-11-27T00:02:14.192+07:00  INFO 92272 --- [timetable] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-11-27T00:02:14.396+07:00  INFO 92272 --- [timetable] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@580c17a0
+2024-11-27T00:02:14.398+07:00  INFO 92272 --- [timetable] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-11-27T00:02:14.438+07:00  WARN 92272 --- [timetable] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2024-11-27T00:02:15.397+07:00  INFO 92272 --- [timetable] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-11-27T00:02:15.612+07:00  INFO 92272 --- [timetable] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-11-27T00:02:15.827+07:00  INFO 92272 --- [timetable] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-11-27T00:02:16.275+07:00  WARN 92272 --- [timetable] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-11-27T00:02:16.303+07:00  INFO 92272 --- [timetable] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2024-11-27T00:02:17.617+07:00  INFO 92272 --- [timetable] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2024-11-27T00:02:17.627+07:00  INFO 92272 --- [timetable] [main] ru.nsu.timetable.TimetableApplication    : Started TimetableApplication in 5.795 seconds (process running for 6.199)
+2024-11-27T00:02:23.307+07:00  INFO 92272 --- [timetable] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-11-27T00:02:23.308+07:00  INFO 92272 --- [timetable] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2024-11-27T00:02:23.313+07:00  INFO 92272 --- [timetable] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 5 ms
+2024-11-27T00:02:41.237+07:00  INFO 92272 --- [timetable] [http-nio-8080-exec-3] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 481 ms
