@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +24,13 @@ import jakarta.validation.Valid;
 @Slf4j
 @RequestMapping("/api/admin")
 @Tag(name = "Admin controller")
+@RequiredArgsConstructor
 public class AdminController {
 
     private static final String EMAIL_EXISTS_ERROR = "Error: email already exists";
     private static final String SUCCESS_MESSAGE = "User created successfully";
 
     private final UserService userService;
-
-    @Autowired
-    public AdminController(UserService userService) {
-        this.userService = userService;
-    }
 
     @Operation(summary = "Registration of new student account in system")
     @ApiResponses({

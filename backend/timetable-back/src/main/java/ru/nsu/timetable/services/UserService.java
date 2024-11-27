@@ -121,7 +121,6 @@ public class UserService {
         }
         newUser.setRoles(userRoles);
 
-        // Устанавливаем переданный пароль
         newUser.setPassword(encoder.encode(password));
         userRepository.save(newUser);
 
