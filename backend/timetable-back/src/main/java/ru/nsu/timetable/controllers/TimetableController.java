@@ -2,6 +2,7 @@ package ru.nsu.timetable.controllers;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import ru.nsu.timetable.services.TimetableService;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/management")
+@Tag(name = "Timetable controller")
 public class TimetableController {
     private final TimetableService timetableService;
 
