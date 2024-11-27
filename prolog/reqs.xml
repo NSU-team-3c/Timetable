@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<requirements>
+	<global slotsperweek="42" slotsperday="7"/>
+	<group id="22215">
+		<req subject="ks" teacher="Пермяков Р.А." amount="2"/>
+        <req subject="mobDev" teacher="Букшев И.Е." amount="2"/>
+        <req subject="ml" teacher="Неделько В.М." amount="2"/>
+        <req subject="dpas" teacher="Куталев А. В." amount="2"/>
+        <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
+        <req subject="prog" teacher="Мигинский Д.С." amount="2"/>
+		<req subject="math" teacher="Васкевич В.Л." amount="2"/>
+		<coupling subject="teamPr" lesson1="0" lesson2="1"/>
+		<free slot="0"/>
+		<free slot="1"/>
+	</group>
+	<room id="r1">
+		<allocate group="22215" subject="teamPr" lesson="0"/>
+		<allocate group="22215" subject="teamPr" lesson="1"/>
+	</room>
+	<freeday teacher="Иртегов Д.В." day="4"/>
+</requirements>

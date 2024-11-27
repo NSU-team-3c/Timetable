@@ -4,7 +4,13 @@
 :- use_module(library(pairs)).
 :- use_module(library(lists)).
 :- use_module(library(format)).
+:- use_module(library(error)).
 :- use_module(library(pio)).
+:- use_module(library(sgml)).
+:- use_module(library(xpath)).
+:- use_module(library(iso_ext)).
+:- use_module(library(files)).
+
 
 :- dynamic(group_subject_teacher_times/4).
 :- dynamic(coupling/4).
@@ -113,7 +119,7 @@ sameroom_var(Reqs, r(Group,Subject,Lesson), Var) :-
         memberchk(req(Group,Subject,_Teacher,_Num)-Slots, Reqs),
         nth0(Lesson, Slots, Var).
 
-constrain_room(Reqs, r(Room, C, S, Slot)) :- 
+constrain_room(Reqs, r(Room, _, _, _)) :- 
         findall(r(Group,Subj,Less), room_alloc(Room,Group,Subj,Less), RReqs),
         maplist(sameroom_var(Reqs), RReqs, Roomvars),
         all_different(Roomvars).
@@ -183,7 +189,7 @@ teacher_rooms_days(Rs, Teacher, Days) :-
         tfilter(teacher_req(Teacher), Rs, Sub),
         foldl(v_teacher(Sub), Vs, 0, _).
 
-v_teacher_rooms(Rs, Rooms, V, N0, N) :-
+v_teacher_rooms(Rs, _, V, N0, N) :-
         (   member(req(C,Subj,_,_)-Times, Rs),
             member(N0, Times) -> V = group_subject(C, Subj)
         ;   V = free
@@ -278,3 +284,148 @@ with_verbatim(T, verbatim(T)).
    %@    h       h
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Parse XML file.
+   This part of the program translates the XML file to a list of
+   Prolog terms that describe the requirements. library(xpath) is used
+   to access nodes of the XML file. A DCG describes the list of Prolog
+   terms. The most important of them are:
+   *) req(C,S,T,N)
+        Class C is to be taught subject S by teacher T; N times a week
+        (on different days)
+   *) coupling(C,S,J,K)
+        In class C, subject S contains a coupling: The J-th lesson of S
+        directly precedes the K-th lesson, on the same day.
+   *) teacher_freeday(T, D)
+        Teacher T must not have any lessons scheduled on day D.
+   These terms can all be dynamically asserted to make the
+   requirements globally accessible.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Extract option values from tag attributes.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+attrs_values(Node, As, Vs) :-
+        %must_be(list(atom), As),
+        maplist(attr_value(Node), As, Vs).
+
+atom_number(Atom, Number) :-
+    atom(Atom),
+    atom_chars(Atom, Chars),
+    number_chars(Number, Chars). 
+
+attr_value(Node, Attr, Value) :-
+        (   xpath(Node, /self(@Attr), Value0) -> true
+        ;   throw('attribute expected'-Node-Attr)
+        ),
+        (   numeric_attribute(Attr) -> atom_number(Value0, Value)
+        ;   Value = Value0
+        ).
+        
+numeric_attribute(amount).
+numeric_attribute(lesson1).
+numeric_attribute(lesson2).
+numeric_attribute(slot).
+numeric_attribute(slotsperweek).
+numeric_attribute(slotsperday).
+numeric_attribute(lesson).
+numeric_attribute(day).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   A DCG relates the XML file to a list of Prolog terms.
+   Example query:
+      ?- phrase(requirementsXML('reqs.xml'), Rs).
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+elements_([], _) --> [].
+elements_([E|Es], Goal) -->
+        call(Goal, E),
+        elements_(Es, Goal).
+
+process_nodes(What, R, Goal) -->
+        { findall(Element, xpath(R, //What, Element), Elements) },
+        elements_(Elements, Goal).
+
+
+process_req(GroupId, Node) -->
+        { attrs_values(Node, [subject,teacher,amount], [Subject,Teacher,Amount]) },
+        [group_subject_teacher_times(GroupId,Subject,Teacher,Amount)].
+
+
+process_coupling(GroupId, Node) -->
+        { attrs_values(Node, [subject,lesson1,lesson2], [Subject,Slot1,Slot2]) },
+        [coupling(GroupId,Subject,Slot1,Slot2)].
+
+
+process_free(GroupId, Node) -->
+        { attrs_values(Node, [slot], [Slot]) },
+        [group_freeslot(GroupId,Slot)].
+
+
+process_group(Node) -->
+        { attrs_values(Node, [id], [Id]) },
+        process_nodes(req, Node, process_req(Id)),
+        process_nodes(coupling, Node, process_coupling(Id)),
+        process_nodes(free, Node, process_free(Id)).
+
+
+globals(Content) -->
+        { xpath_chk(Content, //global, Global),
+          attrs_values(Global, [slotsperweek, slotsperday], [SPW,SPD]) },
+        [slots_per_day(SPD),slots_per_week(SPW)].
+
+
+process_room(Node) -->
+        { attrs_values(Node, [id], [Id]) },
+        process_nodes(allocate, Node, process_allocation(Id)).
+
+
+process_allocation(RoomId, Node) -->
+        { attrs_values(Node, [group,subject,lesson], [Group,Subject,Lesson]) },
+        [room_alloc(RoomId,Group,Subject,Lesson)].
+
+
+process_freeday(Node) -->
+        { attrs_values(Node, [teacher, day], [Teacher,Day]) },
+        [teacher_freeday(Teacher,Day)].
+
+requirementsXML(File) -->
+        { load_xml(File, AST, []),
+          xpath_chk(AST, //requirements, R) },
+        globals(R),
+        process_nodes(group, R, process_group),
+        process_nodes(room, R, process_room),
+        process_nodes(freeday, R, process_freeday).
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Execution entry point.
+   The parsed requirements are asserted to make them easily accessible
+   as Prolog facts. On cleanup, all asserted facts are retracted.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+timetable_(FileName, Rs, Vs) :-
+        phrase(requirementsXML(file(FileName)), Reqs),
+        setup_call_cleanup(
+                maplist(assertz, Reqs),
+                (   
+                        requirements_variables(Rs, Vs, _)
+                ;   
+                        false
+                ),
+                maplist(retract, Reqs)
+        ).
+
+timetable(FileName) :-
+        timetable_(FileName, Rs, Vs),
+        labeling([ff], Vs),
+        print_groups(Rs),
+        nl, nl,
+        print_teachers(Rs),
+        nl.
+
+
+run :- timetable("reqs.xml").
+
