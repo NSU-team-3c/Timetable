@@ -1,9 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 interface StateType {
-  activeDir?: string;
-  activeNavbarBg?: string; // This can be any color,
-  activeSidebarBg?: string; // This can be any color
+  activeDir?: string | any;
   activeMode?: string; // This can be light or dark
   activeTheme?: string; // BLUE_THEME, GREEN_THEME, BLACK_THEME, PURPLE_THEME, ORANGE_THEME
   SidebarWidth?: number;
@@ -16,10 +14,10 @@ interface StateType {
   isHorizontal?: boolean;
   isLanguage?: string;
   isCardShadow?: boolean;
-  borderRadius?: number;
+  borderRadius?: number | any;
 }
 
-const initialState = {
+const initialState: StateType = {
   activeDir: 'ltr',
   activeMode: 'light', // This can be light or dark
   activeTheme: 'BLUE_THEME', // BLUE_THEME, GREEN_THEME, BLACK_THEME, PURPLE_THEME, ORANGE_THEME
@@ -46,6 +44,7 @@ export const CustomizerSlice = createSlice({
     setDarkMode: (state: StateType, action) => {
       state.activeMode = action.payload;
     },
+
     setDir: (state: StateType, action) => {
       state.activeDir = action.payload;
     },
