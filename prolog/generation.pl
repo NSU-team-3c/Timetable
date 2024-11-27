@@ -287,32 +287,14 @@ with_verbatim(T, verbatim(T)).
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Parse XML file.
-   This part of the program translates the XML file to a list of
-   Prolog terms that describe the requirements. library(xpath) is used
-   to access nodes of the XML file. A DCG describes the list of Prolog
-   terms. The most important of them are:
-   *) req(C,S,T,N)
-        Class C is to be taught subject S by teacher T; N times a week
-        (on different days)
-   *) coupling(C,S,J,K)
-        In class C, subject S contains a coupling: The J-th lesson of S
-        directly precedes the K-th lesson, on the same day.
-   *) teacher_freeday(T, D)
-        Teacher T must not have any lessons scheduled on day D.
-   These terms can all be dynamically asserted to make the
-   requirements globally accessible.
+   Парсинг XML файла в факты проглога.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Extract option values from tag attributes.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 attrs_values(Node, As, Vs) :-
         %must_be(list(atom), As),
         maplist(attr_value(Node), As, Vs).
 
-atom_number(Atom, Number) :-
+atom_num(Atom, Number) :-
     atom(Atom),
     atom_chars(Atom, Chars),
     number_chars(Number, Chars). 
@@ -321,7 +303,7 @@ attr_value(Node, Attr, Value) :-
         (   xpath(Node, /self(@Attr), Value0) -> true
         ;   throw('attribute expected'-Node-Attr)
         ),
-        (   numeric_attribute(Attr) -> atom_number(Value0, Value)
+        (   numeric_attribute(Attr) -> atom_num(Value0, Value)
         ;   Value = Value0
         ).
         
@@ -401,9 +383,7 @@ requirementsXML(File) -->
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Execution entry point.
-   The parsed requirements are asserted to make them easily accessible
-   as Prolog facts. On cleanup, all asserted facts are retracted.
+   Входная точка прораммы, на вход подается имя файла с требованиями.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 timetable_(FileName, Rs, Vs) :-
