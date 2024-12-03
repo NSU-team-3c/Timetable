@@ -23,6 +23,9 @@
 :- discontiguous(group_subject_teacher_times/4).
 :- discontiguous(group_freeslot/2).
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Получение данных из фактов пролога.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 requirements(Rs) :-
         Goal = group_subject_teacher_times(Group,Subject,Teacher,Number),
@@ -43,6 +46,10 @@ teachers(Teachers) :-
 rooms(Rooms) :-
         findall(r(Room, C, S, Slot), room_alloc(Room,C,S,Slot), Rooms0),
         sort(Rooms0, Rooms).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Основной блок, здесь формируются все требования к расписаниям.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 requirements_variables(Rs, Vars, Rooms) :-
         requirements(Rs),
@@ -135,6 +142,10 @@ pairs_slots(Ps, Vs) :-
         pairs_values(Ps, Vs0),
         append(Vs0, Vs).
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Формирование данных в определенный формат для дальнейшего вывода.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 days_variables(Days, Vs) :-
         slots_per_week(SPW),
         slots_per_day(SPD),
@@ -197,7 +208,12 @@ v_teacher_rooms(Rs, _, V, N0, N) :-
         N #= N0 + 1.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Отображение объектов
+   Отображение объектов 
+   Здесь находится блока для отладочного вывода расписаний.
+
+   Можно вывести расписание по группам (print_groups), 
+   отдельное расписание для каждого учителя (print_teachers).
+   А также можно добавить к этим расписаниям вывод комнат.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 % Отрисовать расписания всех групп
@@ -214,7 +230,7 @@ format_groups([], _) --> [].
 format_groups([Group|Groups], Rs) -->
         { group_days(Rs, Group, Days0),
           transpose(Days0, Days) },
-        format_("Group: ~w~2n", [Group]),
+        format_("Группа: ~w~2n", [Group]),
         weekdays_header,
         align_rows(Days),
         format_groups(Groups, Rs).
@@ -223,7 +239,7 @@ format_groups_with_rooms([], _, _) --> [].
 format_groups_with_rooms([Group|Groups], Rs, Rooms) -->
         { group_days_rooms(Rs,Rooms, Group, Days0),
           transpose(Days0, Days) },
-        format_("Group: ~w~2n", [Group]),
+        format_("Группа: ~w~2n", [Group]),
         weekdays_header,
         align_rows(Days),
         format_groups(Groups, Rs).
@@ -255,7 +271,7 @@ format_teachers([], _) --> [].
 format_teachers([T|Ts], Rs) -->
         { teacher_days(Rs, T, Days0),
           transpose(Days0, Days) },
-        format_("Teacher: ~s ~2n", [T]),
+        format_("Преподаватель: ~s ~2n", [T]),
         weekdays_header,
         align_rows(Days),
         format_teachers(Ts, Rs).
@@ -263,47 +279,32 @@ format_teachers([T|Ts], Rs) -->
 % Форматирование дней недели
 weekdays_header -->
         { maplist(with_verbatim,
-                  ['Mon','Tue','Wed','Thu','Fri','Sat'],
+                  ['Пн','Вт','Ср','Чт','Пт','Сб'],
                   Vs) },
         align_row(Vs),
         format_("~n~`=t~90|~n", []).
 
 with_verbatim(T, verbatim(T)).
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   ?- consult('reqs_example.pl'),
-      requirements_variables(Rs, Vs),
-      labeling([ff], Vs),
-      print_groups(Rs).
-   %@ Group: 1a
-   %@
-   %@   Mon     Tue     Wed     Thu     Fri
-   %@ ========================================
-   %@   mat     mat     mat     mat     mat
-   %@   eng     eng     eng
-   %@    h       h
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   Парсинг XML файла в факты проглога.
+   Здесь находятся функции для парсинга элементов внутри блока.
+   Пример:
+        из блока <req subject="ml" teacher="Неделько В.М." amount="2"/>
+        достаются subject, teacher, amount.
+        amount - числовая переменная, поэтому для неё проводится дополнительное
+        преобразование в число.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 attrs_values(Node, As, Vs) :-
-        %must_be(list(atom), As),
         maplist(attr_value(Node), As, Vs).
-
-atom_num(Atom, Number) :-
-    atom(Atom),
-    atom_chars(Atom, Chars),
-    number_chars(Number, Chars). 
+ 
 
 attr_value(Node, Attr, Value) :-
         (   xpath(Node, /self(@Attr), Value0) -> true
         ;   throw('attribute expected'-Node-Attr)
         ),
-        (   numeric_attribute(Attr) -> atom_num(Value0, Value)
+        (   numeric_attribute(Attr) -> number_chars(Value, Value0)
         ;   Value = Value0
         ).
         
@@ -317,9 +318,9 @@ numeric_attribute(lesson).
 numeric_attribute(day).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   A DCG relates the XML file to a list of Prolog terms.
-   Example query:
-      ?- phrase(requirementsXML('reqs.xml'), Rs).
+   Парсинг по блокам XML файла, для каждого типа блока
+   есть своя функция парсинга. Например, globals - парсит глобальные 
+   константы.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 elements_([], _) --> [].
 elements_([E|Es], Goal) -->
@@ -386,12 +387,12 @@ requirementsXML(File) -->
    Входная точка прораммы, на вход подается имя файла с требованиями.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-timetable_(FileName, Rs, Vs) :-
+timetable_(FileName, Rs, Vs, Rooms) :-
         phrase(requirementsXML(file(FileName)), Reqs),
         setup_call_cleanup(
                 maplist(assertz, Reqs),
                 (   
-                        requirements_variables(Rs, Vs, _)
+                        requirements_variables(Rs, Vs, Rooms)
                 ;   
                         false
                 ),
@@ -399,9 +400,9 @@ timetable_(FileName, Rs, Vs) :-
         ).
 
 timetable(FileName) :-
-        timetable_(FileName, Rs, Vs),
+        timetable_(FileName, Rs, Vs, Rooms),
         labeling([ff], Vs),
-        print_groups(Rs),
+        print_groups(Rs, Rooms),
         nl, nl,
         print_teachers(Rs),
         nl.
@@ -409,3 +410,68 @@ timetable(FileName) :-
 
 run :- timetable("reqs.xml").
 
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Блок вывода расписаний в XML файл.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+create_timetable :-
+    TimeTable = timetable([day(1, 'Monday', [ 
+                timeSlot(1, [group('22215', 'Group A')], subject('teamPr', 'Team Project'), teacher('t1', 'Иртегов Д.В.'), room('r1', 'Lecture Hall 1')),
+                timeSlot(2, [group('22215', 'Group A')], subject('prog', 'Programming'), teacher('t2', 'Мигинский Д.С.'), room('r2', 'Computer Lab 2')),
+                timeSlot(3, [group('33316', 'Group B')], subject('math', 'Mathematics'), teacher('t3', 'Васкевич В.Л.'), room('r3', 'Math Classroom')),
+                timeSlot(4, [group('22215', 'Group A'), group('33316', 'Group B')], subject('mobDev', 'Mobile Development'), teacher('t4', 'Букшев И.Е.'), room('r4', 'Lecture Hall 2'))
+            ])
+    ]),
+    
+    open('timetable.xml', write, Stream),
+    xml_write(Stream, TimeTable),
+    close(Stream).
+
+
+xml_write(Stream, timetable(Days)) :-
+    phrase_to_stream(phrase("<timetable>\n"), Stream),
+    maplist(write_day(Stream), Days),
+    phrase_to_stream(phrase("</timetable>\n"), Stream).
+
+
+write_day(Stream, day(Number, Name, TimeSlots)) :-
+    phrase_to_stream(format_("\t <day number=~w name='~w'>\n", [Number, Name]), Stream),
+    write_timeSlots(Stream, TimeSlots),
+    phrase_to_stream(phrase("\t </day>\n"), Stream).
+
+
+write_timeSlots(Stream, TimeSlots) :-
+    phrase_to_stream(phrase("\t\t <timeSlots>\n"), Stream),
+    maplist(write_timeSlot(Stream), TimeSlots),
+    phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream).
+
+
+write_timeSlot(Stream, timeSlot(Id, Groups, Subject, Teacher, Room)) :-
+    phrase_to_stream(phrase("\t\t\t <timeSlot>\n"), Stream),
+    phrase_to_stream(format_("\t\t\t\t <id>~w</id>\n", [Id]), Stream),
+    write_groups(Stream, Groups),
+    write_subject(Stream, Subject),
+    write_teacher(Stream, Teacher),
+    write_room(Stream, Room),
+    phrase_to_stream(phrase("\t\t\t </timeSlot>\n"), Stream).
+
+
+write_groups(Stream, Groups) :-
+    phrase_to_stream(phrase("\t\t\t\t <groups>\n"), Stream),
+    maplist(write_group(Stream), Groups),
+    phrase_to_stream(phrase("\t\t\t\t </groups>\n"), Stream).
+
+write_group(Stream, group(Id, Name)) :-
+    phrase_to_stream(format_("\t\t\t\t\t <group id=~w name=~w/>\n", [Id, Name]), Stream).
+
+
+write_subject(Stream, subject(Id, Name)) :-
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=~w name=~w/>\n", [Id, Name]), Stream).
+
+
+write_teacher(Stream, teacher(Id, Name)) :-
+    phrase_to_stream(format_("\t\t\t\t\t <teacher id=~w name=~w/>\n", [Id, Name]), Stream).
+
+
+write_room(Stream, room(Id, Name)) :-
+    phrase_to_stream(format_("\t\t\t\t\t <room id=~w name=~w/>\n", [Id, Name]), Stream).

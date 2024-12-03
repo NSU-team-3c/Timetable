@@ -1,0 +1,43 @@
+<timetable>
+	 <day number=1 name='Monday'>
+		 <timeSlots>
+			 <timeSlot>
+				 <id>1</id>
+				 <groups>
+					 <group id=22215 name=Group A/>
+				 </groups>
+					 <subject id=teamPr name=Team Project/>
+					 <teacher id=t1 name=Иртегов Д.В./>
+					 <room id=r1 name=Lecture Hall 1/>
+			 </timeSlot>
+			 <timeSlot>
+				 <id>2</id>
+				 <groups>
+					 <group id=22215 name=Group A/>
+				 </groups>
+					 <subject id=prog name=Programming/>
+					 <teacher id=t2 name=Мигинский Д.С./>
+					 <room id=r2 name=Computer Lab 2/>
+			 </timeSlot>
+			 <timeSlot>
+				 <id>3</id>
+				 <groups>
+					 <group id=33316 name=Group B/>
+				 </groups>
+					 <subject id=math name=Mathematics/>
+					 <teacher id=t3 name=Васкевич В.Л./>
+					 <room id=r3 name=Math Classroom/>
+			 </timeSlot>
+			 <timeSlot>
+				 <id>4</id>
+				 <groups>
+					 <group id=22215 name=Group A/>
+					 <group id=33316 name=Group B/>
+				 </groups>
+					 <subject id=mobDev name=Mobile Development/>
+					 <teacher id=t4 name=Букшев И.Е./>
+					 <room id=r4 name=Lecture Hall 2/>
+			 </timeSlot>
+		 </timeSlots>
+	 </day>
+</timetable>
