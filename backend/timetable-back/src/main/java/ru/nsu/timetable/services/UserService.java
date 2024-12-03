@@ -71,12 +71,6 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public String generateRandomPassword() {
-        Random random = new Random();
-        int randomPassword = 100000 + random.nextInt(900000);
-        return String.valueOf(randomPassword);
-    }
-
     public String changeUserRoles(String email, Set<String> stringRoles) {
         User userByEmail = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -95,24 +89,24 @@ public class UserService {
         return "Role changed for user " + email;
     }
 
-    public String saveNewAdmin(String email, String fullName, String phone) {
-        return saveNewUserWithRoles(email, fullName, phone, Set.of(
+    public String saveNewAdmin(String email, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_ADMINISTRATOR.name()));
     }
 
-    public String saveNewTeacher(String email, String fullName, String phone) {
-        return saveNewUserWithRoles(email, fullName, phone, Set.of(
+    public String saveNewTeacher(String email, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_TEACHER.name()));
     }
 
-    public String saveNewUser(String email, String fullName, String phone) {
-        return saveNewUserWithRoles(email, fullName, phone, Set.of(
+    public String saveNewUser(String email, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name()));
     }
 
-    private String saveNewUserWithRoles(String email, String fullName, String phone, Set<String> roles) {
+    private String saveNewUserWithRoles(String email, String fullName, String phone, String password, Set<String> roles) {
         User newUser = new User();
         newUser.setFullName(fullName);
         newUser.setEmail(email);
@@ -127,12 +121,10 @@ public class UserService {
         }
         newUser.setRoles(userRoles);
 
-        String userPassword = generateRandomPassword();
-        newUser.setPassword(encoder.encode(userPassword));
+        newUser.setPassword(encoder.encode(password));
         userRepository.save(newUser);
 
         saveOperation("Admin", "Created new user with name '" + fullName + "' and email " + email);
-        log.info("User password: {}", userPassword);
 
         return "User " + fullName + " created";
     }
