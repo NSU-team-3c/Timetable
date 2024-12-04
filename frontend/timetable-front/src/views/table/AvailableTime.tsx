@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import PageContainer from '../../components/container/PageContainer';
-import ChangePasswordForm from '../../components/forms/profile/ChangePasswordForm'
+import ProfessorAvailabilityForm from '../../components/forms/table/ProfessorAvailabilityForm';
 
 const ChangePassword = () => (
     <PageContainer title="Смена пароля" description="this is Change password page">
@@ -10,10 +10,10 @@ const ChangePassword = () => (
             sx={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: 0,
-                paddingTop: '10%',
+                padding: '5%',
             }}
         >
-            <ChangePasswordForm />
+            <ProfessorAvailabilityForm />
         </Box>
     </PageContainer>
 );

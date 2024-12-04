@@ -106,7 +106,6 @@ const components: any = (theme: Theme) => {
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    // border: `1px solid ${theme.palette.grey[100]}`,
                     backgroundImage: 'none',
                 },
             },

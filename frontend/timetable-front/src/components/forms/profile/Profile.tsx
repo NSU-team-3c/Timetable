@@ -1,26 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography, FormControl, FormHelperText } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { Link } from 'react-router-dom'; 
+import { mockProfileData } from '../../../_mockApis/profile';
+import { ProfileData } from '../../../types/user/user';
 
-interface ProfileFormValues {
-  surname: string;
-  name: string;
-  patronymic: string;
-  birthday: string;
-  email: string;
-  phone: string;
-  about: string;
-  photo: File | null;
-}
 
 const ProfileForm: React.FC = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
-  const formik = useFormik<ProfileFormValues>({
-    initialValues: {
+  useEffect(() => {
+    setTimeout(() => {
+      setProfileData(mockProfileData);
+
+      if (mockProfileData.photo) {
+        setPhotoPreview(URL.createObjectURL(mockProfileData.photo));
+      }
+    }, 1000);
+  }, []);
+
+  const formik = useFormik<ProfileData>({
+    enableReinitialize: true,
+    initialValues: profileData || {
       surname: '',
       name: '',
       patronymic: '',
@@ -29,6 +33,8 @@ const ProfileForm: React.FC = () => {
       phone: '',
       about: '',
       photo: null, // Инициализация photo как null
+      role: '',
+      group: 0,
     },
 
     validationSchema: yup.object({
@@ -44,14 +50,14 @@ const ProfileForm: React.FC = () => {
         .nullable()
         .notRequired()
         .test('fileSize', 'Размер файла слишком большой', (value) => {
-          if (!value) return true; // Если фото не выбрано, пропускаем проверку
+          if (!value) return true; 
           if (value instanceof File) {
-            return value.size <= 5000000; // Максимальный размер файла 5MB
+            return value.size <= 5000000; 
           }
           return false;
         })
         .test('fileType', 'Неверный формат файла', (value) => {
-          if (!value) return true; // Если фото не выбрано, пропускаем проверку
+          if (!value) return true; 
           if (value instanceof File) {
             return ['image/jpeg', 'image/png', 'image/gif'].includes(value.type);
           }
@@ -67,22 +73,29 @@ const ProfileForm: React.FC = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
-      // Создание предпросмотра изображения
       setPhotoPreview(URL.createObjectURL(file));
-      formik.setFieldValue('photo', file); // Устанавливаем файл в состояние Formik
+      formik.setFieldValue('photo', file); 
     }
+  };
+
+  const linkToProfessor = () => {
+      return (
+        <Link to="/profile/professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Я преподаватель {'>'}</Typography>
+        </Link>
+      );
   };
 
   return (
     <Box sx={{ width: 800, margin: '0 auto', padding: 2, position: 'relative' }}>
       <form onSubmit={formik.handleSubmit}>
-        {/* Поле для загрузки фотографии в правом верхнем углу */}
+        {/* Поле для загрузки фотографии */}
         <Box
           sx={{
             position: 'absolute',
             top: 0,
             right: 0,
-            zIndex: 1, // чтобы фото было поверх других элементов
+            zIndex: 1, 
           }}
         >
           <FormControl fullWidth margin="normal">
@@ -90,7 +103,7 @@ const ProfileForm: React.FC = () => {
               type="file"
               accept="image/*"
               id="photo-upload"
-              style={{ display: 'none' }} // Скрываем стандартный инпут
+              style={{ display: 'none' }} 
               onChange={handleFileChange}
             />
             <label htmlFor="photo-upload">
@@ -98,8 +111,8 @@ const ProfileForm: React.FC = () => {
                 sx={{
                   width: 150,
                   height: 165,
-                  borderRadius: '5%', // Округлая форма
-                  border: '2px solid #ddd',
+                  borderRadius: '5%', 
+                  border: '0.1% solid #ddd',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -116,7 +129,7 @@ const ProfileForm: React.FC = () => {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      borderRadius: '50%',
+                      borderRadius: '5%',
                     }}
                   />
                 ) : (
@@ -217,10 +230,8 @@ const ProfileForm: React.FC = () => {
           >
             Сохранить
           </Button>
-
-          <Link to="/profile/professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Я преподаватель {'>'}</Typography>
-          </Link>
+          
+          {profileData ?  (profileData.role !== "professor" ? linkToProfessor() : '') : ''}
         </Box>
       </form>
     </Box>

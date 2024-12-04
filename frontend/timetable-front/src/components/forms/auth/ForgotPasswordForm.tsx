@@ -4,10 +4,7 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-
-interface ForgotPasswordValues {
-  email: string;
-}
+import { ForgotPasswordValues } from '../../../types/auth/auth';
 
 const ForgotPasswordForm: React.FC = () => {
 

@@ -4,12 +4,7 @@ import * as yup from 'yup';
 import { Button, TextField, Box, Typography, FormControlLabel, Checkbox, Stack } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../../../_mockApis/auth'
-
-interface LoginFormValues {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
+import { LoginFormValues } from '../../../types/auth/auth';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +40,7 @@ const LoginForm: React.FC = () => {
   });
 
   return (
-    <Box sx={{ width: 400, margin: '0 auto', padding: 2 }}>
+    <Box sx={{ width: '400px', margin: '0 auto', padding: 2 }}>
       <Typography variant="h5" mb={2} textAlign="center">
         Вход
       </Typography>

@@ -6,6 +6,7 @@ export const mockEvents = [
       end: new Date(2024, 10, 19, 10, 35),
       professor: 'Проф. Иванов',
       subject: 'Математика',
+      recurrenceInterval: 2,
     },
     {
       id: 1,
@@ -14,6 +15,7 @@ export const mockEvents = [
       end: new Date(2024, 10, 19, 14, 15),
       professor: 'Проф. Петров',
       subject: 'Физика',
+      recurrenceInterval: 1,
     },
     {
       id: 2,
@@ -22,6 +24,7 @@ export const mockEvents = [
       end: new Date(2024, 10, 20, 12, 25),
       professor: 'Проф. Сидоров',
       subject: 'Информатика',
+      recurrenceInterval: 0,
     },
     {
       id: 3,
@@ -30,6 +33,7 @@ export const mockEvents = [
       end: new Date(2024, 10, 20, 16, 5),
       professor: 'Проф. Кузнецова',
       subject: 'Литература',
+      recurrenceInterval: 1,
     },
   ];
   

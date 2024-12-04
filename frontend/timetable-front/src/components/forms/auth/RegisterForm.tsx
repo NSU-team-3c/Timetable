@@ -3,12 +3,8 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography } from '@mui/material';
+import { RegisterFormValues } from '../../../types/auth/auth';
 
-interface RegisterFormValues {
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
 
 const RegisterForm: React.FC = () => {
 

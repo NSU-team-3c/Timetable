@@ -12,7 +12,7 @@ const Register = () => (
             sx={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: 0,
-                paddingTop: '100px',
+                paddingTop: '10%',
             }}
         >
             <RegisterForm />

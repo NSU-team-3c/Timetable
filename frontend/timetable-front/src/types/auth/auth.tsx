@@ -1,15 +1,15 @@
-export interface registerType {
-    title?: string;
-    subtitle?: JSX.Element | JSX.Element[];
-    subtext?: JSX.Element | JSX.Element[];
+export interface LoginFormValues {
+    email: string;
+    password: string;
+    rememberMe: boolean;
 }
 
-export interface loginType {
-    title?: string;
-    subtitle?: JSX.Element | JSX.Element[];
-    subtext?: JSX.Element | JSX.Element[];
+export interface ForgotPasswordValues {
+    email: string;
 }
 
-export interface signInType {
-    title?: string;
+export interface RegisterFormValues {
+    email: string;
+    password: string;
+    confirmPassword: string;
 }
