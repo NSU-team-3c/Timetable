@@ -435,7 +435,7 @@ xml_write(Stream, timetable(Days)) :-
 
 
 write_day(Stream, day(Number, Name, TimeSlots)) :-
-    phrase_to_stream(format_("\t <day number=~w name='~w'>\n", [Number, Name]), Stream),
+    phrase_to_stream(format_("\t <day number=\"~w\" name=\"~w\">\n", [Number, Name]), Stream),
     write_timeSlots(Stream, TimeSlots),
     phrase_to_stream(phrase("\t </day>\n"), Stream).
 
@@ -462,16 +462,48 @@ write_groups(Stream, Groups) :-
     phrase_to_stream(phrase("\t\t\t\t </groups>\n"), Stream).
 
 write_group(Stream, group(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <group id=~w name=~w/>\n", [Id, Name]), Stream).
+    phrase_to_stream(format_("\t\t\t\t\t <group id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
 
 
 write_subject(Stream, subject(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <subject id=~w name=~w/>\n", [Id, Name]), Stream).
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
 
 
 write_teacher(Stream, teacher(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <teacher id=~w name=~w/>\n", [Id, Name]), Stream).
+    phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
 
 
 write_room(Stream, room(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <room id=~w name=~w/>\n", [Id, Name]), Stream).
+    phrase_to_stream(format_("\t\t\t\t\t <room id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Формирование расписания для вывода.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+% Отрисовать расписания всех групп
+form_groups(Rs) :-
+        groups(Cs),
+        phrase_to_stream(format_groups(Cs, Rs), user_output).
+
+print_groups(Rs, Rooms) :-
+        groups(Cs),
+        phrase_to_stream(format_groups_with_rooms(Cs, Rs, Rooms), user_output).
+
+% Форматирование вывода для каждой группы
+format_groups([], _) --> [].
+format_groups([Group|Groups], Rs) -->
+        { group_days(Rs, Group, Days0),
+          transpose(Days0, Days) },
+        format_("Группа: ~w~2n", [Group]),
+        weekdays_header,
+        align_rows(Days),
+        format_groups(Groups, Rs).
+
+format_groups_with_rooms([], _, _) --> [].
+format_groups_with_rooms([Group|Groups], Rs, Rooms) -->
+        { group_days_rooms(Rs,Rooms, Group, Days0),
+          transpose(Days0, Days) },
+        format_("Группа: ~w~2n", [Group]),
+        weekdays_header,
+        align_rows(Days),
+        format_groups(Groups, Rs).
