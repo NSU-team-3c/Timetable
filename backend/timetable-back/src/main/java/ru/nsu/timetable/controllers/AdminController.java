@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,8 @@ public class AdminController {
 
     private final UserService userService;
 
-    @Operation(summary = "Registration of new student account in system")
+
+    @Operation(summary = "Registration of new student account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Student account created successfully",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
@@ -43,11 +44,12 @@ public class AdminController {
     @PostMapping("/register_student")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Student Registration")
     public ResponseEntity<?> registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
         return registerUser(registrationRequest, "STUDENT");
     }
 
-    @Operation(summary = "Registration of new teacher account in system")
+    @Operation(summary = "Registration of new teacher account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Teacher account created successfully",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
@@ -58,11 +60,12 @@ public class AdminController {
     @PostMapping("/register_teacher")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Teacher Registration")
     public ResponseEntity<?> registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
         return registerUser(registrationRequest, "TEACHER");
     }
 
-    @Operation(summary = "Registration of new admin account in system")
+    @Operation(summary = "Registration of new admin account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Admin account created successfully",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
@@ -73,6 +76,7 @@ public class AdminController {
     @PostMapping("/register_admin")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Admin Registration")
     public ResponseEntity<?> registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
         return registerUser(registrationRequest, "ADMINISTRATOR");
     }
