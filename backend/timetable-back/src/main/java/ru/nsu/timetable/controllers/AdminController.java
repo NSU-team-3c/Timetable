@@ -5,9 +5,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,82 +24,85 @@ import jakarta.validation.Valid;
 @Slf4j
 @RequestMapping("/api/admin")
 @Tag(name = "Admin controller")
+@RequiredArgsConstructor
 public class AdminController {
+
+    private static final String EMAIL_EXISTS_ERROR = "Error: email already exists";
+    private static final String SUCCESS_MESSAGE = "User created successfully";
 
     private final UserService userService;
 
-    @Autowired
-    public AdminController(
-            UserService userService) {
-        this.userService = userService;
-    }
 
-    @Operation(
-            summary = "Registration of new student account in system")
+    @Operation(summary = "Registration of new student account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Information about password that is automatically linked to generated account is returned", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "400", description = "Email already exists", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "500", content = @Content)})
+            @ApiResponse(responseCode = "200", description = "Student account created successfully",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Email already exists",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "500", content = @Content)
+    })
     @PostMapping("/register_student")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Student Registration")
     public ResponseEntity<?> registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        String newUserEmail = registrationRequest.getEmail();
-
-        if (newUserEmail != null && !newUserEmail.isEmpty()) {
-            if (userService.existByEmailCheck(newUserEmail)) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: email already exists"));
-            }
-        }
-        String description = userService.saveNewUser(newUserEmail, registrationRequest.getFullName(),
-                registrationRequest.getPhone());
-
-        return ResponseEntity.ok(new MessageResponse("New user created successfully"));
+        return registerUser(registrationRequest, "STUDENT");
     }
 
-    @Operation(
-            summary = "Registration of new teacher account in system")
+    @Operation(summary = "Registration of new teacher account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Information about password that is automatically linked to generated account is returned", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "400", description = "Email already exists", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "500", content = @Content)})
+            @ApiResponse(responseCode = "200", description = "Teacher account created successfully",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Email already exists",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "500", content = @Content)
+    })
     @PostMapping("/register_teacher")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Teacher Registration")
     public ResponseEntity<?> registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        String newUserEmail = registrationRequest.getEmail();
-
-        if (newUserEmail != null && !newUserEmail.isEmpty()) {
-            if (userService.existByEmailCheck(newUserEmail)) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: email already exists"));
-            }
-        }
-        String description = userService.saveNewTeacher(newUserEmail, registrationRequest.getFullName(),
-                registrationRequest.getPhone());
-
-        return ResponseEntity.ok(new MessageResponse("New teacher created successfully"));
+        return registerUser(registrationRequest, "TEACHER");
     }
 
-    @Operation(
-            summary = "Registration of new admin account in system")
+    @Operation(summary = "Registration of new admin account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Information about password that is automatically linked to generated account is returned", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "400", description = "Email already exists", content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
-            @ApiResponse(responseCode = "500", content = @Content)})
+            @ApiResponse(responseCode = "200", description = "Admin account created successfully",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Email already exists",
+                    content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "500", content = @Content)
+    })
     @PostMapping("/register_admin")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
+    @Tag(name = "Admin Registration")
     public ResponseEntity<?> registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        String newUserEmail = registrationRequest.getEmail();
+        return registerUser(registrationRequest, "ADMINISTRATOR");
+    }
 
-        if (newUserEmail != null && !newUserEmail.isEmpty()) {
-            if (userService.existByEmailCheck(newUserEmail)) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: email already exists"));
-            }
+    private ResponseEntity<?> registerUser(RegistrationRequest request, String role) {
+        String email = request.getEmail();
+        String password = request.getPassword();
+
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: email is required"));
         }
-        String description = userService.saveNewAdmin(newUserEmail, registrationRequest.getFullName(),
-                registrationRequest.getPhone());
+        if (password == null || password.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: password is required"));
+        }
+        if (userService.existByEmailCheck(email)) {
+            return ResponseEntity.badRequest().body(new MessageResponse(EMAIL_EXISTS_ERROR));
+        }
 
-        return ResponseEntity.ok(new MessageResponse("New admin created successfully"));
+        switch (role) {
+            case "STUDENT" -> userService.saveNewUser(email, request.getFullName(), request.getPhone(), password);
+            case "TEACHER" -> userService.saveNewTeacher(email, request.getFullName(), request.getPhone(), password);
+            case "ADMINISTRATOR" ->
+                    userService.saveNewAdmin(email, request.getFullName(), request.getPhone(), password);
+            default -> throw new IllegalArgumentException("Invalid role");
+        }
+
+        return ResponseEntity.ok(new MessageResponse(SUCCESS_MESSAGE));
     }
 }
