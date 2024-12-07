@@ -1,8 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import PageContainer from '../../components/container/PageContainer';
-import ProfileForm from '../../components/forms/profile/Profile';
-import Table from '../table/Table';
 import Profile from '../../components/profile/Profile';
 
 

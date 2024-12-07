@@ -3,11 +3,38 @@ import { Box, Typography} from '@mui/material';
 import { Link } from 'react-router-dom'; 
 import { mockProfileData } from '../../_mockApis/profile';
 import { ProfileData } from '../../types/user/user';
+import { AppState, useDispatch, useSelector } from '../../store/Store';
+import { fetchProfile, updateProfile } from '../../store/profile/profileSlice';
+import Spinner from '../../views/spinner/Spinner';
 
 
 const Profile: React.FC = () => {
   const [photoView, setPhotoView] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  
+  const dispatch = useDispatch();
+  const profile = useSelector((state: AppState) => state.profile.profile);
+  const loading = useSelector((state: AppState) => state.profile.loading);
+  const error = useSelector((state: AppState) => state.profile.error);
+
+  const [editedProfile, setEditedProfile] = useState(profile);
+
+  useEffect(() => {
+    if (!profile) {
+      dispatch(fetchProfile());
+    } else {
+      setEditedProfile(profile);
+    }
+  }, [dispatch, profile]);
+
+  const handleUpdate = () => {
+    if (editedProfile) {
+      dispatch(updateProfile(editedProfile));
+    }
+  };
+
+  if (loading) return <Spinner />;
+  if (error) return <div>{error}</div>;
 
   useEffect(() => {
     setTimeout(() => {
