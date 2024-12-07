@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 
 // project imports
-import Spinner from 'src/views/spinner/Spinner';
+import Spinner from '../../../../views/spinner/Spinner';
 
 // ===========================|| LOADABLE - LAZY LOADING ||=========================== //
 

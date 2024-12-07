@@ -1,0 +1,1 @@
+export const mockAvailableGroups = [22201, 22202, 22203, 22204, 22213, 22214, 22215];
