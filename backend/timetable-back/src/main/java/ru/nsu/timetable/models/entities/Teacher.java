@@ -3,11 +3,7 @@ package ru.nsu.timetable.models.entities;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -25,6 +21,9 @@ public class Teacher {
     private String qualification;
 
     private long userId;
+
+    @ElementCollection
+    private Set<Integer> freeDays;
 
     public void addOccupiedTimeSlot(TimeSlot timeSlot) {
         occupiedTimeSlots.add(timeSlot);

@@ -14,9 +14,12 @@ import java.util.*;
 @Service
 public class RequirementsXmlGeneratorService {
 
-    public void generateXml(List<GroupDTO> groups, List<RoomDTO> rooms, List<TeacherDTO> teachers,
+    public void generateXml(List<GroupDTO> groups,
+                            List<RoomDTO> rooms,
+                            List<TeacherDTO> teachers,
                             Map<Long, List<RequirementDTO>> groupRequirements,
                             Map<Long, Set<Integer>> groupFreeSlots,
+                            Map<Long, List<CouplingDTO>> groupCouplings,
                             Map<Long, List<AllocateDTO>> roomAllocations,
                             int slotsPerWeek, int slotsPerDay, String filePath)
             throws ParserConfigurationException, TransformerException {
@@ -46,6 +49,15 @@ public class RequirementsXmlGeneratorService {
                 groupElement.appendChild(reqElement);
             }
 
+            List<CouplingDTO> couplings = groupCouplings.getOrDefault(group.id(), List.of());
+            for (CouplingDTO coupling : couplings) {
+                Element couplingElement = document.createElement("coupling");
+                couplingElement.setAttribute("subject", coupling.subject());
+                couplingElement.setAttribute("lesson1", String.valueOf(coupling.lesson1()));
+                couplingElement.setAttribute("lesson2", String.valueOf(coupling.lesson2()));
+                groupElement.appendChild(couplingElement);
+            }
+
             Set<Integer> freeSlots = groupFreeSlots.getOrDefault(group.id(), Set.of());
             for (Integer slot : freeSlots) {
                 Element freeElement = document.createElement("free");
@@ -73,10 +85,14 @@ public class RequirementsXmlGeneratorService {
         }
 
         for (TeacherDTO teacher : teachers) {
-            Element freeDayElement = document.createElement("freeday");
-            freeDayElement.setAttribute("teacher", teacher.name());
-            freeDayElement.setAttribute("day", "4");
-            rootElement.appendChild(freeDayElement);
+            if (teacher.freeDays() != null) {
+                for (Integer day : teacher.freeDays()) {
+                    Element freeDayElement = document.createElement("freeday");
+                    freeDayElement.setAttribute("teacher", teacher.name());
+                    freeDayElement.setAttribute("day", String.valueOf(day));
+                    rootElement.appendChild(freeDayElement);
+                }
+            }
         }
 
         saveToFile(document, filePath);

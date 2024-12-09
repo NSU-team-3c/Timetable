@@ -1,5 +1,7 @@
 package ru.nsu.timetable.models.mappers;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -17,12 +19,18 @@ public class TeacherMapper {
     }
 
     public TeacherDTO toTeacherDTO(Teacher teacher) {
-        return new TeacherDTO(teacher.getId(), teacher.getName(),
+        return new TeacherDTO(
+                teacher.getId(),
+                teacher.getName(),
                 teacher.getOccupiedTimeSlots().stream()
                         .map(TimeSlot::getId)
                         .collect(Collectors.toSet()),
                 teacher.getQualification(),
-                teacher.getUserId());
+                teacher.getUserId(),
+                teacher.getFreeDays() != null
+                        ? new HashSet<>(teacher.getFreeDays())
+                        : Set.of()
+        );
     }
 
     public Teacher toTeacher(TeacherDTO teacherDTO) {
