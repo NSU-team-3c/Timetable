@@ -63,9 +63,21 @@ public class TimetableController {
             Map<Long, Set<Integer>> slotsMap = new HashMap<>();
             Map<Long, List<AllocateDTO>> allocateMap = new HashMap<>();
 
+            Map<Long, List<CouplingDTO>> couplingMap = new HashMap<>();
             String requirementsFilePath = "reqs.xml";
-            requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, requirementsMap, slotsMap, allocateMap, 42, 7, requirementsFilePath);
 
+            requirementsXmlGeneratorService.generateXml(
+                    groups,
+                    rooms,
+                    teachers,
+                    requirementsMap,
+                    slotsMap,
+                    couplingMap,
+                    allocateMap,
+                    42,
+                    7,
+                    requirementsFilePath
+            );
             String queryType = "create_timetable";
             String outputFilePath = prologIntegrationService.generateTimetable(requirementsFilePath, queryType);
             TimetableDTO timetableDTO = xmlParserService.parseTimetable(outputFilePath);
