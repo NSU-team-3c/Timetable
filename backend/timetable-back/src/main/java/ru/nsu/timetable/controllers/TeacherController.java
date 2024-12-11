@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.TeacherDTO;
+import ru.nsu.timetable.models.dto.TeacherRequestDTO;
+import ru.nsu.timetable.models.dto.TeacherSubjectDTO;
 import ru.nsu.timetable.models.mappers.TeacherMapper;
 import ru.nsu.timetable.services.TeacherService;
 
@@ -34,12 +37,32 @@ public class TeacherController {
     }
 
     @PostMapping("/teachers")
-    public TeacherDTO createTeacher(@RequestBody TeacherDTO teacherDTO) {
-        return teacherService.saveTeacher(teacherDTO);
+    public TeacherDTO createTeacher(@RequestBody TeacherRequestDTO teacherRequestDTO) {
+        return teacherService.saveTeacher(teacherRequestDTO);
     }
 
     @DeleteMapping("/teachers/{id}")
     public void deleteTeacher(@PathVariable Long id) {
         teacherService.deleteTeacher(id);
+    }
+
+    @PutMapping("teachers/{id}")
+    public TeacherDTO updateTeacher(@PathVariable long id, @RequestBody TeacherRequestDTO teacherRequestDTO) {
+        return teacherService.updateTeacher(id, teacherRequestDTO);
+    }
+
+    @PostMapping("teachers/assign-subjects")
+    public TeacherDTO assignSubjectsToTeacher(@RequestBody TeacherSubjectDTO dto) {
+        return teacherService.assignSubjectsToTeacher(dto);
+    }
+
+    @PutMapping("teachers/update-subjects")
+    public TeacherDTO updateSubjectsForTeacher(@RequestBody TeacherSubjectDTO dto) {
+        return teacherService.updateSubjectsForTeacher(dto);
+    }
+
+    @DeleteMapping("teachers/remove-subjects")
+    public TeacherDTO removeSubjectsFromTeacher(@RequestBody TeacherSubjectDTO dto) {
+        return teacherService.removeSubjectsFromTeacher(dto);
     }
 }

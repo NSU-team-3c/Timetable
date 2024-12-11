@@ -14,7 +14,7 @@ import java.util.*;
 @Service
 public class RequirementsXmlGeneratorService {
 
-    public void generateXml(List<GroupDTO> groups,
+    /*public void generateXml(List<GroupDTO> groups,
                             List<RoomDTO> rooms,
                             List<TeacherDTO> teachers,
                             Map<Long, List<RequirementDTO>> groupRequirements,
@@ -108,5 +108,5 @@ public class RequirementsXmlGeneratorService {
         StreamResult result = new StreamResult(new File(filePath));
         transformer.transform(source, result);
 
-    }
+    }*/
 }
