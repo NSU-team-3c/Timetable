@@ -1,6 +1,6 @@
 package ru.nsu.timetable.models.dto;
 
-import java.util.Set;
+import java.util.List;
 
-public record TimetableDTO(Long id, Set<Long> facultyIds, Set<Long> timeSlotIds) {
+public record TimetableDTO(Long id, List<EventDTO> events) {
 }

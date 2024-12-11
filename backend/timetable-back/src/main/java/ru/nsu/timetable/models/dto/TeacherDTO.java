@@ -1,7 +1,9 @@
 package ru.nsu.timetable.models.dto;
 
-import java.util.Set;
+import java.util.List;
 
-public record TeacherDTO(Long id, String name, Set<Long> occupiedTimeSlotsIds, String qualification,
-                         long userId) {
+public record TeacherDTO(Long id, String name, String organization, String education, String specialization,
+                         List<TimeSlotDTO> availableTimeSlots,
+                         List<Long> subjectIds,
+                         Long userId) {
 }

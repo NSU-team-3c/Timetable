@@ -1,13 +1,9 @@
 package ru.nsu.timetable.models.entities;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -19,15 +15,23 @@ public class Teacher {
 
     private String name;
 
-    @OneToMany(mappedBy = "teacher")
-    private Set<TimeSlot> occupiedTimeSlots = new HashSet<>();
+    private String organisation;
 
-    private String qualification;
+    private String education;
+
+    private String specialization;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "teacher_id")
+    private List<TimeSlot> availableTimeSlots = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<Subject> subjects = new ArrayList<>();
 
     private long userId;
-
-    public void addOccupiedTimeSlot(TimeSlot timeSlot) {
-        occupiedTimeSlots.add(timeSlot);
-        timeSlot.setTeacher(this);
-    }
 }

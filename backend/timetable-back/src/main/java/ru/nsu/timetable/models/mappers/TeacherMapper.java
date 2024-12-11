@@ -4,38 +4,43 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import ru.nsu.timetable.models.dto.TeacherDTO;
+import ru.nsu.timetable.models.dto.TeacherRequestDTO;
+import ru.nsu.timetable.models.entities.Subject;
 import ru.nsu.timetable.models.entities.Teacher;
-import ru.nsu.timetable.models.entities.TimeSlot;
-import ru.nsu.timetable.repositories.TimeSlotRepository;
+import ru.nsu.timetable.repositories.SubjectRepository;
 
 @Component
 public class TeacherMapper {
-    private final TimeSlotRepository timeSlotRepository;
+    private final TimeSlotMapper timeSlotMapper;
+    private final SubjectRepository subjectRepository;
 
-    public TeacherMapper(TimeSlotRepository timeSlotRepository) {
-        this.timeSlotRepository = timeSlotRepository;
+    public TeacherMapper(TimeSlotMapper timeSlotMapper, SubjectRepository subjectRepository) {
+        this.timeSlotMapper = timeSlotMapper;
+        this.subjectRepository = subjectRepository;
     }
 
     public TeacherDTO toTeacherDTO(Teacher teacher) {
-        return new TeacherDTO(teacher.getId(), teacher.getName(),
-                teacher.getOccupiedTimeSlots().stream()
-                        .map(TimeSlot::getId)
-                        .collect(Collectors.toSet()),
-                teacher.getQualification(),
+        return new TeacherDTO(
+                teacher.getId(),
+                teacher.getName(),
+                teacher.getOrganisation(),
+                teacher.getEducation(),
+                teacher.getSpecialization(),
+                teacher.getAvailableTimeSlots().stream()
+                        .map(timeSlotMapper::toTimeSlotDTO)
+                        .collect(Collectors.toList()),
+                teacher.getSubjects().stream()
+                        .map(Subject::getId)
+                        .collect(Collectors.toList()),
                 teacher.getUserId());
     }
 
-    public Teacher toTeacher(TeacherDTO teacherDTO) {
+    public Teacher toTeacher(TeacherRequestDTO teacherRequestDTO) {
         Teacher teacher = new Teacher();
-        teacher.setName(teacherDTO.name());
-        teacherDTO.occupiedTimeSlotsIds().forEach(timeSlotId ->
-                timeSlotRepository.findById(timeSlotId).ifPresent(teacher::addOccupiedTimeSlot)
-        );
-        teacher.setQualification(teacherDTO.qualification());
-        teacher.setUserId(teacherDTO.userId());
-        if (teacherDTO.id() != null) {
-            teacher.setId(teacherDTO.id());
-        }
+        teacher.setName(teacherRequestDTO.name());
+        teacher.setEducation(teacherRequestDTO.education());
+        teacher.setSpecialization(teacherRequestDTO.specialization());
+        teacher.setOrganisation(teacherRequestDTO.organization());
         return teacher;
     }
 }

@@ -1,12 +1,14 @@
 package ru.nsu.timetable.models.entities;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
 
@@ -17,17 +19,7 @@ public class Timetable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany
-    private Set<Faculty> faculties = new HashSet<>();
-
-    @OneToMany
-    private Set<TimeSlot> timeSlots = new HashSet<>();
-
-    public void addFaculty(Faculty faculty) {
-        faculties.add(faculty);
-    }
-
-    public void addTimeSlot(TimeSlot timeSlot) {
-        timeSlots.add(timeSlot);
-    }
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "timetable_id")
+    private List<Event> events = new ArrayList<>();
 }

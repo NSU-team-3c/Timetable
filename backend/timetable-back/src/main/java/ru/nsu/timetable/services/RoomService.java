@@ -42,6 +42,20 @@ public class RoomService {
         }
     }
 
+    public RoomDTO updateRoom(Long id, RoomDTO roomDTO) {
+        Room room = getRoom(id);
+        if (roomDTO.name() != null) {
+            room.setName(roomDTO.name());
+        }
+        if (roomDTO.capacity() > 0) {
+            room.setCapacity(roomDTO.capacity());
+        }
+        if (roomDTO.type() != null) {
+            room.setType(Room.RoomType.valueOf(roomDTO.type()));
+        }
+        return roomMapper.toRoomDTO(roomRepository.save(room));
+    }
+
     private Room getRoom(Long id) {
         Optional<Room> room = roomRepository.findById(id);
         if (room.isEmpty()) {
