@@ -41,17 +41,12 @@ public class TimetableController {
         return timetableService.getTimetableById(id);
     }
 
-    @PostMapping("/timetables")
-    public TimetableDTO createTimetable(@RequestBody TimetableDTO timetableDTO) {
-        return timetableService.saveTimetable(timetableDTO);
-    }
-
     @DeleteMapping("/timetables/{id}")
     public void deleteTimetable(@PathVariable Long id) {
         timetableService.deleteTimetable(id);
     }
 
-    @PostMapping("/timetables/generate")
+    /*@PostMapping("/timetables/generate")
     public ResponseEntity<TimetableDTO> generateAndSaveTimetable(
             @RequestBody TimetableGenerationRequest request) {
         try {
@@ -90,5 +85,5 @@ public class TimetableController {
         } catch (ParserConfigurationException | TransformerException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 }

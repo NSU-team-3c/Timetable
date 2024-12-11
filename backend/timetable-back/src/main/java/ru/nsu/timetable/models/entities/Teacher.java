@@ -1,6 +1,7 @@
 package ru.nsu.timetable.models.entities;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -15,8 +16,9 @@ public class Teacher {
 
     private String name;
 
-    @OneToMany(mappedBy = "teacher")
-    private Set<TimeSlot> occupiedTimeSlots = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "teacher_id")
+    private List<TimeSlot> availableTimeSlots = new ArrayList<>();
 
     private String qualification;
 
@@ -24,9 +26,4 @@ public class Teacher {
 
     @ElementCollection
     private Set<Integer> freeDays;
-
-    public void addOccupiedTimeSlot(TimeSlot timeSlot) {
-        occupiedTimeSlots.add(timeSlot);
-        timeSlot.setTeacher(this);
-    }
 }

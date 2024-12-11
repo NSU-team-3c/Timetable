@@ -15,7 +15,7 @@ import java.util.*;
 public class XmlParserService {
 
     //sorry
-    private static final Map<String, Long> ID_MAPPING = Map.ofEntries(
+    /*private static final Map<String, Long> ID_MAPPING = Map.ofEntries(
             Map.entry("teamPr", 101L),
             Map.entry("prog", 102L),
             Map.entry("math", 103L),
@@ -109,5 +109,5 @@ public class XmlParserService {
     private String getElementTextContent(Element parent, String tagName) {
         NodeList list = parent.getElementsByTagName(tagName);
         return (list.getLength() > 0) ? list.item(0).getTextContent() : "";
-    }
+    }*/
 }
