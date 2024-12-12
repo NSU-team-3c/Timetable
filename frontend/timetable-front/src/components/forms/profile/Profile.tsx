@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { Button, TextField, Box, Typography, FormControl, FormHelperText } from '@mui/material';
+import { Button, TextField, Box, FormControl, FormHelperText } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom'; 
 import { mockProfileData } from '../../../_mockApis/profile';
 import { ProfileData } from '../../../types/user/user';
 
 
 const ProfileForm: React.FC = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);    
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     setTimeout(() => {
@@ -32,7 +34,7 @@ const ProfileForm: React.FC = () => {
       email: '',
       phone: '',
       about: '',
-      photo: null, // Инициализация photo как null
+      photo: null, 
       role: '',
       group: 0,
     },
@@ -67,6 +69,7 @@ const ProfileForm: React.FC = () => {
 
     onSubmit: async (values) => {
       console.log('Форма отправлена', values);
+      navigate('/profile', { replace: true });
     },
   });
 
@@ -76,14 +79,6 @@ const ProfileForm: React.FC = () => {
       setPhotoPreview(URL.createObjectURL(file));
       formik.setFieldValue('photo', file); 
     }
-  };
-
-  const linkToProfessor = () => {
-      return (
-        <Link to="/profile/professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Я преподаватель {'>'}</Typography>
-        </Link>
-      );
   };
 
   return (
@@ -230,8 +225,6 @@ const ProfileForm: React.FC = () => {
           >
             Сохранить
           </Button>
-          
-          {profileData ?  (profileData.role !== "professor" ? linkToProfessor() : '') : ''}
         </Box>
       </form>
     </Box>

@@ -8,5 +8,5 @@ export const mockProfileData = {
     about: 'XAXAXAXAXAXAXXAXAXAXAXAXAXAXAXAXAXAXAXAXAXAXAXAXAX',
     photo: null,
     group: 22215,
-    role: "professor"
+    role: "adminUser"
   };

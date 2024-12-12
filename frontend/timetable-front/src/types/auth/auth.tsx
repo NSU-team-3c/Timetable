@@ -1,14 +1,14 @@
-export interface LoginFormValues {
+export interface Login {
     email: string;
     password: string;
     rememberMe: boolean;
 }
 
-export interface ForgotPasswordValues {
+export interface ForgotPassword{
     email: string;
 }
 
-export interface RegisterFormValues {
+export interface Register {
     email: string;
     password: string;
     confirmPassword: string;

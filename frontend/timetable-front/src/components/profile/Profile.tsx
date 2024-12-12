@@ -3,38 +3,13 @@ import { Box, Typography} from '@mui/material';
 import { Link } from 'react-router-dom'; 
 import { mockProfileData } from '../../_mockApis/profile';
 import { ProfileData } from '../../types/user/user';
-import { AppState, useDispatch, useSelector } from '../../store/Store';
-import { fetchProfile, updateProfile } from '../../store/profile/profileSlice';
 import Spinner from '../../views/spinner/Spinner';
 
 
 const Profile: React.FC = () => {
   const [photoView, setPhotoView] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  
-  const dispatch = useDispatch();
-  const profile = useSelector((state: AppState) => state.profile.profile);
-  const loading = useSelector((state: AppState) => state.profile.loading);
-  const error = useSelector((state: AppState) => state.profile.error);
 
-  const [editedProfile, setEditedProfile] = useState(profile);
-
-  useEffect(() => {
-    if (!profile) {
-      dispatch(fetchProfile());
-    } else {
-      setEditedProfile(profile);
-    }
-  }, [dispatch, profile]);
-
-  const handleUpdate = () => {
-    if (editedProfile) {
-      dispatch(updateProfile(editedProfile));
-    }
-  };
-
-  if (loading) return <Spinner />;
-  if (error) return <div>{error}</div>;
 
   useEffect(() => {
     setTimeout(() => {
@@ -52,6 +27,32 @@ const Profile: React.FC = () => {
             Группа: {profileData?.group}
         </Typography>
     );
+  }
+
+  const additionLinkView = () => {
+    return (
+      <Box>
+        <Link to="/admin/add-professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Typography color="primary">Добавление преподавателей {'>'} </Typography>
+        </Link>
+
+        <Link to="/admin/add-subject" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Typography color="primary">Добавление предметов {'>'} </Typography>
+        </Link>
+
+        <Link to="/admin/add-classroom" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Typography color="primary">Добавление комнат {'>'} </Typography>
+        </Link>
+        
+        <Link to="/admin/add-group" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Typography color="primary">Добавление групп {'>'} </Typography>
+        </Link>
+      </Box>      
+    )
+  }
+
+  if (!profileData) {
+    return <Spinner />;
   }
 
   return (
@@ -89,7 +90,7 @@ const Profile: React.FC = () => {
                 Отчество: {profileData ? profileData.patronymic : ''}
             </Typography>
 
-            {profileData ? (profileData.role !=='professor' ? groupView() : '' ) : ''}
+            {profileData ? (profileData.role ==='student' ? groupView() : '' ) : ''}
 
             <Typography variant="body1" gutterBottom>
                 Дата рождения: {profileData ? profileData.birthday : ''}
@@ -109,13 +110,15 @@ const Profile: React.FC = () => {
 
 
           <Link to="/profile/change-password" style={{ textAlign: 'left', display: 'block' }}>
-          <Typography color="secondary"> Изменить пароль {'>'}</Typography>
-
+            <Typography color="secondary"> Изменить пароль {'>'}</Typography>
           </Link>
 
           <Link to="/profile/profile-edit" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
             <Typography color="primary">Редактировать профиль {'>'}</Typography>
           </Link>
+
+          {profileData ? (profileData.role === 'adminUser' ? additionLinkView() : '' ) : ''}
+
         </Box>
     </Box>
   );

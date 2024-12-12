@@ -1,4 +1,3 @@
-// src/redux/slices/profileSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { ProfileData } from '../../types/user/user';
@@ -39,12 +38,17 @@ export const updateProfile = createAsyncThunk<ProfileData, ProfileData>('profile
   return response.data;
 });
 
-
-
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
-  reducers: {},
+  reducers: {
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
+    setError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProfile.pending, (state) => {
@@ -73,5 +77,7 @@ const profileSlice = createSlice({
       });
   },
 });
+
+export const { setLoading, setError } = profileSlice.actions;
 
 export default profileSlice.reducer;

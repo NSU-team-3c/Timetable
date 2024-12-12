@@ -1,4 +1,4 @@
-const typography: any = {
+const typography = {
     fontFamily: "'Plus Jakarta Sans', sans-serif;",
     h1: {
         fontWeight: 600,

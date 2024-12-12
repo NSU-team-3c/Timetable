@@ -4,11 +4,11 @@ import * as yup from 'yup';
 import { Button, TextField, Box, Typography, FormControlLabel, Checkbox, Stack } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../../../_mockApis/auth'
-import { LoginFormValues } from '../../../types/auth/auth';
+import { Login } from '../../../types/auth/auth';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
-  const formik = useFormik<LoginFormValues>({
+  const formik = useFormik<Login>({
     initialValues: {
       email: '',
       password: '',

@@ -1,14 +1,13 @@
-// src/components/LoginForm.tsx
 import React from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography } from '@mui/material';
-import { RegisterFormValues } from '../../../types/auth/auth';
+import { Register } from '../../../types/auth/auth';
 
 
 const RegisterForm: React.FC = () => {
 
-  const formik = useFormik<RegisterFormValues>({
+  const formik = useFormik<Register>({
     initialValues: {
       email: '',
       password: '',
@@ -22,7 +21,7 @@ const RegisterForm: React.FC = () => {
       confirmPassword: yup.string().oneOf([yup.ref('password')], 'Пароли не совпадают')
                     .required('Подтверждение пароля обязательно'),
     }),
-    onSubmit: (values: any) => {
+    onSubmit: (values: Register) => {
       console.log('Форма отправлена', values);
 
       // Здесь можно отправить запрос на сервер для регистрации пользователя

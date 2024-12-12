@@ -1,14 +1,13 @@
-// src/components/LoginForm.tsx
 import React from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { ForgotPasswordValues } from '../../../types/auth/auth';
+import { ForgotPassword } from '../../../types/auth/auth';
 
 const ForgotPasswordForm: React.FC = () => {
 
-  const formik = useFormik<ForgotPasswordValues>({
+  const formik = useFormik<ForgotPassword>({
     initialValues: {
       email: '',
     },
@@ -16,7 +15,7 @@ const ForgotPasswordForm: React.FC = () => {
       email: yup.string().email('Неверный формат почты')
                     .required('Почта обязательна'),
     }),
-    onSubmit: (values: any) => {
+    onSubmit: (values: ForgotPassword) => {
       console.log('Форма отправлена', values);
 
       // Здесь можно отправить запрос на сервер для восстановления пароля

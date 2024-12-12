@@ -1,22 +1,22 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import PageContainer from '../../components/container/PageContainer';
-import Table from '../../components/table/Table';
+import ClassroomList from '../../components/list/ClassroomList';
 
-const ChangePassword = () => (
-    <PageContainer title="Смена пароля" description="this is Change password page">
+
+const AddClassroom = () => (
+    <PageContainer title="Профиль" description="this is Profile page">
         <Box
             p={24}
             sx={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: 0,
-                paddingTop: '5%',
-                padding: "5%",
+                padding: '10%',
             }}
         >
-            <Table />
+            <ClassroomList />
         </Box>
     </PageContainer>
 );
 
-export default ChangePassword;
+export default AddClassroom;

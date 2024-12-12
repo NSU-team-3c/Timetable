@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Локализатор для moment

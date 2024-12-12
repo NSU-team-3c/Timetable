@@ -41,8 +41,8 @@ const Table: React.FC = () => {
     const repeatCount = 12; 
   
     for (let i = 0; i < repeatCount; i++) {
-      let newStartDate = startDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
-      let newEndDate = endDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
+      const newStartDate = startDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
+      const newEndDate = endDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
       
       recurringEvents.push({
         ...event,

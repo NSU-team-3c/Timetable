@@ -25,6 +25,13 @@ const ProfileEdit       = Loadable(lazy(() => import('../views/profile/ProfileEd
 const ChangePassword    = Loadable(lazy(() => import('../views/profile/ChangePassword')));
 const ProfessorProfile  = Loadable(lazy(() => import('../views/profile/Professor')));
 
+
+/* ***Admin*** */
+const AddProfessor  = Loadable(lazy(() => import('../views/add/AddProfessor')));
+const AddSubject    = Loadable(lazy(() => import('../views/add/AddSubject')));
+const AddClassroom  = Loadable(lazy(() => import('../views/add/AddClassroom')));
+const AddGroup      = Loadable(lazy(() => import('../views/add/AddGroup')));
+
 const Timetable         = Loadable(lazy(() => import('../views/table/Table')));
 const CreateCourse      = Loadable(lazy(() => import('../views/courses/Course')));
 const AvaliabilityTime  = Loadable(lazy(() => import('../views/table/AvailableTime')));
@@ -61,6 +68,22 @@ const Router = [
       { path: '/profile/professor/availability',  element: <AvaliabilityTime /> }
     ],
   },
+
+  {
+    path: '/admin',
+    element: (
+      <AuthGuard>
+        <FullLayout/>
+      </AuthGuard>
+    ),
+    children: [
+      { path: '/admin/add-professor',  element: <AddProfessor /> },
+      { path: '/admin/add-subject',     element: <AddSubject /> },
+      { path: '/admin/add-classroom',   element: <AddClassroom /> },
+      { path: '/admin/add-group',       element: <AddGroup /> },
+
+    ],
+  },
   {
     path: '/',
     element: <BlankLayout />,
@@ -72,3 +95,4 @@ const Router = [
 ];
 
 export default Router;
+

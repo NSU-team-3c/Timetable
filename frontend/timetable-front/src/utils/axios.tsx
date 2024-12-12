@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const axiosInstance = axios.create({
   baseURL: 'https://api.example.com', 
@@ -26,15 +27,26 @@ axiosInstance.interceptors.request.use(
 
 // Интерсептор ответа для обработки ошибок
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response && error.response.status === 401) {
-    localStorage.removeItem('authToken');
-      console.log('Unauthorized, please login again.');
+  (response) => response,
+  async (error) => {
+    if (error.response) {
+      const status = error.response.status;
+      switch (status) {
+        case 401:
+          localStorage.removeItem('authToken');
+          console.log('Unauthorized, please login again.');
+          break;
+        case 403:
+          console.log('Forbidden, you do not have permission to access this resource.');
+          break;
+        case 500:
+          console.log('Internal Server Error. Please try again later.');
+          break;
+        default:
+          console.error('An error occurred:', error);
+      }
     } else {
-        console.error('API Error: ', error);
+      console.error('Error with no response:', error);
     }
     
     return Promise.reject(error);
