@@ -29,8 +29,8 @@ public class TimetableService {
         return timetableMapper.toTimetableDTO(getTimetable(id));
     }
 
-    public TimetableDTO saveTimetable(Timetable timetable) {
-        return timetableMapper.toTimetableDTO(timetableRepository.save(timetable));
+    public Timetable saveTimetable(Timetable timetable) {
+        return timetableRepository.save(timetable);
     }
 
     public void deleteTimetable(Long id) {

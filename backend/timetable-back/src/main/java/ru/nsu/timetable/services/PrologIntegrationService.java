@@ -61,5 +61,6 @@ public class PrologIntegrationService {
         };
 
         Files.writeString(Path.of("query1.txt"), queryContent);
+        Files.writeString(Path.of("query.txt"), queryContent);
     }
 }

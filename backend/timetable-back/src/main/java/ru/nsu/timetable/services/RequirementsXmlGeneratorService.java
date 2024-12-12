@@ -10,11 +10,12 @@ import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RequirementsXmlGeneratorService {
 
-    /*public void generateXml(List<GroupDTO> groups,
+    public void generateXml(List<GroupDTO> groups,
                             List<RoomDTO> rooms,
                             List<TeacherDTO> teachers,
                             Map<Long, List<RequirementDTO>> groupRequirements,
@@ -85,13 +86,27 @@ public class RequirementsXmlGeneratorService {
         }
 
         for (TeacherDTO teacher : teachers) {
-            if (teacher.freeDays() != null) {
-                for (Integer day : teacher.freeDays()) {
-                    Element freeDayElement = document.createElement("freeday");
-                    freeDayElement.setAttribute("teacher", teacher.name());
-                    freeDayElement.setAttribute("day", String.valueOf(day));
-                    rootElement.appendChild(freeDayElement);
-                }
+            Set<Integer> allDays = Set.of(0, 1, 2, 3, 4, 5, 6);
+
+            Set<Integer> busyDays = teacher.availableTimeSlots() != null
+                    ? teacher.availableTimeSlots().stream()
+                    .map(slot -> {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(slot.startTime());
+                        return calendar.get(Calendar.DAY_OF_WEEK) - 2;
+                    })
+                    .filter(day -> day >= 0 && day <= 6)
+                    .collect(Collectors.toSet())
+                    : Set.of();
+
+            Set<Integer> freeDays = new HashSet<>(allDays);
+            freeDays.removeAll(busyDays);
+
+            for (Integer day : freeDays) {
+                Element freeDayElement = document.createElement("freeday");
+                freeDayElement.setAttribute("teacher", teacher.name());
+                freeDayElement.setAttribute("day", String.valueOf(day));
+                rootElement.appendChild(freeDayElement);
             }
         }
 
@@ -102,11 +117,10 @@ public class RequirementsXmlGeneratorService {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.setOutputProperty("{https://xml.apache.org/xslt}indent-amount", "4");
 
         DOMSource source = new DOMSource(document);
         StreamResult result = new StreamResult(new File(filePath));
         transformer.transform(source, result);
-
-    }*/
+    }
 }

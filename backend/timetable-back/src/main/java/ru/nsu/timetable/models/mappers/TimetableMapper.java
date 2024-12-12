@@ -20,4 +20,15 @@ public class TimetableMapper {
                         .map(eventMapper::toEventDTO)
                         .collect(Collectors.toList()));
     }
+
+    public Timetable toTimetable(TimetableDTO timetableDTO) {
+        Timetable timetable = new Timetable();
+        timetable.setId(timetableDTO.id());
+        timetable.setEvents(
+                timetableDTO.events().stream()
+                        .map(eventMapper::toEvent)
+                        .collect(Collectors.toList())
+        );
+        return timetable;
+    }
 }

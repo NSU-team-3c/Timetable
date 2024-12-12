@@ -2,32 +2,27 @@ package ru.nsu.timetable.services;
 
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
-import ru.nsu.timetable.models.dto.DayDTO;
-import ru.nsu.timetable.models.dto.GroupDTO;
-import ru.nsu.timetable.models.dto.TimeSlotDTO;
-import ru.nsu.timetable.models.dto.TimetableDTO;
+import org.xml.sax.InputSource;
+import ru.nsu.timetable.models.dto.*;
 
 import javax.xml.parsers.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
 public class XmlParserService {
 
-    //sorry
-    /*private static final Map<String, Long> ID_MAPPING = Map.ofEntries(
-            Map.entry("teamPr", 101L),
-            Map.entry("prog", 102L),
-            Map.entry("math", 103L),
-            Map.entry("mobDev", 104L),
-            Map.entry("t1", 201L),
-            Map.entry("t2", 202L),
-            Map.entry("t3", 203L),
-            Map.entry("t4", 204L),
-            Map.entry("r1", 301L),
-            Map.entry("r2", 302L),
-            Map.entry("r3", 303L),
-            Map.entry("r4", 304L)
+    private static final String BASE_DATE = "2024-04-29";
+    private static final Map<Integer, String> PAIR_TIMES = Map.of(
+            1, "09:00-10:35",
+            2, "10:50-12:25",
+            3, "12:40-14:15",
+            4, "14:30-16:05",
+            5, "16:20-17:55",
+            6, "18:10-19:45",
+            7, "20:00-21:35"
     );
 
     public TimetableDTO parseTimetable(String filePath) {
@@ -35,79 +30,85 @@ public class XmlParserService {
             File xmlFile = new File(filePath);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
+
+            InputStream inputStream = new FileInputStream(xmlFile);
+            InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            InputSource inputSource = new InputSource(reader);
+            inputSource.setEncoding("UTF-8");
+
+            Document doc = builder.parse(inputSource);
             doc.getDocumentElement().normalize();
 
-            Map<Integer, DayDTO> days = new HashMap<>();
-
+            List<EventDTO> events = new ArrayList<>();
             NodeList dayNodes = doc.getElementsByTagName("day");
+
             for (int i = 0; i < dayNodes.getLength(); i++) {
                 Element dayElement = (Element) dayNodes.item(i);
                 int dayNumber = Integer.parseInt(dayElement.getAttribute("number"));
-                String dayName = dayElement.getAttribute("name");
-
-                List<TimeSlotDTO> timeSlots = parseTimeSlots(dayElement);
-                days.put(dayNumber, new DayDTO(dayNumber, dayName, new HashSet<>(timeSlots)));
+                events.addAll(parseEvents(dayElement, dayNumber));
             }
 
-            Set<Long> facultyIds = new HashSet<>();
-            Set<Long> timeSlotIds = new HashSet<>();
-            for (DayDTO day : days.values()) {
-                for (TimeSlotDTO timeSlot : day.timeSlots()) {
-                    timeSlotIds.add(timeSlot.id());
-                    facultyIds.add(timeSlot.teacherId());
-                }
-            }
-
-            return new TimetableDTO(123L, facultyIds, timeSlotIds);
+            return new TimetableDTO(123L, events);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse XML file", e);
         }
     }
 
-    private List<TimeSlotDTO> parseTimeSlots(Element dayElement) {
-        List<TimeSlotDTO> timeSlotDTOs = new ArrayList<>();
+    private List<EventDTO> parseEvents(Element dayElement, int dayNumber) {
+        List<EventDTO> events = new ArrayList<>();
 
         NodeList timeSlotNodes = dayElement.getElementsByTagName("timeSlot");
         for (int j = 0; j < timeSlotNodes.getLength(); j++) {
             Element timeSlotElement = (Element) timeSlotNodes.item(j);
 
-            Long timeSlotId = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
-            Long subjectId = mapToLong(timeSlotElement, "subject", "id");
-            Long teacherId = mapToLong(timeSlotElement, "teacher", "id");
-            Long roomId = mapToLong(timeSlotElement, "room", "id");
+            Long id = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
+            String teacherName = getElementAttributeValue(timeSlotElement, "teacher");
+            String subjectName = getElementAttributeValue(timeSlotElement, "subject");
+            String roomName = getElementAttributeValue(timeSlotElement, "room");
 
-            Set<GroupDTO> groups = parseGroups(timeSlotElement);
+            Date[] startEndTimes = calculateTimes(dayNumber, id.intValue());
 
-            timeSlotDTOs.add(new TimeSlotDTO(timeSlotId, null, null, subjectId, roomId, teacherId));
+            events.add(new EventDTO(id, startEndTimes[0], startEndTimes[1], teacherName, subjectName, roomName));
         }
 
-        return timeSlotDTOs;
+        return events;
     }
 
-    private Long mapToLong(Element parent, String tagName, String attribute) {
-        Element element = (Element) parent.getElementsByTagName(tagName).item(0);
-        if (element != null) {
-            String id = element.getAttribute(attribute);
-            return ID_MAPPING.getOrDefault(id, -1L);
+    private Date[] calculateTimes(int dayNumber, int pairNumber) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(BASE_DATE));
+            calendar.add(Calendar.DAY_OF_YEAR, dayNumber - 1);
+
+            String[] timeRange = PAIR_TIMES.get(pairNumber).split("-");
+            String startTime = timeRange[0];
+            String endTime = timeRange[1];
+
+            Date startDate = dateFormat.parse(
+                    new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()) + " " + startTime
+            );
+            Date endDate = dateFormat.parse(
+                    new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()) + " " + endTime
+            );
+
+            return new Date[]{startDate, endDate};
+        } catch (Exception e) {
+            throw new RuntimeException("Error calculating event times", e);
         }
-        return -1L;
     }
 
-    private Set<GroupDTO> parseGroups(Element timeSlotElement) {
-        Set<GroupDTO> groups = new HashSet<>();
-        NodeList groupNodes = timeSlotElement.getElementsByTagName("group");
-        for (int k = 0; k < groupNodes.getLength(); k++) {
-            Element groupElement = (Element) groupNodes.item(k);
-            Long groupId = Long.parseLong(groupElement.getAttribute("id"));
-            String groupName = groupElement.getAttribute("name");
-            groups.add(new GroupDTO(groupId, groupName, new HashSet<>()));
+    private String getElementAttributeValue(Element parent, String tagName) {
+        NodeList nodes = parent.getElementsByTagName(tagName);
+        if (nodes.getLength() > 0) {
+            Element element = (Element) nodes.item(0);
+            return element.getAttribute("name");
         }
-        return groups;
+        return "";
     }
 
     private String getElementTextContent(Element parent, String tagName) {
         NodeList list = parent.getElementsByTagName(tagName);
         return (list.getLength() > 0) ? list.item(0).getTextContent() : "";
-    }*/
+    }
 }
