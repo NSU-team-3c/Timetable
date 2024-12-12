@@ -16,27 +16,27 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/management")
+@RequestMapping("/api/v1/groups")
 @Tag(name = "Group controller")
 public class GroupController {
     private final GroupService groupService;
 
-    @GetMapping("/groups")
+    @GetMapping("")
     public List<GroupDTO> getAllGroups() {
         return groupService.getAllGroups();
     }
 
-    @GetMapping("/groups/{id}")
+    @GetMapping("/{id}")
     public GroupDTO getGroupById(@PathVariable Long id) {
         return groupService.getGroupById(id);
     }
 
-    @PostMapping("/groups")
+    @PostMapping("")
     public GroupDTO createGroup(@RequestBody GroupDTO groupDTO) {
         return groupService.saveGroup(groupDTO);
     }
 
-    @DeleteMapping("/groups/{id}")
+    @DeleteMapping("/{id}")
     public void deleteGroup(@PathVariable Long id) {
         groupService.deleteGroup(id);
     }

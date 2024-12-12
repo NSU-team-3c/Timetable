@@ -7,5 +7,5 @@ import ru.nsu.timetable.models.entities.Teacher;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
-    Optional<Teacher> findByName(String name);
+    Optional<Teacher> findByUserData_id(Long id);
 }

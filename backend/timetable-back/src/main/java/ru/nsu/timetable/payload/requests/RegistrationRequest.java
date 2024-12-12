@@ -16,8 +16,9 @@ public class RegistrationRequest {
     @Schema(description = "Email", example = "admin@mail.ru")
     private String email;
 
-    @Schema(description = "Group number", example = "22214")
-    private String group;
+    @NotBlank
+    @Schema(description = "Username", example = "user007")
+    private String username;
 
     @NotBlank
     @Schema(description = "Full name", example = "Surname Name Patronymic")

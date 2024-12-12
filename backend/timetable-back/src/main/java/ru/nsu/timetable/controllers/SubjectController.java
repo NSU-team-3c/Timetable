@@ -12,47 +12,47 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/management")
+@RequestMapping("/api/v1/subjects")
 @Tag(name = "Subject controller")
 public class SubjectController {
     private final SubjectService subjectService;
 
-    @GetMapping("/subjects")
+    @GetMapping("")
     public List<SubjectDTO> getAllSubjects() {
         return subjectService.getAllSubjects();
     }
 
-    @GetMapping("/subjects/{id}")
+    @GetMapping("/{id}")
     public SubjectDTO getSubjectById(@PathVariable Long id) {
         return subjectService.getSubjectById(id);
     }
 
-    @PostMapping("/subjects")
+    @PostMapping("")
     public SubjectDTO createSubject(@RequestBody SubjectRequestDTO subjectRequestDTO) {
         return subjectService.saveSubject(subjectRequestDTO);
     }
 
-    @DeleteMapping("/subjects/{id}")
+    @DeleteMapping("/{id}")
     public void deleteSubject(@PathVariable Long id) {
         subjectService.deleteSubject(id);
     }
 
-    @PutMapping("subjects/{id}")
+    @PutMapping("/{id}")
     public SubjectDTO updateSubject(@PathVariable long id, @RequestBody SubjectRequestDTO subjectRequestDTO) {
         return subjectService.updateSubject(id, subjectRequestDTO);
     }
 
-    @PostMapping("subjects/assign-groups")
+    @PostMapping("/assign-groups")
     public SubjectDTO assignGroupsToSubject(@RequestBody SubjectGroupDTO dto) {
         return subjectService.assignGroupsToSubject(dto);
     }
 
-    @PutMapping("subjects/update-groups")
+    @PutMapping("/update-groups")
     public SubjectDTO updateGroupsForSubject(@RequestBody SubjectGroupDTO dto) {
         return subjectService.updateGroupsForSubject(dto);
     }
 
-    @DeleteMapping("subjects/remove-groups")
+    @DeleteMapping("/remove-groups")
     public SubjectDTO removeGroupsFromSubject(@RequestBody SubjectGroupDTO dto) {
         return subjectService.removeGroupsFromSubject(dto);
     }

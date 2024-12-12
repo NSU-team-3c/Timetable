@@ -42,7 +42,7 @@ public class GroupService {
         }
     }
 
-    private Group getGroup(Long id) {
+    public Group getGroup(Long id) {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isEmpty()) {
             throw new ResourceNotFoundException("Group with id " + id + " not found");

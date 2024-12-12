@@ -45,7 +45,7 @@ public class AuthService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
         long expiresIn = refreshToken.getExpiryDate().getEpochSecond() - Instant.now().getEpochSecond();
 
-        var user = userService.findById(userDetails.getId());
+        var user = userService.getUser(userDetails.getId());
         List<String> userRoles = user.getRoles().stream()
                 .map(Role::toString)
                 .toList();

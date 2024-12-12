@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.UserDTO;
 import ru.nsu.timetable.models.entities.Operations;
 import ru.nsu.timetable.models.entities.Role;
+import ru.nsu.timetable.models.entities.Room;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.repositories.OperationsRepository;
@@ -53,7 +55,7 @@ public class UserService {
         }
     }
 
-    private User getUser(Long id) {
+    public User getUser(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
@@ -64,11 +66,6 @@ public class UserService {
 
     public boolean existByEmailCheck(String email) {
         return userRepository.existsByEmail(email);
-    }
-
-    public User findById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public String changeUserRoles(String email, Set<String> stringRoles) {
@@ -89,25 +86,26 @@ public class UserService {
         return "Role changed for user " + email;
     }
 
-    public String saveNewAdmin(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
+    public String saveNewAdmin(String email, String username, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_ADMINISTRATOR.name()));
     }
 
-    public String saveNewTeacher(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
+    public String saveNewTeacher(String email, String username, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_TEACHER.name()));
     }
 
-    public String saveNewUser(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
+    public String saveNewUser(String email, String username, String fullName, String phone, String password) {
+        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
                 ERole.ROLE_USER.name()));
     }
 
-    private String saveNewUserWithRoles(String email, String fullName, String phone, String password, Set<String> roles) {
+    private String saveNewUserWithRoles(String email, String username, String fullName, String phone, String password, Set<String> roles) {
         User newUser = new User();
+        newUser.setUsername(username);
         newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());

@@ -24,7 +24,7 @@ import javax.xml.transform.TransformerException;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/management")
+@RequestMapping("/api/v1/timetables")
 @Tag(name = "Timetable controller")
 public class TimetableController {
 
@@ -34,22 +34,22 @@ public class TimetableController {
     private final RequirementsXmlGeneratorService requirementsXmlGeneratorService;
     private final TimetableMapper timetableMapper;
 
-    @GetMapping("/timetables")
+    @GetMapping("")
     public List<TimetableDTO> getAllTimetables() {
         return timetableService.getAllTimetables();
     }
 
-    @GetMapping("/timetables/{id}")
+    @GetMapping("/{id}")
     public TimetableDTO getTimetableById(@PathVariable Long id) {
         return timetableService.getTimetableById(id);
     }
 
-    @DeleteMapping("/timetables/{id}")
+    @DeleteMapping("/{id}")
     public void deleteTimetable(@PathVariable Long id) {
         timetableService.deleteTimetable(id);
     }
 
-    @PostMapping("/timetables/generate")
+    @PostMapping("/generate")
     public ResponseEntity<TimetableDTO> generateAndSaveTimetable(
             @RequestBody TimetableGenerationRequest request) {
         try {

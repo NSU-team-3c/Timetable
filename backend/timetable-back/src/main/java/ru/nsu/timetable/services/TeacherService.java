@@ -5,16 +5,20 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.TeacherDTO;
 import ru.nsu.timetable.models.dto.TeacherRequestDTO;
 import ru.nsu.timetable.models.dto.TeacherSubjectDTO;
+import ru.nsu.timetable.models.dto.TeacherTimeslotDTO;
 import ru.nsu.timetable.models.entities.Subject;
 import ru.nsu.timetable.models.entities.Teacher;
+import ru.nsu.timetable.models.entities.TimeSlot;
+import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.TeacherMapper;
 import ru.nsu.timetable.repositories.SubjectRepository;
 import ru.nsu.timetable.repositories.TeacherRepository;
+import ru.nsu.timetable.repositories.TimeSlotRepository;
+import ru.nsu.timetable.repositories.UserRepository;
 
 @RequiredArgsConstructor
 @Service
@@ -22,6 +26,8 @@ public class TeacherService {
     private final TeacherRepository teacherRepository;
     private final TeacherMapper teacherMapper;
     private final SubjectRepository subjectRepository;
+    private final TimeSlotRepository timeSlotRepository;
+    private final UserRepository userRepository;
 
     public List<TeacherDTO> getAllTeachers() {
         return teacherRepository
@@ -29,6 +35,14 @@ public class TeacherService {
                 .stream()
                 .map(teacherMapper::toTeacherDTO)
                 .toList();
+    }
+
+    public TeacherDTO getTeacherByUserId(Long userId) {
+        Optional<Teacher> teacher = teacherRepository.findByUserData_id(userId);
+        if (teacher.isEmpty()) {
+            throw new ResourceNotFoundException("Teacher with user id " + userId + " not found");
+        }
+        return teacherMapper.toTeacherDTO(teacher.get());
     }
 
     public TeacherDTO getTeacherById(Long id) {
@@ -50,9 +64,6 @@ public class TeacherService {
 
     public TeacherDTO updateTeacher(Long id, TeacherRequestDTO teacherRequestDTO) {
         Teacher teacher = getTeacher(id);
-        if (teacherRequestDTO.name() != null) {
-            teacher.setName(teacherRequestDTO.name());
-        }
         if (teacherRequestDTO.organization() != null) {
             teacher.setOrganisation(teacherRequestDTO.organization());
         }
@@ -63,7 +74,12 @@ public class TeacherService {
             teacher.setOrganisation(teacherRequestDTO.specialization());
         }
         if (teacherRequestDTO.userId() > 0) {
-            teacher.setUserId(teacherRequestDTO.userId());
+            Optional<User> user = userRepository.findById(teacherRequestDTO.userId());
+            if (user.isEmpty()) {
+                throw new ResourceNotFoundException("User with id " + id + " not found");
+            } else {
+                teacher.setUserData(user.get());
+            }
         }
         return teacherMapper.toTeacherDTO(teacherRepository.save(teacher));
     }
@@ -90,10 +106,32 @@ public class TeacherService {
         return teacherMapper.toTeacherDTO(teacherRepository.save(teacher));
     }
 
+    public TeacherDTO assignTimeSlotsToTeacher(TeacherTimeslotDTO dto) {
+        Teacher teacher = getTeacher(dto.teacherId());
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(dto.timeSlotIds());
+        teacher.getAvailableTimeSlots().addAll(timeSlots);
+        return teacherMapper.toTeacherDTO(teacherRepository.save(teacher));
+    }
+
+    public TeacherDTO updateTimeSlotsForTeacher(TeacherTimeslotDTO dto) {
+        Teacher teacher = getTeacher(dto.teacherId());
+        teacher.getAvailableTimeSlots().clear();
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(dto.timeSlotIds());
+        teacher.getAvailableTimeSlots().addAll(timeSlots);
+        return teacherMapper.toTeacherDTO(teacherRepository.save(teacher));
+    }
+
+    public TeacherDTO removeTimeSlotsFromTeacher(TeacherTimeslotDTO dto) {
+        Teacher teacher = getTeacher(dto.teacherId());
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(dto.timeSlotIds());
+        teacher.getAvailableTimeSlots().removeAll(timeSlots);
+        return teacherMapper.toTeacherDTO(teacherRepository.save(teacher));
+    }
+
     private Teacher getTeacher(Long id) {
         Optional<Teacher> teacher = teacherRepository.findById(id);
         if (teacher.isEmpty()) {
-            throw new ResourceNotFoundException("Course with id " + id + " not found");
+            throw new ResourceNotFoundException("Teacher with id " + id + " not found");
         } else {
             return teacher.get();
         }

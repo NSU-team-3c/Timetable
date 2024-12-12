@@ -13,8 +13,6 @@ public class Teacher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String name;
-
     private String organisation;
 
     private String education;
@@ -33,5 +31,7 @@ public class Teacher {
     )
     private List<Subject> subjects = new ArrayList<>();
 
-    private long userId;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", unique = true)
+    private User userData;
 }

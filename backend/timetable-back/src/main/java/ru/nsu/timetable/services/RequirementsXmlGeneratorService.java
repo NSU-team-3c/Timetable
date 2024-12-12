@@ -1,8 +1,10 @@
 package ru.nsu.timetable.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import ru.nsu.timetable.models.dto.*;
+import ru.nsu.timetable.repositories.TimeSlotRepository;
 
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -12,8 +14,10 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class RequirementsXmlGeneratorService {
+    private TimeSlotRepository timeSlotRepository;
 
     public void generateXml(List<GroupDTO> groups,
                             List<RoomDTO> rooms,
@@ -88,11 +92,11 @@ public class RequirementsXmlGeneratorService {
         for (TeacherDTO teacher : teachers) {
             Set<Integer> allDays = Set.of(0, 1, 2, 3, 4, 5, 6);
 
-            Set<Integer> busyDays = teacher.availableTimeSlots() != null
-                    ? teacher.availableTimeSlots().stream()
+            Set<Integer> busyDays = teacher.availableTimeSlotIds() != null
+                    ? timeSlotRepository.findAllById(teacher.availableTimeSlotIds()).stream()
                     .map(slot -> {
                         Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(slot.startTime());
+                        calendar.setTime(slot.getStartTime());
                         return calendar.get(Calendar.DAY_OF_WEEK) - 2;
                     })
                     .filter(day -> day >= 0 && day <= 6)
@@ -104,7 +108,7 @@ public class RequirementsXmlGeneratorService {
 
             for (Integer day : freeDays) {
                 Element freeDayElement = document.createElement("freeday");
-                freeDayElement.setAttribute("teacher", teacher.name());
+                freeDayElement.setAttribute("teacher", teacher.user().fullName()); //посмотреть норм ли поправила
                 freeDayElement.setAttribute("day", String.valueOf(day));
                 rootElement.appendChild(freeDayElement);
             }

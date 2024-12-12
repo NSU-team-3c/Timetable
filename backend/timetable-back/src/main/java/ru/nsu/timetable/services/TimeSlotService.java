@@ -42,6 +42,17 @@ public class TimeSlotService {
         }
     }
 
+    public TimeSlotDTO updateTimeSlot(Long id, TimeSlotDTO timeSlotDTO) {
+        TimeSlot timeSlot = getTimeSlot(id);
+        if (timeSlotDTO.startTime() != null) {
+            timeSlot.setStartTime(timeSlotDTO.startTime());
+        }
+        if (timeSlotDTO.endTime() != null) {
+            timeSlot.setEndTime(timeSlotDTO.endTime());
+        }
+        return timeSlotMapper.toTimeSlotDTO(timeSlotRepository.save(timeSlot));
+    }
+
     private TimeSlot getTimeSlot(Long id) {
         Optional<TimeSlot> timeSlot = timeSlotRepository.findById(id);
         if (timeSlot.isEmpty()) {

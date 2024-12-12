@@ -17,32 +17,32 @@ import ru.nsu.timetable.services.RoomService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/management")
+@RequestMapping("/api/v1/rooms")
 @Tag(name = "Room controller")
 public class RoomController {
     private final RoomService roomService;
 
-    @GetMapping("/rooms")
+    @GetMapping("")
     public List<RoomDTO> getAllRooms() {
         return roomService.getAllRooms();
     }
 
-    @GetMapping("/rooms/{id}")
+    @GetMapping("/{id}")
     public RoomDTO getRoomById(@PathVariable Long id) {
         return roomService.getRoomById(id);
     }
 
-    @PostMapping("/rooms")
+    @PostMapping("")
     public RoomDTO createRoom(@RequestBody RoomDTO roomDTO) {
         return roomService.saveRoom(roomDTO);
     }
 
-    @DeleteMapping("/rooms/{id}")
+    @DeleteMapping("/{id}")
     public void deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
     }
 
-    @PutMapping("rooms/{id}")
+    @PutMapping("/{id}")
     public RoomDTO updateRoom(@PathVariable long id, @RequestBody RoomDTO roomDTO) {
         return roomService.updateRoom(id, roomDTO);
     }

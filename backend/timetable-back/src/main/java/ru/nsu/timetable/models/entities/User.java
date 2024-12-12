@@ -21,7 +21,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +32,9 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    // Связь ManyToMany с сущностью Role
+    @Column(name = "username", unique = true)
+    private String username;
+
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "user_roles",
@@ -45,7 +46,7 @@ public class User {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "full_name", unique = true)
+    @Column(name = "full_name")
     private String fullName;
 
     @NotBlank
