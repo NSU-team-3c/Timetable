@@ -25,4 +25,7 @@ public class Group {
 
     @ManyToMany(mappedBy = "groups")
     private List<Subject> subjects = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "groups")
+    private List<Event> events;
 }

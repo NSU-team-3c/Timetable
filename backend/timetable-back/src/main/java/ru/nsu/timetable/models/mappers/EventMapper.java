@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.nsu.timetable.models.dto.EventDTO;
 import ru.nsu.timetable.models.entities.Event;
-import ru.nsu.timetable.models.entities.Room;
-import ru.nsu.timetable.models.entities.Subject;
 import ru.nsu.timetable.repositories.RoomRepository;
 import ru.nsu.timetable.repositories.SubjectRepository;
 import ru.nsu.timetable.repositories.TeacherRepository;
@@ -30,41 +28,20 @@ public class EventMapper {
     }
 
     public EventDTO toEventDTO(Event event) {
-        return new EventDTO(event.getId(), event.getStartTime(), event.getEndTime(), event.getTeacher().getUserData().getFullName(),
-                event.getSubject().getName(), event.getRoom().getName());
-    }
+        String teacherName = (event.getTeacher() != null && event.getTeacher().getUserData() != null)
+                ? event.getTeacher().getUserData().getFullName()
+                : "Unknown Teacher";
 
-    public Event toEvent(EventDTO eventDTO) {
-        Event event = new Event();
-        event.setId(eventDTO.id());
-        event.setStartTime(eventDTO.startTime());
-        event.setEndTime(eventDTO.endTime());
+        String subjectName = event.getSubject() != null ? event.getSubject().getName() : "Unknown Subject";
+        String roomName = event.getRoom() != null ? event.getRoom().getName() : "Unknown Room";
 
-        //name больше нет
-        /*Teacher teacher = teacherRepository.findByName(eventDTO.teacherName())
-                .orElseGet(() -> {
-                    Teacher newTeacher = new Teacher();
-                    newTeacher.setName(eventDTO.teacherName());
-                    return teacherRepository.save(newTeacher);
-                });
-        event.setTeacher(teacher);*/
-
-        Subject subject = subjectRepository.findByName(eventDTO.subjectName())
-                .orElseGet(() -> {
-                    Subject newSubject = new Subject();
-                    newSubject.setName(eventDTO.subjectName());
-                    return subjectRepository.save(newSubject);
-                });
-        event.setSubject(subject);
-
-        Room room = roomRepository.findByName(eventDTO.roomName())
-                .orElseGet(() -> {
-                    Room newRoom = new Room();
-                    newRoom.setName(eventDTO.roomName());
-                    return roomRepository.save(newRoom);
-                });
-        event.setRoom(room);
-
-        return event;
+        return new EventDTO(
+                event.getId(),
+                event.getStartTime(),
+                event.getEndTime(),
+                teacherName,
+                subjectName,
+                roomName
+        );
     }
 }

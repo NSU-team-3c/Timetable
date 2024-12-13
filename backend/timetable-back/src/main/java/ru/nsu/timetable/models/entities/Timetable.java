@@ -3,6 +3,7 @@ package ru.nsu.timetable.models.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,5 +22,6 @@ public class Timetable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "timetable_id")
+    @JsonManagedReference
     private List<Event> events = new ArrayList<>();
 }

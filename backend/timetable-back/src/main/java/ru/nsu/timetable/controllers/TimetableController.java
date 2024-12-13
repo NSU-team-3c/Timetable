@@ -1,26 +1,18 @@
 package ru.nsu.timetable.controllers;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.timetable.models.dto.*;
-import ru.nsu.timetable.models.entities.Timetable;
-import ru.nsu.timetable.payload.requests.TimetableGenerationRequest;
 import ru.nsu.timetable.services.PrologIntegrationService;
 import ru.nsu.timetable.services.RequirementsXmlGeneratorService;
 import ru.nsu.timetable.services.TimetableService;
 import ru.nsu.timetable.services.XmlParserService;
 
 import ru.nsu.timetable.models.mappers.TimetableMapper;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,10 +21,6 @@ import javax.xml.transform.TransformerException;
 public class TimetableController {
 
     private final TimetableService timetableService;
-    private final PrologIntegrationService prologIntegrationService;
-    private final XmlParserService xmlParserService;
-    private final RequirementsXmlGeneratorService requirementsXmlGeneratorService;
-    private final TimetableMapper timetableMapper;
 
     @GetMapping("")
     public List<TimetableDTO> getAllTimetables() {
@@ -49,45 +37,13 @@ public class TimetableController {
         timetableService.deleteTimetable(id);
     }
 
-    @PostMapping("/generate")
-    public ResponseEntity<TimetableDTO> generateAndSaveTimetable(
-            @RequestBody TimetableGenerationRequest request) {
+    @GetMapping("/generate")
+    public ResponseEntity<TimetableDTO> generateAndSaveTimetable() {
         try {
-
-            List<GroupDTO> groups = request.getGroups();
-            List<RoomDTO> rooms = request.getRooms();
-            List<TeacherDTO> teachers = request.getTeachers();
-
-            Map<Long, List<RequirementDTO>> requirementsMap = new HashMap<>();
-            Map<Long, Set<Integer>> slotsMap = new HashMap<>();
-            Map<Long, List<AllocateDTO>> allocateMap = new HashMap<>();
-            Map<Long, List<CouplingDTO>> couplingMap = new HashMap<>();
-            String requirementsFilePath = "reqs.xml";
-
-            requirementsXmlGeneratorService.generateXml(
-                    groups,
-                    rooms,
-                    teachers,
-                    requirementsMap,
-                    slotsMap,
-                    couplingMap,
-                    allocateMap,
-                    42,
-                    7,
-                    requirementsFilePath
-            );
-            String queryType = "create_timetable";
-            String outputFilePath = prologIntegrationService.generateTimetable(requirementsFilePath, queryType);
-            TimetableDTO timetableDTO = xmlParserService.parseTimetable(outputFilePath);
-            Timetable timetableEntity = timetableMapper.toTimetable(timetableDTO);
-            Timetable savedTimetable = timetableService.saveTimetable(timetableEntity);
-            TimetableDTO savedTimetableDTO = timetableMapper.toTimetableDTO(savedTimetable);
-            return ResponseEntity.ok(savedTimetableDTO);
-
-        } catch (IOException | InterruptedException e) {
+            TimetableDTO timetableDTO = timetableService.generateAndSaveTimetable();
+            return ResponseEntity.ok(timetableDTO);
+        } catch (Exception e) {
             return ResponseEntity.status(500).body(null);
-        } catch (ParserConfigurationException | TransformerException e) {
-            throw new RuntimeException(e);
         }
     }
 }

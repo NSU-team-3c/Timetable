@@ -3,18 +3,17 @@ package ru.nsu.timetable.services;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Service
 public class PrologIntegrationService {
     public String generateTimetable(String inputRequirementsPath, String queryType) throws IOException, InterruptedException {
 
         String prologExecutable = "./scryer-prolog";
+        //String prologExecutableWin = "./scryer-prolog.exe";
         String prologScript = "generation.pl";
         String queryFile = "query.txt";
         String outputFilePath = "timetable.xml";
-        writeQueryFile(queryType);
+        // writeQueryFile(queryType);
 
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(prologExecutable, prologScript);
@@ -60,7 +59,6 @@ public class PrologIntegrationService {
             default -> "requirements_variables(Rs, Vs, Rooms), labeling([ff], Vs), print_groups(Rs).";
         };
 
-        Files.writeString(Path.of("query1.txt"), queryContent);
-        Files.writeString(Path.of("query.txt"), queryContent);
+        //Files.writeString(Path.of("query.txt"), queryContent);
     }
 }

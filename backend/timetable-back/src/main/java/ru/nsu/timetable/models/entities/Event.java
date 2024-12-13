@@ -1,13 +1,11 @@
 package ru.nsu.timetable.models.entities;
 
 import java.util.Date;
+import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -31,4 +29,19 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_group",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    @JsonIgnore
+    private List<Group> groups;
+
+    @ManyToOne
+    @JoinColumn(name = "timetable_id")
+    @JsonIgnore
+    @JsonBackReference
+    private Timetable timetable;
 }
