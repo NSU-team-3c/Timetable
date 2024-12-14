@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { ForgotPassword, Login, Register } from '../../types/auth/auth';
+import axiosInstance from '../../utils/axios';
 
 interface AuthState {
   user: any | null; 
@@ -17,17 +18,17 @@ const initialState: AuthState = {
 };
 
 export const login = createAsyncThunk('auth/login', async (loginData: Login) => {
-  const response = await axios.post('/api/auth/login', loginData);
+  const response = await axiosInstance.post('/api/auth', loginData);
   return response.data; 
 });
 
 export const register = createAsyncThunk('auth/register', async (registerData: Register) => {
-  const response = await axios.post('/api/auth/register', registerData);
+  const response = await axiosInstance.post('/api/auth/register', registerData);
   return response.data; 
 });
 
 export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (forgotData: ForgotPassword) => {
-  const response = await axios.post('/api/auth/forgot-password', forgotData);
+  const response = await axiosInstance.post('/api/auth/forgot-password', forgotData);
   return response.data; 
 });
 

@@ -2,25 +2,29 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://api.example.com', 
+  baseURL: 'http://localhost:8080', 
   headers: {
+    'accept': 'application/json',
     'Content-Type': 'application/json', 
   },
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
+    //console.log(config);
+
     const token = localStorage.getItem('authToken');
     
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     } else {
-      delete config.headers['Authorization'];
+      config.headers['Authorization'] = `Bearer `;
     }
     
     return config; 
   },
   (error) => {
+    console.log(error);
     return Promise.reject(error); 
   }
 );

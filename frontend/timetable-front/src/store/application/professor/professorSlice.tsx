@@ -2,12 +2,13 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 interface Professor {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-  }
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  password?: string; 
+}
 
 interface professorState {
   professors: Professor[];
@@ -23,7 +24,10 @@ const initialState: professorState = {
 
 export const fetchProfessors = createAsyncThunk('professors/fetchProfessors', async () => {
   const response = await axios.get('/api/professors');
-  return response.data;
+  return response.data.map((professor: Professor) => {
+    const { password, ...professorWithoutPassword } = professor;
+    return professorWithoutPassword; 
+  });
 });
 
 export const createProfessor = createAsyncThunk('professors/createProfessor', async (professor: Professor) => {
@@ -32,7 +36,7 @@ export const createProfessor = createAsyncThunk('professors/createProfessor', as
 });
 
 export const updateProfessor = createAsyncThunk('professors/updateProfessor', async (professor: Professor) => {
-  const response = await axios.put(`/api/v/${professor.id}`, professor);
+  const response = await axios.put(`/api/professors/${professor.id}`, professor);
   return response.data;
 });
 
@@ -99,7 +103,7 @@ const professorSlice = createSlice({
       })
       .addCase(deleteProfessor.fulfilled, (state, action: PayloadAction<number>) => {
         state.loading = false;
-        state.professors = state.professors.filter((professor) => professor.id !== action.payload); // Удаляем аудиторию по ID
+        state.professors = state.professors.filter((professor) => professor.id !== action.payload);
       })
       .addCase(deleteProfessor.rejected, (state, action) => {
         state.loading = false;

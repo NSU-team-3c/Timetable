@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, DialogContentText } from '@mui/material';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Локализатор для moment
@@ -16,6 +16,8 @@ const TeacherAvailabilityForm: React.FC = () => {
   const [events, setEvents] = useState<Availability[]>([]); 
   const [open, setOpen] = useState(false); 
   const [currentEvent, setCurrentEvent] = useState<Availability | null>(null); 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<Availability | null>(null);
 
   const handleSelectSlot = useCallback((slotInfo: any) => {
     if (slotInfo.start.getHours() !== 0) { 
@@ -33,14 +35,33 @@ const TeacherAvailabilityForm: React.FC = () => {
 
   const handleSave = () => {
     if (currentEvent) {
-      setEvents([...events, currentEvent]);
-      setOpen(false);
-      setCurrentEvent(null);
+      // Check if the new event overlaps with any existing events
+      const overlap = events.some(
+        (event) =>
+          (event.start < currentEvent.end && event.end > currentEvent.start)
+      );
+      if (!overlap) {
+        setEvents([...events, currentEvent]);
+        setOpen(false);
+        setCurrentEvent(null);
+      } else {
+        alert('This time slot overlaps with an existing availability!');
+      }
     }
   };
 
   const handleDelete = (eventToDelete: Availability) => {
     setEvents(events.filter(event => event !== eventToDelete));
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteDialogOpen = (event: Availability) => {
+    setEventToDelete(event);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setOpenDeleteDialog(false);
   };
 
   const CustomWeekHeader = ({ label }: { label: string }) => (
@@ -64,7 +85,7 @@ const TeacherAvailabilityForm: React.FC = () => {
         onSelectSlot={handleSelectSlot}
         defaultView="week"
         views={['week']}
-        step={30}
+        step={45}
         min={new Date(2024, 9, 19, 9, 0)} 
         max={new Date(2029, 5, 19, 20, 0)}
         toolbar={false}
@@ -93,6 +114,10 @@ const TeacherAvailabilityForm: React.FC = () => {
           <Button
             onClick={handleSave}
             color="primary"
+            disabled={!currentEvent || events.some(
+              (event) =>
+                (event.start < currentEvent.end && event.end > currentEvent.start)
+            )}
           >
             Сохранить
           </Button>
@@ -112,13 +137,37 @@ const TeacherAvailabilityForm: React.FC = () => {
               <Typography>
                 {moment(event.start).format('dddd, HH:mm')} - {moment(event.end).format('HH:mm')}
               </Typography>
-              <Button color="error" onClick={() => handleDelete(event)}>
+              <Button color="error" onClick={() => handleDeleteDialogOpen(event)}>
                 Удалить
               </Button>
             </Box>
           ))
         )}
       </Box>
+
+      {/* Confirm Delete Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleDeleteDialogClose}
+      >
+        <DialogTitle>Удалить интервал?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Вы уверены, что хотите удалить этот интервал?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose} color="primary">
+            Отмена
+          </Button>
+          <Button
+            onClick={() => eventToDelete && handleDelete(eventToDelete)}
+            color="secondary"
+          >
+            Удалить
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

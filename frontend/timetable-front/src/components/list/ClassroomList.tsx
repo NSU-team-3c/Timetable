@@ -17,7 +17,7 @@ const ClassroomList: React.FC = () => {
   const [auditories, setAuditories] = useState<Auditory[]>(mockAuditories);
   const [open, setOpen] = useState(false);
   const [editingAuditory, setEditingAuditory] = useState<Auditory | null>(null);
-
+  
   const formik = useFormik({
     initialValues: {
       number: editingAuditory?.number || '',

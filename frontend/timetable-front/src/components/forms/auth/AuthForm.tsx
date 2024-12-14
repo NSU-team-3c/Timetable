@@ -3,8 +3,9 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography, FormControlLabel, Checkbox, Stack } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../../../_mockApis/auth'
 import { Login } from '../../../types/auth/auth';
+import { dispatch } from '../../../store/Store';
+import { login } from '../../../store/auth/authSlice';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -12,29 +13,32 @@ const LoginForm: React.FC = () => {
     initialValues: {
       email: '',
       password: '',
-      rememberMe: false,
+      //rememberMe: false,
     },
     validationSchema: yup.object({
       email: yup.string().email('Неверный формат почты').required('Почта обязательна'),
       password: yup.string().min(6, 'Пароль должен содержать минимум 6 символов').required('Пароль обязателен'),
     }),
     onSubmit: async (values) => {
-      console.log('Форма отправлена', values);
+      //console.log('Форма отправлена', values);
 
-      const result = await login(values.email, values.password);
-        
-        if (result.token != null) {
-          localStorage.setItem('authToken', result.token);
+      const resultAction = await dispatch(login(values)); 
 
-          if (values.rememberMe) {
-            localStorage.setItem('rememberMe', 'true');
-          }
+      if (login.fulfilled.match(resultAction)) {
+        const result = resultAction.payload;  
+        if (result.access_token) {
+          localStorage.setItem('authToken', result.access_token);
+          
+          // if (values.rememberMe) {
+          //   localStorage.setItem('rememberMe', 'true');
+          // }
 
           navigate('/profile');
-
-        } else {
-          formik.setErrors({ email: 'Неверная почта или пароль' });
         }
+
+      } else {
+        formik.setErrors({ email: 'Неверная почта или пароль' });
+      }
         
     },
   });
@@ -72,7 +76,7 @@ const LoginForm: React.FC = () => {
 
 
             {/* Опция "Запомнить меня" */}
-            <FormControlLabel
+            {/* <FormControlLabel
             control={
                 <Checkbox
                 {...formik.getFieldProps('rememberMe')}
@@ -81,7 +85,7 @@ const LoginForm: React.FC = () => {
                 />
             }
             label="Запомнить меня"
-            />
+            /> */}
             
             {/* Ссылка на восстановление пароля */}
             <Link to="/auth/forgot-password" style={{ color: '#1976d2', marginLeft: '79px', textAlign: 'right'}}>
