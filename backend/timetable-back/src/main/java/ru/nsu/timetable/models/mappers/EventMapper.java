@@ -29,7 +29,8 @@ public class EventMapper {
 
     public EventDTO toEventDTO(Event event) {
         String teacherName = (event.getTeacher() != null && event.getTeacher().getUserData() != null)
-                ? event.getTeacher().getUserData().getFullName()
+                ? event.getTeacher().getUserData().getSurname() +
+                event.getTeacher().getUserData().getName()
                 : "Unknown Teacher";
 
         String subjectName = event.getSubject() != null ? event.getSubject().getName() : "Unknown Subject";

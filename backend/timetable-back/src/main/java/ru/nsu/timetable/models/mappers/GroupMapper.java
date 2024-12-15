@@ -17,7 +17,7 @@ public class GroupMapper {
     }
 
     public GroupDTO toGroupDTO(Group group) {
-        return new GroupDTO(group.getId(), group.getName(), group.getStudents(),
+        return new GroupDTO(group.getId(), group.getNumber(), group.getStudents(),
                 group.getSubjects().stream()
                         .map(Subject::getId)
                         .collect(Collectors.toList()));
@@ -25,7 +25,7 @@ public class GroupMapper {
 
     public Group toGroup(GroupDTO groupDTO) {
         Group group = new Group();
-        group.setName(groupDTO.name());
+        group.setNumber(groupDTO.number());
         group.setStudents(groupDTO.students());
         group.setSubjects(subjectRepository.findAllById(groupDTO.subjectIds()));
         if (groupDTO.id() != null) {

@@ -4,17 +4,19 @@ import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.UserDTO;
+import ru.nsu.timetable.models.dto.UserInputDTO;
+import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Operations;
 import ru.nsu.timetable.models.entities.Role;
-import ru.nsu.timetable.models.entities.Room;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
+import ru.nsu.timetable.repositories.GroupRepository;
 import ru.nsu.timetable.repositories.OperationsRepository;
 import ru.nsu.timetable.repositories.RoleRepository;
 import ru.nsu.timetable.repositories.UserRepository;
@@ -29,31 +31,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final OperationsRepository operationsRepository;
-
-    public List<UserDTO> getAllUsers() {
-        return userRepository
-                .findAll()
-                .stream()
-                .map(userMapper::toUserDTO)
-                .toList();
-    }
-
-    public UserDTO getUserById(Long id) {
-        return userMapper.toUserDTO(getUser(id));
-    }
-
-    public UserDTO saveUser(UserDTO userDTO) {
-        User user = userMapper.toUser(userDTO);
-        return userMapper.toUserDTO(userRepository.save(user));
-    }
-
-    public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("User with id " + id + " not found");
-        }
-    }
+    private final GroupRepository groupRepository;
 
     public User getUser(Long id) {
         Optional<User> user = userRepository.findById(id);
@@ -62,6 +40,41 @@ public class UserService {
         } else {
             return user.get();
         }
+    }
+
+    public UserDTO getUserInfoByEmail(String email) {
+        return userMapper.toUserDTO(getUserByEmail(email));
+
+    }
+
+    private User getUserByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User with id " + email + " not found");
+        } else {
+            return user.get();
+        }
+    }
+
+    public UserDTO updateUserByEmail(String email, UserInputDTO userInputDTO) {
+        User user = getUserByEmail(email);
+        if (userInputDTO.password() != null) {
+            user.setPassword(new BCryptPasswordEncoder().encode(userInputDTO.password()));
+        }
+        user.setPhone(userInputDTO.phone());
+        user.setSurname(userInputDTO.surname());
+        user.setName(userInputDTO.name());
+        user.setPatronymic(userInputDTO.patronymic());
+        user.setBirthday(userInputDTO.birthday());
+        user.setAbout(userInputDTO.about());
+        user.setPhotoUrl(userInputDTO.photoUrl());
+        if (user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_USER))) {
+            if (userInputDTO.group() != null) {
+                Group group = groupRepository.findByNumber(userInputDTO.group()).orElseThrow();
+                user.setGroup(group);
+            }
+        }
+        return userMapper.toUserDTO(userRepository.save(user));
     }
 
     public boolean existByEmailCheck(String email) {
@@ -86,30 +99,27 @@ public class UserService {
         return "Role changed for user " + email;
     }
 
-    public String saveNewAdmin(String email, String username, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
+    public User saveNewAdmin(String email, String password) {
+        return saveNewUserWithRoles(email, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_ADMINISTRATOR.name()));
     }
 
-    public String saveNewTeacher(String email, String username, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
+    public User saveNewTeacher(String email, String password) {
+        return saveNewUserWithRoles(email, password, Set.of(
                 ERole.ROLE_USER.name(),
                 ERole.ROLE_TEACHER.name()));
     }
 
-    public String saveNewUser(String email, String username, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, username, fullName, phone, password, Set.of(
+    public User saveNewUser(String email, String password) {
+        return saveNewUserWithRoles(email, password, Set.of(
                 ERole.ROLE_USER.name()));
     }
 
-    private String saveNewUserWithRoles(String email, String username, String fullName, String phone, String password, Set<String> roles) {
+    private User saveNewUserWithRoles(String email, String password, Set<String> roles) {
         User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());
-        newUser.setPhone(phone);
 
         Set<Role> userRoles = new HashSet<>();
         for (String role : roles) {
@@ -122,9 +132,9 @@ public class UserService {
         newUser.setPassword(encoder.encode(password));
         userRepository.save(newUser);
 
-        saveOperation("Admin", "Created new user with name '" + fullName + "' and email " + email);
+        saveOperation("Admin", "Created new user with email " + email);
 
-        return "User " + fullName + " created";
+        return newUser;
     }
 
     private void saveOperation(String userAccount, String description) {

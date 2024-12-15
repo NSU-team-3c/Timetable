@@ -43,8 +43,6 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.findByEmail("admin@example.com").isEmpty()) {
             User admin = new User();
             admin.setEmail("admin@example.com");
-            admin.setUsername("admin");
-            admin.setFullName("Administrator");
             admin.setPassword(new BCryptPasswordEncoder().encode("password")); // Хеширование пароля
             admin.setDateOfCreation(new Date());
             Role adminRole = roleRepository.findByName(ROLE_ADMINISTRATOR)

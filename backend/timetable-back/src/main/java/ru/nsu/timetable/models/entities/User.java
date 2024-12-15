@@ -32,9 +32,6 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "username", unique = true)
-    private String username;
-
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "user_roles",
@@ -46,12 +43,25 @@ public class User {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @NotBlank
     @ToString.Exclude
     @JsonIgnore
     @Column(name = "password")
     private String password;
+
+    private String surname;
+
+    private String name;
+
+    private String patronymic;
+
+    private Date birthday;
+
+    private String about;
+
+    private String photoUrl;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "group_id", unique = true)
+    private Group group;
 }

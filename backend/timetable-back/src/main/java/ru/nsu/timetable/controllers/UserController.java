@@ -1,15 +1,19 @@
 package ru.nsu.timetable.controllers;
 
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
+import ru.nsu.timetable.exceptions.UnauthorizedException;
 import ru.nsu.timetable.models.dto.UserDTO;
+import ru.nsu.timetable.models.dto.UserInputDTO;
 import ru.nsu.timetable.services.UserService;
 
 @RequiredArgsConstructor
@@ -18,19 +22,29 @@ import ru.nsu.timetable.services.UserService;
 @Tag(name = "User controller")
 public class UserController {
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @GetMapping("")
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers();
+    @Operation(summary = "Get user info", security = @SecurityRequirement(name = "bearerAuth"))
+    public UserDTO getUser(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            String email = jwtUtils.getUserNameFromJwtToken(token);
+            return userService.getUserInfoByEmail(email);
+        }
+        throw new UnauthorizedException("Invalid or missing token");
     }
 
-    @GetMapping("/{id}")
-    public UserDTO getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @PutMapping("")
+    @Operation(summary = "Update user info (если группа не определена передавайте null!!!)", security = @SecurityRequirement(name = "bearerAuth"))
+    public UserDTO updateUser(@RequestBody UserInputDTO userInputDTO, HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            String email = jwtUtils.getUserNameFromJwtToken(token);
+            return userService.updateUserByEmail(email, userInputDTO);
+        }
+        throw new UnauthorizedException("Invalid or missing token");
     }
 }
