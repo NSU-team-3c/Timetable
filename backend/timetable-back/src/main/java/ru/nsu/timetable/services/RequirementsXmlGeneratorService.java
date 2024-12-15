@@ -1,130 +1,249 @@
 package ru.nsu.timetable.services;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.*;
-import ru.nsu.timetable.models.dto.*;
-import ru.nsu.timetable.repositories.TimeSlotRepository;
-
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-import java.io.*;
+import ru.nsu.timetable.models.entities.*;
+import ru.nsu.timetable.models.entities.TimeSlot;
+import javax.xml.bind.annotation.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import java.io.File;
 
-@RequiredArgsConstructor
 @Service
 public class RequirementsXmlGeneratorService {
-    private TimeSlotRepository timeSlotRepository;
 
-    public void generateXml(List<GroupDTO> groups,
-                            List<RoomDTO> rooms,
-                            List<TeacherDTO> teachers,
-                            Map<Long, List<RequirementDTO>> groupRequirements,
-                            Map<Long, Set<Integer>> groupFreeSlots,
-                            Map<Long, List<CouplingDTO>> groupCouplings,
-                            Map<Long, List<AllocateDTO>> roomAllocations,
-                            int slotsPerWeek, int slotsPerDay, String filePath)
-            throws ParserConfigurationException, TransformerException {
+    @XmlRootElement(name = "requirements")
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @Data
+    public static class Requirements {
+        @XmlElement(name = "global")
+        private Global global;
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.newDocument();
+        @XmlElementWrapper(name = "groups")
+        @XmlElement(name = "group")
+        private List<GroupRequirement> groups = new ArrayList<>();
 
-        Element rootElement = document.createElement("requirements");
-        document.appendChild(rootElement);
+        @XmlElementWrapper(name = "rooms")
+        @XmlElement(name = "room")
+        private List<RoomXml> rooms = new ArrayList<>();
 
-        Element globalElement = document.createElement("global");
-        globalElement.setAttribute("slotsperweek", String.valueOf(slotsPerWeek));
-        globalElement.setAttribute("slotsperday", String.valueOf(slotsPerDay));
-        rootElement.appendChild(globalElement);
+//        @XmlElementWrapper(name = "freeday")
+//        @XmlElement(name = "teacher")
+//        private List<TeacherFreeDay> freeDays = new ArrayList<>();
 
-        for (GroupDTO group : groups) {
-            Element groupElement = document.createElement("group");
-            groupElement.setAttribute("id", String.valueOf(group.id()));
-
-            List<RequirementDTO> reqs = groupRequirements.getOrDefault(group.id(), List.of());
-            for (RequirementDTO req : reqs) {
-                Element reqElement = document.createElement("req");
-                reqElement.setAttribute("subject", req.subject());
-                reqElement.setAttribute("teacher", req.teacher());
-                reqElement.setAttribute("amount", String.valueOf(req.amount()));
-                groupElement.appendChild(reqElement);
-            }
-
-            List<CouplingDTO> couplings = groupCouplings.getOrDefault(group.id(), List.of());
-            for (CouplingDTO coupling : couplings) {
-                Element couplingElement = document.createElement("coupling");
-                couplingElement.setAttribute("subject", coupling.subject());
-                couplingElement.setAttribute("lesson1", String.valueOf(coupling.lesson1()));
-                couplingElement.setAttribute("lesson2", String.valueOf(coupling.lesson2()));
-                groupElement.appendChild(couplingElement);
-            }
-
-            Set<Integer> freeSlots = groupFreeSlots.getOrDefault(group.id(), Set.of());
-            for (Integer slot : freeSlots) {
-                Element freeElement = document.createElement("free");
-                freeElement.setAttribute("slot", String.valueOf(slot));
-                groupElement.appendChild(freeElement);
-            }
-
-            rootElement.appendChild(groupElement);
-        }
-
-        for (RoomDTO room : rooms) {
-            Element roomElement = document.createElement("room");
-            roomElement.setAttribute("id", "r" + room.id());
-
-            List<AllocateDTO> allocations = roomAllocations.getOrDefault(room.id(), List.of());
-            for (AllocateDTO allocation : allocations) {
-                Element allocateElement = document.createElement("allocate");
-                allocateElement.setAttribute("group", String.valueOf(allocation.groupId()));
-                allocateElement.setAttribute("subject", allocation.subject());
-                allocateElement.setAttribute("lesson", String.valueOf(allocation.lesson()));
-                roomElement.appendChild(allocateElement);
-            }
-
-            rootElement.appendChild(roomElement);
-        }
-
-        for (TeacherDTO teacher : teachers) {
-            Set<Integer> allDays = Set.of(0, 1, 2, 3, 4, 5, 6);
-
-            Set<Integer> busyDays = teacher.availableTimeSlotIds() != null
-                    ? timeSlotRepository.findAllById(teacher.availableTimeSlotIds()).stream()
-                    .map(slot -> {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(slot.getStartTime());
-                        return calendar.get(Calendar.DAY_OF_WEEK) - 2;
-                    })
-                    .filter(day -> day >= 0 && day <= 6)
-                    .collect(Collectors.toSet())
-                    : Set.of();
-
-            Set<Integer> freeDays = new HashSet<>(allDays);
-            freeDays.removeAll(busyDays);
-
-            for (Integer day : freeDays) {
-                Element freeDayElement = document.createElement("freeday");
-                freeDayElement.setAttribute("teacher", teacher.user().fullName()); //посмотреть норм ли поправила
-                freeDayElement.setAttribute("day", String.valueOf(day));
-                rootElement.appendChild(freeDayElement);
-            }
-        }
-
-        saveToFile(document, filePath);
+        @XmlElementWrapper(name = "availableTeacherSlots")
+        @XmlElement(name = "day")
+        private List<TeacherAvailableSlots> availableTeacherSlots = new ArrayList<>();
     }
 
-    private void saveToFile(Document document, String filePath) throws TransformerException {
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{https://xml.apache.org/xslt}indent-amount", "4");
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @Data
+    public static class Global {
+        @XmlAttribute(name = "slotsperweek")
+        private int slotsPerWeek;
 
-        DOMSource source = new DOMSource(document);
-        StreamResult result = new StreamResult(new File(filePath));
-        transformer.transform(source, result);
+        @XmlAttribute(name = "slotsperday")
+        private int slotsPerDay;
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @Data
+    public static class GroupRequirement {
+        @XmlAttribute(name = "id")
+        private long id;
+
+        @XmlElement(name = "req")
+        private List<Requirement> requirements = new ArrayList<>();
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @Data
+    public static class Requirement {
+        @XmlAttribute(name = "subject")
+        private String subject;
+
+        @XmlAttribute(name = "teacher")
+        private long teacherId;
+
+        @XmlAttribute(name = "amount")
+        private int amount;
+    }
+
+    @Data
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class RoomXml {
+        @XmlAttribute(name = "id")
+        private String id;
+
+        @XmlAttribute(name = "capacity")
+        private int capacity;
+
+        @XmlElement(name = "allocate")
+        private List<RoomAllocate> allocations = new ArrayList<>();
+    }
+
+    @Data
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class RoomAllocate {
+        @XmlAttribute(name = "day")
+        private int day;
+
+        @XmlAttribute(name = "start")
+        private int start;
+
+        @XmlAttribute(name = "end")
+        private int end;
+
+        public RoomAllocate(int day, int start, int end) {
+            this.day = day;
+            this.start = start;
+            this.end = end;
+        }
+    }
+
+//    @Data
+//    @XmlAccessorType(XmlAccessType.FIELD)
+//    public static class TeacherFreeDay {
+//        @XmlAttribute(name = "teacher")
+//        private long teacherId;
+//
+//        @XmlAttribute(name = "day")
+//        private int day;
+//    }
+
+    @Data
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class TeacherAvailableSlots {
+        @XmlAttribute(name = "teacher")
+        private long teacherId;
+
+        @XmlElementWrapper(name = "availableSlots")
+        @XmlElement(name = "day")
+        private List<DaySlots> availableSlots = new ArrayList<>();
+    }
+
+    @Data
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class DaySlots {
+        @XmlAttribute(name = "number")
+        private int dayNumber;
+
+        @XmlElement(name = "slot")
+        private List<XmlTimeSlot> timeSlots = new ArrayList<>();
+    }
+
+    @Data
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class XmlTimeSlot {
+        @XmlAttribute(name = "start")
+        private int start;
+
+        @XmlAttribute(name = "end")
+        private int end;
+    }
+
+    public void generateXml(List<Group> groups, List<Room> rooms, List<Teacher> teachers,
+                            int slotsPerWeek, int slotsPerDay, String filePath) {
+        try {
+            Requirements requirements = new Requirements();
+
+            Global global = new Global();
+            global.setSlotsPerWeek(slotsPerWeek);
+            global.setSlotsPerDay(slotsPerDay);
+            requirements.setGlobal(global);
+
+            for (Group group : groups) {
+                GroupRequirement groupReq = new GroupRequirement();
+                groupReq.setId(group.getId());
+
+                List<Requirement> reqList = new ArrayList<>();
+                for (Subject subject : group.getSubjects()) {
+                    for (Teacher teacher : subject.getTeachers()) {
+                        Requirement req = new Requirement();
+                        req.setSubject(subject.getName());
+                        req.setTeacherId(teacher.getId());
+                        req.setAmount(2);
+                        reqList.add(req);
+                    }
+                }
+                groupReq.setRequirements(reqList);
+                requirements.getGroups().add(groupReq);
+            }
+
+            for (Room room : rooms) {
+                RoomXml roomElement = new RoomXml();
+                roomElement.setId("r" + room.getId());
+                roomElement.setCapacity(room.getCapacity());
+
+                List<RoomAllocate> allocations = new ArrayList<>();
+                allocations.add(new RoomAllocate(1, 1, 7));
+                allocations.add(new RoomAllocate(2, 1, 7));
+                allocations.add(new RoomAllocate(3, 1, 7));
+                allocations.add(new RoomAllocate(4, 1, 7));
+                allocations.add(new RoomAllocate(5, 1, 7));
+                allocations.add(new RoomAllocate(6, 1, 7));
+                allocations.add(new RoomAllocate(7, 1, 7));
+                roomElement.setAllocations(allocations);
+
+                requirements.getRooms().add(roomElement);
+            }
+
+//            for (Teacher teacher : teachers) {
+//                for (int i = 0; i < 7; i++) {
+//                    if (teacher.isFreeOnDay(i)) {
+//                        TeacherFreeDay freeDay = new TeacherFreeDay();
+//                        freeDay.setTeacherId(teacher.getId());
+//                        freeDay.setDay(i);
+//                        requirements.getFreeDays().add(freeDay);
+//                    }
+//                }
+//            }
+
+            for (Teacher teacher : teachers) {
+                TeacherAvailableSlots availableSlots = new TeacherAvailableSlots();
+                availableSlots.setTeacherId(teacher.getId());
+
+                Map<Integer, List<XmlTimeSlot>> slotsByDay = new HashMap<>();
+
+                for (TimeSlot timeSlot : teacher.getAvailableTimeSlots()) {
+                    int slotDay = getDayOfWeek(timeSlot);
+
+                    if (!slotsByDay.containsKey(slotDay)) {
+                        slotsByDay.put(slotDay, new ArrayList<>());
+                    }
+
+                    XmlTimeSlot xmlSlot = new XmlTimeSlot();
+                    xmlSlot.setStart((int) (timeSlot.getStartTime().getTime() / 1000));
+                    xmlSlot.setEnd((int) (timeSlot.getEndTime().getTime() / 1000));
+                    slotsByDay.get(slotDay).add(xmlSlot);
+                }
+
+                for (int day = 1; day <= 7; day++) {
+                    if (slotsByDay.containsKey(day)) {
+                        DaySlots daySlots = new DaySlots();
+                        daySlots.setDayNumber(day);
+                        daySlots.setTimeSlots(slotsByDay.get(day));
+                        availableSlots.getAvailableSlots().add(daySlots);
+                    }
+                }
+
+                requirements.getAvailableTeacherSlots().add(availableSlots);
+            }
+            JAXBContext context = JAXBContext.newInstance(Requirements.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(requirements, new File(filePath));
+
+            System.out.println("XML file successfully generated: " + filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getDayOfWeek(TimeSlot timeSlot) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(timeSlot.getStartTime());
+        return calendar.get(Calendar.DAY_OF_WEEK);
     }
 }

@@ -70,7 +70,7 @@ public class TimetableService {
 
         String requirementsFilePath = "reqs.xml";
 
-        //requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
+        requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
 
         System.out.println("Generating timetable using Prolog...");
         String queryType = "create_timetable";
