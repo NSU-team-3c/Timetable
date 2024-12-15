@@ -16,8 +16,8 @@ classroom("3107", "Lecture room").
 classroom("2128", "Small room").
 
 % Room capacity
-classroom_capacity("3107", 100).
-classroom_capacity("2128", 20).
+classroom_capacity("3107", 10).
+classroom_capacity("2128", 12).
 
 % Availability of rooms
 classroom_available(Room, 1, 1, 7) :- classroom(Room, _). % Day 1, all rooms are available from 10 to 12

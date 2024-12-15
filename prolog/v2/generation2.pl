@@ -33,10 +33,9 @@ main :-
 
 check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2)) :-
     (
-        (
+    (
             (
-                Group1 == Group2;
-                Teacher1 == Teacher2
+                Group1 == Group2
             ),
             (
                 (
@@ -44,21 +43,31 @@ check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teach
                     Slot1 #\= Slot2
                 )
             )
-        );
+    );
+    (
+        \+ Group1 == Group2,
         (
+            \+ RoomID1 == RoomID2;
             (
-                \+Group1 == Group2;
-                \+Teacher1 == Teacher2
-            ),
-            (
-                (
-                    Day1 #\= Day2;
-                    Slot1 #\= Slot2;
-                    \+RoomID1 == RoomID2
-                )
+                Day1 #\= Day2;
+                Slot1 #\= Slot2
             )
         )
-    ).
+    )
+    ),
+    (
+    (
+        (
+            Teacher1 == Teacher2
+        ),
+        (
+            (
+                Day1 #\= Day2;
+                Slot1 #\= Slot2
+            )
+        )
+    );
+    \+ Teacher1 == Teacher2).
 
 check_capacity_condition_of_Lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
     group_cap(Group1, Amt),
@@ -67,11 +76,11 @@ check_capacity_condition_of_Lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
 
 check_the_added_Lesson(_, []).
 check_the_added_Lesson(AddedLesson, [Lesson|RestLessons]) :-
-    \+check_strict_conditions_of_any_two_lessons(AddedLesson, Lesson),
+    check_strict_conditions_of_any_two_lessons(AddedLesson, Lesson),
     check_the_added_Lesson(AddedLesson, RestLessons).
 
 check_neighbor(node([AddedLesson |Schedule], _, _)) :-
-    \+check_capacity_condition_of_Lesson(AddedLesson),
+    \+check_capacity_condition_of_Lesson(AddedLesson).
     check_the_added_Lesson(AddedLesson, Schedule).
 
 % ------------------------------------------------------------------------
@@ -79,14 +88,17 @@ check_neighbor(node([AddedLesson |Schedule], _, _)) :-
 event_req(C0, C1, T) :- 
     =(C0, C1, T).
 
+count([],X,0).
+count([X|T],X,Y):- count(T,X,Z), Y #= 1+Z.
+count([X1|T],X,Z):- X1\=X,count(T,X,Z).
+
 % getting neighbor--------------------------------------------------------
 
-neighbor(node(State, Length, _), node(NewState, NewLength, NewCost)) :- 
+neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :- 
     group_subject_teacher_times(Group, Lesson, Teacher, Times),
-    tfilter(=(event(Group, Lesson, Teacher, _, _, _)), State, Vals),
-    length(Vals, Length),
-    Length #=< Times,
-    format("length:~d times:~d", [Length, Times]),
+    findall(event(Group, Lesson, _, Teacher, _, _), member(event(Group, Lesson, _, Teacher, _, _),State), Result),
+    length(Result, Val),
+    Val #< Times,
     classroom_available(RoomID, Day, Start, End),
     slots_per_week(SPW),
     slots_per_day(SPD),
@@ -94,9 +106,10 @@ neighbor(node(State, Length, _), node(NewState, NewLength, NewCost)) :-
     between(1, Days, Day),
     LastTimeToStartTheLesson #= End + 1,
     random_integer(Start, LastTimeToStartTheLesson, Slot),
+    \+ member(event(Group, Lesson, RoomID, Teacher, Day, Slot), State),
     NewState = [event(Group, Lesson, RoomID, Teacher, Day, Slot)|State],
     NewLength #= Length + 1,
-    cost(schedule(NewState), NewCost),
+    % cost(schedule(NewState), NewCost).
     pretty_print(schedule(NewState)).
 
 % ------------------------------------------------------------------------
@@ -139,18 +152,16 @@ concatenate([Item|List1],List2,[Item|List3]) :-
   Подсчет пенальти.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-cost(Schedule, 0).
-%cost(Schedule, Cost) :- cost(Schedule, Cost, _).
+cost(Schedule, Cost) :- cost(Schedule, Cost, _).
 
 schedule_violates_constraint(Schedule, Violated) :- cost(Schedule, _, Violated).
 
-cost(Reqs, Cost, Violated) :-
+cost(Schedule, Cost, Violated) :-
 	findall(G, group_cap(G, _), Groups),
 	findall(T, group_subject_teacher_times(_, _, T, _), Teachers),
-	prepare_env(Exams),
 	teacher_loop(Teacher, Events, Buffer, Violated),
 	length(Teachers, Len),
-	Cost is Buffer / Len.
+	Cost #= Buffer / Len.
 
 
 teacher_loop(Persons, Events, Cost, Violated) :- person_loop(Persons, Events, 0, [], Cost, Violated).
@@ -163,20 +174,12 @@ teacher_loop([P | Ps], Events, Cost0, Violated0, Cost, Violated) :-
 	NewCost is Cost0 + ECost,
 	!,
 	person_loop(Ps, Events, NewCost, NewViolated, Cost, Violated).
-teacher_loop([P | Ps], Events, Cost0, Violated0, Cost, Violated) :-
-	event_loop(P, Events, ECost, EViolated),
-	sort(3, @=<, Events, SortedEvents),
-	ex_season_starts(FirstDay),
-	NewCost is Cost0 + ECost,
-	!,
-	person_loop(Ps, Events, NewCost, NewViolated, Cost, Violated).
 
 
 event_loop(P, Events, Cost, Violated) :- event_loop(P, Events, 0, [], Cost, Violated).
 
 event_loop(_, [], Cost, Violated, Cost, Violated).
-event_loop(P, [event(Ex, Room, Day, Time) | Evs], Cost0, Violated0, Cost, Violated) :-
-	relates_to(P, Ex),
+event_loop(Teacher, [event(Group, Lesson, RoomID, Teacher, Day, Slot) | Evs], Cost0, Violated0, Cost, Violated) :-
 	no_exam_in_period(P, event(Ex, Room, Day, Time), Cost1, Violated1),
 	lunch_break(P, event(Ex, Room, Day, Time), Cost2, Violated2),
 	not_in_period(P, event(Ex, Room, Day, Time), Cost3, Violated3),
@@ -206,7 +209,7 @@ no_exam_in_period(_,_,0,[]).
 
 
 
-lunch_break(P, event(Ex,_,_,Start), Penalty, [c_lunch_break(P,Ex,Penalty)]) :-
+lunch_break(P, event(Group, Lesson, RoomID, Teacher, Day, Slot), Penalty, [c_lunch_break(P,Ex,Penalty)]) :-
 	Start == 12,
 	c_lunch_break(P,Penalty).
 lunch_break(P, event(Ex,_,_,Start), Penalty, [c_lunch_break(P,Ex,Penalty)]) :-
