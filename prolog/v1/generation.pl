@@ -13,6 +13,10 @@
 
 
 :- dynamic(group_subject_teacher_times/4).
+:- dynamic(classroom_available/4).
+:- dynamic(classroom_capacity/2).
+:- dynamic(classroom/2).
+:- dynamic(group_student_amount/2).
 :- dynamic(coupling/4).
 :- dynamic(teacher_freeday/2).
 :- dynamic(slots_per_day/1).
@@ -25,6 +29,8 @@
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Получение данных из фактов пролога.
+   Структра требований req(Group, Subject, Teacher, Number)-Slots
+   Где каждый Slot содержит в себе пару - (время, комната).
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 requirements(Rs) :-
@@ -47,6 +53,16 @@ rooms(Rooms) :-
         findall(r(Room, C, S, Slot), room_alloc(Room,C,S,Slot), Rooms0),
         sort(Rooms0, Rooms).
 
+% получение списка всех комнат
+roomslist([], [RoomID|List]) :-
+    classroom(RoomID, _),
+    roomslist([RoomID], List), !.
+roomslist(Buffer, [RoomID|List]) :-
+    classroom(RoomID, _),
+    \+ memberchk(RoomID, Buffer), 
+    roomslist([RoomID|Buffer], List), !.
+roomslist(_, []).
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Основной блок, здесь формируются все требования к расписаниям.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -60,16 +76,20 @@ requirements_variables(Rs, Vars, Rooms) :-
         maplist(constrain_subject, Rs),
         groups(Groups),
         teachers(Teachers),
-        rooms(Rooms),
+        % rooms(Rooms),
         maplist(constrain_teacher(Rs), Teachers),
-        maplist(constrain_group(Rs), Groups),
-        maplist(constrain_room(Rs), Rooms).
+        maplist(constrain_group(Rs), Groups).
+        constrain_room2(Rs, [], Rooms).
+        %maplist(constrain_room(Rs), Rooms).
 
 % в каком дне недели располагается слот
 slot_day(S, Q) :-
         slots_per_day(SPD),
         Q #= S // SPD.
 
+slot_num(S, Q) :-
+        slots_per_day(SPD),
+        Q #= S mod SPD.
 
 list_without_nths(Es0, Ws, Es) :-
         phrase(without_(Ws, 0, Es0), Es).
@@ -130,6 +150,28 @@ constrain_room(Reqs, r(Room, _, _, _)) :-
         findall(r(Group,Subj,Less), room_alloc(Room,Group,Subj,Less), RReqs),
         maplist(sameroom_var(Reqs), RReqs, Roomvars),
         all_different(Roomvars).
+
+
+req_room_const(req(Group,Subj,_Teacher,_Num)-[Slot|Rest], Buf, [r(RoomID, Group, Subj, Slot)|Acc]) :-
+        slot_day(Slot, Day),
+        classroom_available(RoomID, Day, Begin, End),
+        group_student_amount(Group, Amount),
+        classroom_capacity(RoomID, Cap),
+        Amount #=< Cap,
+        slot_num(Slot, Num),
+        Num #=< End,
+        Num #>= Begin,
+        \+ member(r(RoomID, _, _, Slot), Buf),
+        req_room_const(req(Group,Subj,_Teacher,_Num)-Rest, [r(RoomID, Group, Subj, Slot)|Buf], Acc).
+
+req_room_const(req(_, _, _, _)-[], _, []).
+
+constrain_room2([Req|Rest], Buf, [NewBuf|RoomsReq]) :-
+    req_room_const(Req, Buf, Acc),
+    append(Buf, Acc, NewBuf),
+    constrain_room2(Rest, NewBuf, RoomsReq).
+
+constrain_room2([], _, []).
 
 
 strictly_ascending(Ls) :- chain(#<, Ls).
