@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <requirements>
 	<global slotsperweek="42" slotsperday="7"/>
-	<group id="22215">
+	<group id="22215" amount="12">
 		<req subject="ks" teacher="Пермяков Р.А." amount="2"/>
         <req subject="mobDev" teacher="Букшев И.Е." amount="2"/>
         <req subject="ml" teacher="Неделько В.М." amount="2"/>

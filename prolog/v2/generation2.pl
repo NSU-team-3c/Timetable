@@ -30,7 +30,7 @@ main :-
     ucs_traverse([node([], 0, 0)], Length).
 
 % checking strict conditions ------------------------------------------
-
+check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1)) :- false.
 check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2)) :-
     (
     (
@@ -106,17 +106,24 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     between(1, Days, Day),
     LastTimeToStartTheLesson #= End + 1,
     random_integer(Start, LastTimeToStartTheLesson, Slot),
-    \+ member(event(Group, Lesson, RoomID, Teacher, Day, Slot), State),
+    % write('Slot: '), write(Slot), nl,     
+    % write('Group: '), write(Group), nl,    
+    % write('Teacher: '), write(Teacher), nl,
+    % write('Room: '), write(RoomID), nl,     
+    % write('Lesson: '), write(Lesson), nl,  
+    % write('Day: '), write(Day), nl,  
+    % write('State:'), write(State), nl,
+    %between(1, SPD, Slot),
     NewState = [event(Group, Lesson, RoomID, Teacher, Day, Slot)|State],
-    NewLength #= Length + 1,
+    NewLength #= Length + 1.
     % cost(schedule(NewState), NewCost).
-    pretty_print(schedule(NewState)).
 
 % ------------------------------------------------------------------------
 
 ucs_traverse([node(State, Goal, Cost)| _], Goal) :-
-    format("\nTotal penalty: ~w\n\n\nSCHEDULE\n", Cost),
-    pretty_print(schedule(State)),!.
+    format("\nTotal penalty: ~d\n\n\nSCHEDULE\n", [Cost]),
+    write('State:'), write(State), nl,
+    pretty_print(schedule(State)).
 
 ucs_traverse([Node | Rest], Goal) :-
     findall(Neighbor, (neighbor(Node, Neighbor), check_neighbor(Neighbor)), Neighbors),
@@ -269,9 +276,9 @@ print_day(Events) :-
 print_event(Events) :-
 	setof(event(Group, Lesson, _, Teacher, Day, Slot), Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
 	classroom(RoomID, RoomName),
-	format("~s:~n", [RoomName]),
-	quicksort_events_by_time(Result, Sorted),
-	print(Sorted).
+	format("~s:~n", [RoomID]),
+	% quicksort_events_by_time(Result, Sorted),
+	print(Result).
 
 
 quicksort_events_by_time([], []).
@@ -298,10 +305,11 @@ split2(X, [Y| Tail], Small, [Y | Big]):-
 
 print([]).
 
-print([event(_, Lesson, _, Teacher, _, Slot)|RestEvents]) :-
-	format("~d ", [Slot]),
-	format("~s ", [Lesson]),
-	format("(~s).~n", [Teacher]),
+print([event(Group, Lesson, _, Teacher, _, Slot)|RestEvents]) :-
+	format("\tSlot: ~d | ", [Slot]),
+    format("Group: ~s | ", [Group]),
+	format("Lesson: ~s | ", [Lesson]),
+	format("Teacher: ~s~n", [Teacher]),
 	print(RestEvents).
 
 
@@ -328,6 +336,7 @@ attr_value(Node, Attr, Value) :-
         
 numeric_attribute(amount).
 numeric_attribute(lesson1).
+numeric_attribute(capacity).
 numeric_attribute(lesson2).
 numeric_attribute(slot).
 numeric_attribute(slotsperweek).
@@ -367,7 +376,8 @@ process_free(GroupId, Node) -->
 
 
 process_group(Node) -->
-        { attrs_values(Node, [id], [Id]) },
+        { attrs_values(Node, [id, amount], [Id, Amount]) },
+        [group_cap(Id, Amount)],
         process_nodes(req, Node, process_req(Id)),
         process_nodes(coupling, Node, process_coupling(Id)),
         process_nodes(free, Node, process_free(Id)).
@@ -380,13 +390,14 @@ globals(Content) -->
 
 
 process_room(Node) -->
-        { attrs_values(Node, [id], [Id]) },
+        { attrs_values(Node, [id, name, capacity], [Id, Name, Capacity]) },
+        [classroom(Id, Name), classroom_capacity(Id, Capacity)],
         process_nodes(allocate, Node, process_allocation(Id)).
 
 
 process_allocation(RoomId, Node) -->
-        { attrs_values(Node, [group,subject,lesson], [Group,Subject,Lesson]) },
-        [room_alloc(RoomId,Group,Subject,Lesson)].
+        { attrs_values(Node, [day, start, end], [Day, Start, End]) },
+        [classroom_available(RoomId,Day,Start,End)].
 
 
 process_freeday(Node) -->
@@ -466,3 +477,23 @@ write_teacher(Stream, teacher(Id, Name)) :-
 
 write_room(Stream, room(Id, Name)) :-
     phrase_to_stream(format_("\t\t\t\t\t <room id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   Входная точка прораммы, на вход подается имя файла с требованиями.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+timetable(FileName) :-
+        phrase(requirementsXML(file(FileName)), Reqs),
+        setup_call_cleanup(
+                maplist(assertz, Reqs),
+                (   
+                        main
+                ;   
+                        false
+                ),
+                maplist(retract, Reqs)
+        ).
+
+
+run :- timetable("reqs.xml").
