@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @Builder
@@ -21,5 +19,5 @@ public class JwtAuthResponse {
 
     private Long expires_in;
 
-    private List<String> roles;
+    private String roles;
 }

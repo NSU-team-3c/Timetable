@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Component
 public class UserMapper {
+
     public UserDTO toUserDTO(User user) {
         String groupNumber = null;
         if (user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_USER))) {
@@ -19,12 +20,15 @@ public class UserMapper {
                 groupNumber = user.getGroup().getNumber();
             }
         }
+
+        String roles = user.getRoles().stream()
+                .map(this::getRoleName)
+                .collect(Collectors.joining(", "));
+
         return new UserDTO(
                 user.getEmail(),
                 user.getPhone(),
-                user.getRoles().stream()
-                        .map(role -> role.getName().name())
-                        .collect(Collectors.toSet()),
+                roles,
                 user.getSurname(),
                 user.getName(),
                 user.getPatronymic(),
@@ -33,5 +37,9 @@ public class UserMapper {
                 user.getPhotoUrl(),
                 groupNumber
         );
+    }
+
+    private String getRoleName(Role role) {
+        return role.getName().name().replace("ROLE_", "").toLowerCase();
     }
 }

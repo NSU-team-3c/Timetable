@@ -1,12 +1,11 @@
 package ru.nsu.timetable.models.dto;
 
 import java.util.Date;
-import java.util.Set;
 
 public record UserDTO(
         String email,
         String phone,
-        Set<String> roles,
+        String roles,
         String surname,
         String name,
         String patronymic,

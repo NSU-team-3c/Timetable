@@ -100,34 +100,25 @@ public class UserService {
     }
 
     public User saveNewAdmin(String email, String password) {
-        return saveNewUserWithRoles(email, password, Set.of(
-                ERole.ROLE_USER.name(),
-                ERole.ROLE_ADMINISTRATOR.name()));
+        return saveNewUserWithRole(email, password, ERole.ROLE_ADMINISTRATOR);
     }
 
     public User saveNewTeacher(String email, String password) {
-        return saveNewUserWithRoles(email, password, Set.of(
-                ERole.ROLE_USER.name(),
-                ERole.ROLE_TEACHER.name()));
+        return saveNewUserWithRole(email, password, ERole.ROLE_TEACHER);
     }
 
     public User saveNewUser(String email, String password) {
-        return saveNewUserWithRoles(email, password, Set.of(
-                ERole.ROLE_USER.name()));
+        return saveNewUserWithRole(email, password, ERole.ROLE_USER);
     }
 
-    private User saveNewUserWithRoles(String email, String password, Set<String> roles) {
+    private User saveNewUserWithRole(String email, String password, ERole role) {
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());
 
-        Set<Role> userRoles = new HashSet<>();
-        for (String role : roles) {
-            Role userRole = roleRepository.findByName(ERole.valueOf(role))
-                    .orElseThrow(() -> new RuntimeException("Role not found"));
-            userRoles.add(userRole);
-        }
-        newUser.setRoles(userRoles);
+        Role userRole = roleRepository.findByName(role)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        newUser.setRoles(Set.of(userRole));
 
         newUser.setPassword(encoder.encode(password));
         userRepository.save(newUser);
