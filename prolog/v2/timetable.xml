@@ -1,0 +1,90 @@
+<timetable>
+	 <day number="1">
+		 <timeSlots>
+				 <id>4</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[k,s]"/>
+					 <teacher id="[П,е,р,м,я,к,о,в, ,Р,.,А,.]"/>
+					 <room id="[2,1,2,8]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>1</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[k,s]"/>
+					 <teacher id="[П,е,р,м,я,к,о,в, ,Р,.,А,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>5</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[m,l]"/>
+					 <teacher id="[Н,е,д,е,л,ь,к,о, ,В,.,М,.]"/>
+					 <room id="[2,1,2,8]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>3</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[m,l]"/>
+					 <teacher id="[Н,е,д,е,л,ь,к,о, ,В,.,М,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>1</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[m,o,b,D,e,v]"/>
+					 <teacher id="[Б,у,к,ш,е,в, ,И,.,Е,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>2</id>
+					 <group id="[2,2,2,1,4]"/>
+					 <subject id="[m,o,b,D,e,v]"/>
+					 <teacher id="[Б,у,к,ш,е,в, ,И,.,Е,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>6</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[m,o,b,D,e,v]"/>
+					 <teacher id="[Б,у,к,ш,е,в, ,И,.,Е,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+	 </day>
+	 <day number="2">
+		 <timeSlots>
+				 <id>2</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[k,s]"/>
+					 <teacher id="[П,е,р,м,я,к,о,в, ,Р,.,А,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>5</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[k,s]"/>
+					 <teacher id="[П,е,р,м,я,к,о,в, ,Р,.,А,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>3</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[m,l]"/>
+					 <teacher id="[Н,е,д,е,л,ь,к,о, ,В,.,М,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>3</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[m,l]"/>
+					 <teacher id="[Н,е,д,е,л,ь,к,о, ,В,.,М,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>5</id>
+					 <group id="[2,2,2,1,5]"/>
+					 <subject id="[m,o,b,D,e,v]"/>
+					 <teacher id="[Б,у,к,ш,е,в, ,И,.,Е,.]"/>
+					 <room id="[3,1,0,7]"/>
+		 </timeSlots>
+	 </day>
+</timetable>

@@ -1,4 +1,3 @@
-:- discontiguous(group_subject_teacher_times/4).
 
 
 slots_per_week(42).

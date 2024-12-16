@@ -13,6 +13,16 @@
 :- use_module(library(random)).
 :- use_module(library(between)).
 
+:- dynamic(group_subject_teacher_times/4).
+:- dynamic(classroom_available/4).
+:- dynamic(classroom_capacity/2).
+:- dynamic(classroom/2).
+:- dynamic(group_cap/2).
+:- dynamic(slots_per_day/1).
+:- dynamic(slots_per_week/1).
+
+:- discontiguous(group_subject_teacher_times/4).
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Основная логика составления расписаний.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -31,7 +41,7 @@ main :-
 
 % checking strict conditions ------------------------------------------
 check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1)) :- false.
-check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2)) :-
+check_strict_conditions_of_any_two_lessons(event(Group1, _, RoomID1, Teacher1, Day1, Slot1), event(Group2, _, RoomID2, Teacher2, Day2, Slot2)) :-
     (
     (
             (
@@ -45,9 +55,9 @@ check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teach
             )
     );
     (
-        \+ Group1 == Group2,
+        Group1 \= Group2,
         (
-            \+ RoomID1 == RoomID2;
+            RoomID1 \= RoomID2;
             (
                 Day1 #\= Day2;
                 Slot1 #\= Slot2
@@ -67,21 +77,21 @@ check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teach
             )
         )
     );
-    \+ Teacher1 == Teacher2).
+    Teacher1 \= Teacher2).
 
-check_capacity_condition_of_Lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
+check_capacity_condition_of_lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
     group_cap(Group1, Amt),
     classroom_capacity(RoomID, Capacity),
     Amt #> Capacity.
 
-check_the_added_Lesson(_, []).
-check_the_added_Lesson(AddedLesson, [Lesson|RestLessons]) :-
+check_the_added_lesson(_, []).
+check_the_added_lesson(AddedLesson, [Lesson|RestLessons]) :-
     check_strict_conditions_of_any_two_lessons(AddedLesson, Lesson),
-    check_the_added_Lesson(AddedLesson, RestLessons).
+    check_the_added_lesson(AddedLesson, RestLessons).
 
 check_neighbor(node([AddedLesson |Schedule], _, _)) :-
-    \+check_capacity_condition_of_Lesson(AddedLesson).
-    check_the_added_Lesson(AddedLesson, Schedule).
+    \+check_capacity_condition_of_lesson(AddedLesson).
+    check_the_added_lesson(AddedLesson, Schedule).
 
 % ------------------------------------------------------------------------
 
@@ -99,11 +109,11 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     findall(event(Group, Lesson, _, Teacher, _, _), member(event(Group, Lesson, _, Teacher, _, _),State), Result),
     length(Result, Val),
     Val #< Times,
-    classroom_available(RoomID, Day, Start, End),
     slots_per_week(SPW),
     slots_per_day(SPD),
-    Days #= SPW / SPD,
-    between(1, Days, Day),
+    Days #= SPW / SPD + 1,
+    random_integer(1, Days, Day),
+    classroom_available(RoomID, Day, Start, End),
     LastTimeToStartTheLesson #= End + 1,
     random_integer(Start, LastTimeToStartTheLesson, Slot),
     % write('Slot: '), write(Slot), nl,     
@@ -123,7 +133,7 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
 ucs_traverse([node(State, Goal, Cost)| _], Goal) :-
     format("\nTotal penalty: ~d\n\n\nSCHEDULE\n", [Cost]),
     write('State:'), write(State), nl,
-    pretty_print(schedule(State)).
+    pretty_print(schedule(State)), create_timetable(schedule(State)),!.
 
 ucs_traverse([Node | Rest], Goal) :-
     findall(Neighbor, (neighbor(Node, Neighbor), check_neighbor(Neighbor)), Neighbors),
@@ -343,6 +353,8 @@ numeric_attribute(slotsperweek).
 numeric_attribute(slotsperday).
 numeric_attribute(lesson).
 numeric_attribute(day).
+numeric_attribute(start).
+numeric_attribute(end).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Парсинг по блокам XML файла, для каждого типа блока
@@ -388,7 +400,6 @@ globals(Content) -->
           attrs_values(Global, [slotsperweek, slotsperday], [SPW,SPD]) },
         [slots_per_day(SPD),slots_per_week(SPW)].
 
-
 process_room(Node) -->
         { attrs_values(Node, [id, name, capacity], [Id, Name, Capacity]) },
         [classroom(Id, Name), classroom_capacity(Id, Capacity)],
@@ -416,67 +427,33 @@ requirementsXML(File) -->
   Блок вывода расписаний в XML файл.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-create_timetable :-
-    TimeTable = timetable([day(1, 'Monday', [ 
-                timeSlot(1, [group('22215', 'Group A')], subject('teamPr', 'Team Project'), teacher('t1', 'Иртегов Д.В.'), room('r1', 'Lecture Hall 1')),
-                timeSlot(2, [group('22215', 'Group A')], subject('prog', 'Programming'), teacher('t2', 'Мигинский Д.С.'), room('r2', 'Computer Lab 2')),
-                timeSlot(3, [group('33316', 'Group B')], subject('math', 'Mathematics'), teacher('t3', 'Васкевич В.Л.'), room('r3', 'Math Classroom')),
-                timeSlot(4, [group('22215', 'Group A'), group('33316', 'Group B')], subject('mobDev', 'Mobile Development'), teacher('t4', 'Букшев И.Е.'), room('r4', 'Lecture Hall 2'))
-            ])
-    ]),
-    
+create_timetable(Schedule) :-
     open('timetable.xml', write, Stream),
-    xml_write(Stream, TimeTable),
+    xml_write(Stream, Schedule),
     close(Stream).
 
-
-xml_write(Stream, timetable(Days)) :-
+xml_write(Stream, schedule(Events)) :-
     phrase_to_stream(phrase("<timetable>\n"), Stream),
-    maplist(write_day(Stream), Days),
+    findall(_, write_day(Stream, Events), _),
     phrase_to_stream(phrase("</timetable>\n"), Stream).
 
 
-write_day(Stream, day(Number, Name, TimeSlots)) :-
-    phrase_to_stream(format_("\t <day number=\"~w\" name=\"~w\">\n", [Number, Name]), Stream),
-    write_timeSlots(Stream, TimeSlots),
+write_day(Stream, Events) :-
+    setof(event(Group, Lesson, RoomID, Teacher, _, Slot), RoomID^Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
+    phrase_to_stream(format_("\t <day number=\"~w\">\n", [Day]), Stream),
+    write_event(Stream, Result),
     phrase_to_stream(phrase("\t </day>\n"), Stream).
 
-
-write_timeSlots(Stream, TimeSlots) :-
+write_event(Stream, []).
+write_event(Stream, [event(Group, Lesson, RoomID, Teacher, Day, Slot)|Rest]) :-
     phrase_to_stream(phrase("\t\t <timeSlots>\n"), Stream),
-    maplist(write_timeSlot(Stream), TimeSlots),
-    phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream).
-
-
-write_timeSlot(Stream, timeSlot(Id, Groups, Subject, Teacher, Room)) :-
-    phrase_to_stream(phrase("\t\t\t <timeSlot>\n"), Stream),
-    phrase_to_stream(format_("\t\t\t\t <id>~w</id>\n", [Id]), Stream),
-    write_groups(Stream, Groups),
-    write_subject(Stream, Subject),
-    write_teacher(Stream, Teacher),
-    write_room(Stream, Room),
-    phrase_to_stream(phrase("\t\t\t </timeSlot>\n"), Stream).
-
-
-write_groups(Stream, Groups) :-
-    phrase_to_stream(phrase("\t\t\t\t <groups>\n"), Stream),
-    maplist(write_group(Stream), Groups),
-    phrase_to_stream(phrase("\t\t\t\t </groups>\n"), Stream).
-
-write_group(Stream, group(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <group id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
-
-
-write_subject(Stream, subject(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
-
-
-write_teacher(Stream, teacher(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
-
-
-write_room(Stream, room(Id, Name)) :-
-    phrase_to_stream(format_("\t\t\t\t\t <room id=\"~w\" name=\"~w\"/>\n", [Id, Name]), Stream).
+    phrase_to_stream(format_("\t\t\t\t <id>~w</id>\n", [Slot]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <group id=\"~w\"/>\n", [Group]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~w\"/>\n", [Lesson]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~w\"/>\n", [Teacher]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <room id=\"~w\"/>\n", [RoomID]), Stream),
+    phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream),
+    write_event(Stream, Rest).
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -496,4 +473,4 @@ timetable(FileName) :-
         ).
 
 
-run :- timetable("reqs.xml").
+run :- timetable("reqs2.xml").
