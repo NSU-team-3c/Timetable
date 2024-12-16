@@ -4,7 +4,7 @@ import PageContainer from '../../components/container/PageContainer';
 import ProfessorAvailabilityForm from '../../components/forms/table/ProfessorAvailabilityForm';
 
 const ChangePassword = () => (
-    <PageContainer title="Смена пароля" description="this is Change password page">
+    <PageContainer title="Выбор времени" description="this is professor availability page">
         <Box
             p={24}
             sx={{

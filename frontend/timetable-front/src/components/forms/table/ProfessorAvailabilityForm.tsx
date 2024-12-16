@@ -1,59 +1,61 @@
-import React, { useState, useCallback } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, DialogContentText } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay, addDays, addMinutes } from 'date-fns';
+import { ru } from 'date-fns/locale'; // Локализация на русском
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, DialogContentText } from '@mui/material';
+import { AppState, dispatch } from '../../../store/Store';
+import { addTimeslot, deleteTimeslot, fetchTimeslots, removeTimeslot, updateTimeslot } from '../../../store/professor/avaliabilitySlice';
+import { useSelector } from 'react-redux';
 
-// Локализатор для moment
-const localizer = momentLocalizer(moment);
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales: { 'ru': ru }, // Локализация на русском
+});
+
+const fixedWeekStart = new Date(2024, 9, 20, 9, 0); 
 
 interface Availability {
-  start: Date;
-  end: Date;
+  id: number;
+  startTime: Date;
+  endTime: Date;
 }
 
 const TeacherAvailabilityForm: React.FC = () => {
   const [events, setEvents] = useState<Availability[]>([]); 
-  const [open, setOpen] = useState(false); 
-  const [currentEvent, setCurrentEvent] = useState<Availability | null>(null); 
+  const {timeslots} = useSelector((state: AppState) => state.availability);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Availability | null>(null);
 
-  const handleSelectSlot = useCallback((slotInfo: any) => {
-    if (slotInfo.start.getHours() !== 0) { 
-      setCurrentEvent({
-        start: slotInfo.start,
-        end: slotInfo.end,
-      });
-      setOpen(true);
-    }
-  }, []);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleSave = () => {
-    if (currentEvent) {
-      // Check if the new event overlaps with any existing events
-      const overlap = events.some(
-        (event) =>
-          (event.start < currentEvent.end && event.end > currentEvent.start)
-      );
-      if (!overlap) {
-        setEvents([...events, currentEvent]);
-        setOpen(false);
-        setCurrentEvent(null);
-      } else {
-        alert('This time slot overlaps with an existing availability!');
+  useEffect(() => {
+    dispatch(fetchTimeslots());
+  }, [dispatch]);
+  
+  // Инициализация событий на выбор
+  useEffect(() => {
+    const newEvents: Availability[] = [];
+    for (let day = 1; day < 7; day++) {
+      for (let lesson = 0; lesson < 7; lesson++) {
+        const id = 100 * day + lesson;
+        const startTime = addMinutes(addDays(fixedWeekStart, day), lesson * 110); 
+        const endTime = addMinutes(startTime, 95); 
+        newEvents.push({ id, startTime, endTime });
       }
     }
-  };
+    setEvents(newEvents);
+  }, []);
 
-  const handleDelete = (eventToDelete: Availability) => {
-    setEvents(events.filter(event => event !== eventToDelete));
-    setOpenDeleteDialog(false);
-  };
+  // Удаление события
+  const handleDelete = useCallback((eventToDelete: Availability) => {
+    if (eventToDelete) {
+      dispatch(deleteTimeslot(eventToDelete.id));
+      dispatch(removeTimeslot(eventToDelete.id))
+      setOpenDeleteDialog(false);
+    }
+  }, [dispatch, eventToDelete]);
 
   const handleDeleteDialogOpen = (event: Availability) => {
     setEventToDelete(event);
@@ -66,9 +68,45 @@ const TeacherAvailabilityForm: React.FC = () => {
 
   const CustomWeekHeader = ({ label }: { label: string }) => (
     <Box sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-      {label.split(" ")[1]}
+      {label.split(" ")[1]} {/* Отображает только день недели */}
     </Box>
   );
+
+  const isTimeConflict = (event1: Availability, event2: Availability) => {
+    const start1 = new Date(event1.startTime); 
+    const end1 = new Date(event1.endTime); 
+    const start2 = new Date(event2.startTime); 
+    const end2 = new Date(event2.endTime);
+
+    return (
+      start1.getTime() === start2.getTime() &&
+      end1.getTime() === end2.getTime()
+    );
+  };
+
+  const handlerEvent = useCallback((event: Availability) => {
+    if (timeslots.find(e => isTimeConflict(e, event)) === undefined) {
+      dispatch(updateTimeslot(event));
+      dispatch(addTimeslot(event));
+    } else {
+      handleDeleteDialogOpen(event);  
+    }
+  }, [dispatch, timeslots]);
+
+
+  const eventPropGetter = useCallback((event: Availability) => {
+    
+    if (timeslots.some(e => isTimeConflict(e, event))) {
+      return {
+        style: {
+          backgroundColor: '#ff7043', 
+          color: '#fff',              
+          borderRadius: '5px',       
+        },
+      };
+    }
+    return {}; 
+  }, [timeslots]);
 
   return (
     <Box>
@@ -78,16 +116,17 @@ const TeacherAvailabilityForm: React.FC = () => {
 
       <Calendar
         localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        selectable
-        onSelectSlot={handleSelectSlot}
+        events={events} 
+        startAccessor="startTime"
+        endAccessor="endTime"
         defaultView="week"
+        date={fixedWeekStart} 
+        onSelectEvent={handlerEvent}
+        eventPropGetter={eventPropGetter}
         views={['week']}
-        step={45}
+        step={55}
         min={new Date(2024, 9, 19, 9, 0)} 
-        max={new Date(2029, 5, 19, 20, 0)}
+        max={new Date(2029, 5, 19, 21, 50)}
         toolbar={false}
         components={{
           week: {
@@ -96,46 +135,18 @@ const TeacherAvailabilityForm: React.FC = () => {
         }}
       />
 
-      {/* Модальное окно для добавления интервала */}
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Добавить свободное время</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" gutterBottom>
-            Начало: {currentEvent ? moment(currentEvent.start).format('HH:mm') : '—'}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Конец: {currentEvent ? moment(currentEvent.end).format('HH:mm') : '—'}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Отмена
-          </Button>
-          <Button
-            onClick={handleSave}
-            color="primary"
-            disabled={!currentEvent || events.some(
-              (event) =>
-                (event.start < currentEvent.end && event.end > currentEvent.start)
-            )}
-          >
-            Сохранить
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Вывод списка сохранённых интервалов */}
+      {/* Список сохранённых интервалов */}
       <Box>
         <Typography variant="h6">Сохранённые интервалы</Typography>
-        {events.length === 0 ? (
+        {timeslots.length === 0 ? (
           <Typography variant="body2" color="textSecondary">
             Нет сохранённых интервалов.
           </Typography>
         ) : (
-          events.map((event, index) => (
+          timeslots.map((event, index) => (
             <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
               <Typography>
-                {moment(event.start).format('dddd, HH:mm')} - {moment(event.end).format('HH:mm')}
+                {format(event.startTime, 'eeee, HH:mm')} - {format(event.endTime, 'HH:mm')}
               </Typography>
               <Button color="error" onClick={() => handleDeleteDialogOpen(event)}>
                 Удалить
@@ -145,7 +156,7 @@ const TeacherAvailabilityForm: React.FC = () => {
         )}
       </Box>
 
-      {/* Confirm Delete Dialog */}
+      {/* Подтверждение удаления интервала */}
       <Dialog
         open={openDeleteDialog}
         onClose={handleDeleteDialogClose}

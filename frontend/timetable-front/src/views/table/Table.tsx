@@ -4,7 +4,7 @@ import PageContainer from '../../components/container/PageContainer';
 import Table from '../../components/table/Table';
 
 const ChangePassword = () => (
-    <PageContainer title="Смена пароля" description="this is Change password page">
+    <PageContainer title="Расписание" description="this is timetable view page">
         <Box
             p={24}
             sx={{

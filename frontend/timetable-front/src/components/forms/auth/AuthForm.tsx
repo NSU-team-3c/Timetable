@@ -13,7 +13,6 @@ const LoginForm: React.FC = () => {
     initialValues: {
       email: '',
       password: '',
-      //rememberMe: false,
     },
     validationSchema: yup.object({
       email: yup.string().email('Неверный формат почты').required('Почта обязательна'),
@@ -27,12 +26,8 @@ const LoginForm: React.FC = () => {
       if (login.fulfilled.match(resultAction)) {
         const result = resultAction.payload;  
         if (result.access_token) {
-          localStorage.setItem('authToken', result.access_token);
+          sessionStorage.setItem('authToken', result.access_token);
           
-          // if (values.rememberMe) {
-          //   localStorage.setItem('rememberMe', 'true');
-          // }
-
           navigate('/profile');
         }
 
@@ -74,21 +69,9 @@ const LoginForm: React.FC = () => {
                 helperText={formik.touched.password && formik.errors.password}
             />
 
-
-            {/* Опция "Запомнить меня" */}
-            {/* <FormControlLabel
-            control={
-                <Checkbox
-                {...formik.getFieldProps('rememberMe')}
-                checked={formik.values.rememberMe}
-                color="primary"
-                />
-            }
-            label="Запомнить меня"
-            /> */}
             
             {/* Ссылка на восстановление пароля */}
-            <Link to="/auth/forgot-password" style={{ color: '#1976d2', marginLeft: '79px', textAlign: 'right'}}>
+            <Link to="/auth/forgot-password" style={{ color: '#1976d2'}}>
                 Забыли пароль?
             </Link>
 

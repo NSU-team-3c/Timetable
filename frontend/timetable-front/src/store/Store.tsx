@@ -5,6 +5,7 @@ import  ProfileReducer  from './profile/profileSlice';
 import ProfessorReducer from './profile/professorSlice'
 import AuditoryReducer from './application/room/auditorySlice'
 import AuthReducer from './auth/authSlice';
+import AvailabilityReducer from './professor/avaliabilitySlice'
 import {
   useDispatch as useAppDispatch,
   useSelector as useAppSelector,
@@ -18,6 +19,7 @@ export const store = configureStore({
     profile: ProfileReducer,
     professor: ProfessorReducer,
     rooms: AuditoryReducer,
+    availability: AvailabilityReducer,
   },
 });
 
@@ -27,6 +29,7 @@ const rootReducer = combineReducers({
   profile: ProfileReducer,
   professor: ProfessorReducer,
   rooms: AuditoryReducer,
+  availability: AvailabilityReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthGuard = ({ children }: any) => {
     const navigate = useNavigate();
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
 
     useEffect(() => {
         if (authToken) {

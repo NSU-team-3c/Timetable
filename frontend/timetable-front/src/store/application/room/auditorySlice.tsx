@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axios';
 
 interface Auditory {
   id: number;
-  number: string;
+  name: string;
   type: string;
   capacity: number;
 }
@@ -20,23 +21,23 @@ const initialState: AuditoryState = {
   error: null,
 };
 
-export const fetchAuditories = createAsyncThunk('auditories/fetchAuditories', async () => {
-  const response = await axios.get('/api/auditories');
+export const fetchAuditories = createAsyncThunk('rooms/fetchAuditories', async () => {
+  const response = await axiosInstance.get('/api/v1/rooms');
   return response.data;
 });
 
-export const createAuditory = createAsyncThunk('auditories/createAuditory', async (auditory: Auditory) => {
-  const response = await axios.post('/api/auditories', auditory);
+export const createAuditory = createAsyncThunk('rooms/createAuditory', async (auditory: Auditory) => {
+  const response = await axiosInstance.post('/api/v1/rooms', auditory);
   return response.data;
 });
 
-export const updateAuditory = createAsyncThunk('auditories/updateAuditory', async (auditory: Auditory) => {
-  const response = await axios.put(`/api/auditories/${auditory.id}`, auditory);
+export const updateAuditory = createAsyncThunk('rooms/updateAuditory', async (auditory: Auditory) => {
+  const response = await axiosInstance.put(`/api/v1/rooms/${auditory.id}`, auditory);
   return response.data;
 });
 
-export const deleteAuditory = createAsyncThunk('auditories/deleteAuditory', async (id: number) => {
-  await axios.delete(`/api/auditories/${id}`);
+export const deleteAuditory = createAsyncThunk('rooms/deleteAuditory', async (id: number) => {
+  await axiosInstance.delete(`/api/v1/rooms/${id}`);
   return id;
 });
 
