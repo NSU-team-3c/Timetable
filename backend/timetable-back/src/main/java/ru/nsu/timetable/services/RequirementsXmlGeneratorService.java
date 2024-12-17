@@ -46,6 +46,9 @@ public class RequirementsXmlGeneratorService {
         @XmlAttribute(name = "id")
         private long id;
 
+        @XmlAttribute(name = "amount")
+        private int amount;
+
         @XmlElement(name = "req")
         private List<Requirement> requirements = new ArrayList<>();
     }
@@ -132,10 +135,10 @@ public class RequirementsXmlGeneratorService {
                 GroupRequirement groupReq = new GroupRequirement();
                 groupReq.setId(group.getId());
 
+                groupReq.setAmount(group.getCapacity());
+
                 List<Requirement> reqList = new ArrayList<>();
-
                 for (Subject subject : group.getSubjects()) {
-
                     for (Teacher teacher : subject.getTeachers()) {
                         Requirement req = new Requirement();
                         req.setSubjectId(subject.getId());
