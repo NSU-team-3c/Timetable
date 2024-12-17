@@ -15,6 +15,7 @@
 
 :- dynamic(group_subject_teacher_times/4).
 :- dynamic(classroom_available/4).
+:- dynamic(teacher_available/4).
 :- dynamic(classroom_capacity/2).
 :- dynamic(classroom/2).
 :- dynamic(group_cap/2).
@@ -84,13 +85,18 @@ check_capacity_condition_of_lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
     classroom_capacity(RoomID, Capacity),
     Amt #> Capacity.
 
+check_teacher_availability(event(_, _, _, Teacher, Day, Slot)) :-
+    teacher_available(Teacher, Day, Start, End),
+    between(Start, End, Slot).
+
 check_the_added_lesson(_, []).
 check_the_added_lesson(AddedLesson, [Lesson|RestLessons]) :-
     check_strict_conditions_of_any_two_lessons(AddedLesson, Lesson),
     check_the_added_lesson(AddedLesson, RestLessons).
 
 check_neighbor(node([AddedLesson |Schedule], _, _)) :-
-    \+check_capacity_condition_of_lesson(AddedLesson).
+    \+check_capacity_condition_of_lesson(AddedLesson),
+    check_teacher_availability(AddedLesson),
     check_the_added_lesson(AddedLesson, Schedule).
 
 % ------------------------------------------------------------------------
@@ -112,10 +118,11 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     slots_per_week(SPW),
     slots_per_day(SPD),
     Days #= SPW / SPD + 1,
-    random_integer(1, Days, Day),
+    between(1, Days, Day),
     classroom_available(RoomID, Day, Start, End),
     LastTimeToStartTheLesson #= End + 1,
-    random_integer(Start, LastTimeToStartTheLesson, Slot),
+    between(Start, LastTimeToStartTheLesson, Slot),
+    
     % write('Slot: '), write(Slot), nl,     
     % write('Group: '), write(Group), nl,    
     % write('Teacher: '), write(Teacher), nl,
@@ -405,6 +412,14 @@ process_room(Node) -->
         [classroom(Id, Name), classroom_capacity(Id, Capacity)],
         process_nodes(allocate, Node, process_allocation(Id)).
 
+process_teacher(Node) -->
+        { attrs_values(Node, [teacher], [Teacher]) },
+        process_nodes(allocate, Node, teacher_timeslot_allocation(Teacher, Node)).
+
+teacher_timeslot_allocation(Teacher, Node) -->
+        { attrs_values(Node, [day, start, end], [Day, Start, End]) },
+        [teacher_available(Teacher,Day,Start,End)].
+
 
 process_allocation(RoomId, Node) -->
         { attrs_values(Node, [day, start, end], [Day, Start, End]) },
@@ -421,7 +436,8 @@ requirementsXML(File) -->
         globals(R),
         process_nodes(group, R, process_group),
         process_nodes(room, R, process_room),
-        process_nodes(freeday, R, process_freeday).
+        process_nodes(freeday, R, process_freeday),
+        process_nodes(availableTeacherSlots, R, process_teacher).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Блок вывода расписаний в XML файл.
@@ -447,11 +463,11 @@ write_day(Stream, Events) :-
 write_event(Stream, []).
 write_event(Stream, [event(Group, Lesson, RoomID, Teacher, Day, Slot)|Rest]) :-
     phrase_to_stream(phrase("\t\t <timeSlots>\n"), Stream),
-    phrase_to_stream(format_("\t\t\t\t <id>~w</id>\n", [Slot]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <group id=\"~w\"/>\n", [Group]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~w\"/>\n", [Lesson]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~w\"/>\n", [Teacher]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <room id=\"~w\"/>\n", [RoomID]), Stream),
+    phrase_to_stream(format_("\t\t\t\t <id>~d</id>\n", [Slot]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <group id=\"~s\"/>\n", [Group]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~s\"/>\n", [Lesson]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <room id=\"~s\"/>\n", [RoomID]), Stream),
     phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream),
     write_event(Stream, Rest).
 

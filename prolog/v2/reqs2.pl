@@ -30,7 +30,10 @@ classroom_available(Room, 2, 1, 7) :- classroom(Room, _). % Day 2, all rooms are
 teacher_lunch_break(Teacher, 1) :- teacher(Teacher).
 
 % Irtegov available in any day
-teacher_available("Irtegov", _, 1, 7, 5).
+teacher_available("Irtegov", 1, 1, 5).
+teacher_available("Permeckov", 1, 1, 5).
+teacher_available("Irtegov", 2, 1, 5).
+teacher_available("Permeckov", 2, 1, 5).
 
 subject_not_in_day("math", 1, 3).
 
