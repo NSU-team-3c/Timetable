@@ -7,5 +7,5 @@ import ru.nsu.timetable.models.entities.Room;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    Optional<Room> findByName(String name);
+    Optional<Room> findByNumber(String name);
 }

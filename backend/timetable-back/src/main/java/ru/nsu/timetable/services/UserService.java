@@ -4,7 +4,6 @@ import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
@@ -47,7 +46,7 @@ public class UserService {
 
     }
 
-    private User getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
             throw new ResourceNotFoundException("User with id " + email + " not found");
@@ -96,22 +95,24 @@ public class UserService {
         return "Role changed for user " + email;
     }
 
-    public User saveNewAdmin(String email, String password) {
-        return saveNewUserWithRole(email, password, ERole.ROLE_ADMINISTRATOR);
+    public User saveNewAdmin(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_ADMINISTRATOR, name, surname);
     }
 
-    public User saveNewTeacher(String email, String password) {
-        return saveNewUserWithRole(email, password, ERole.ROLE_TEACHER);
+    public User saveNewTeacher(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_TEACHER, name, surname);
     }
 
-    public User saveNewUser(String email, String password) {
-        return saveNewUserWithRole(email, password, ERole.ROLE_USER);
+    public User saveNewUser(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_USER, name, surname);
     }
 
-    private User saveNewUserWithRole(String email, String password, ERole role) {
+    private User saveNewUserWithRole(String email, String password, ERole role, String name, String surname) {
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());
+        newUser.setName(name);
+        newUser.setSurname(surname);
 
         Role userRole = roleRepository.findByName(role)
                 .orElseThrow(() -> new RuntimeException("Role not found"));

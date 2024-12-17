@@ -5,7 +5,7 @@ import java.util.Date;
 public record UserDTO(
         String email,
         String phone,
-        String roles,
+        String role,
         String surname,
         String name,
         String patronymic,

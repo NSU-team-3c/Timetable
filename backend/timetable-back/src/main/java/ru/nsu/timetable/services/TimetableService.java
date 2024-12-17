@@ -2,11 +2,12 @@ package ru.nsu.timetable.services;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
+import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.TimetableDTO;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.models.mappers.TimetableMapper;
@@ -27,38 +28,60 @@ public class TimetableService {
     private final TeacherRepository teacherRepository;
     private final RoomRepository roomRepository;
     private final EventRepository eventRepository;
+    private final UserService userService;
 
-    public List<TimetableDTO> getAllTimetables() {
-        return timetableRepository
-                .findAll()
+    public TimetableDTO getTimetableForUser(String email) {
+        User user = userService.getUserByEmail(email);
+        if (user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_ADMINISTRATOR))) {
+            Timetable fullTimetable = getGeneratedTimetable();
+            return timetableMapper.toTimetableDTO(fullTimetable);
+        }
+        if (user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_USER))) {
+            return timetableMapper.toTimetableDTO(getTimetableForStudent(user));
+        } else {
+            return timetableMapper.toTimetableDTO(getTimetableForTeacher(user));
+        }
+    }
+
+    private Timetable getGeneratedTimetable() {
+        return timetableRepository.findById(1L)
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find generated timetable."));
+    }
+
+    private Timetable getTimetableForStudent(User user) {
+        Group group = user.getGroup();
+        if (group == null) {
+            throw new InvalidDataException("Cannot find timetable for user " + user.getEmail() +
+                    " because the group has not been identified");
+        }
+        Timetable fullTimetable = getGeneratedTimetable();
+        List<Event> events = fullTimetable.getEvents()
                 .stream()
-                .map(timetableMapper::toTimetableDTO)
+                .filter(event -> {
+                    for (Group groupAtEvent : event.getGroups()) {
+                        if (groupAtEvent.getId() == group.getId()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
                 .toList();
+
+        Timetable timetableForStudent = new Timetable();
+        timetableForStudent.setEvents(events);
+        return timetableForStudent;
     }
 
-    public TimetableDTO getTimetableById(long id) {
-        return timetableMapper.toTimetableDTO(getTimetable(id));
-    }
+    private Timetable getTimetableForTeacher(User user) {
+        Timetable fullTimetable = getGeneratedTimetable();
+        List<Event> events = fullTimetable.getEvents()
+                .stream()
+                .filter(event -> event.getTeacher().getId() == user.getId())
+                .toList();
 
-    public Timetable saveTimetable(Timetable timetable) {
-        return timetableRepository.save(timetable);
-    }
-
-    public void deleteTimetable(Long id) {
-        if (timetableRepository.existsById(id)) {
-            timetableRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("Timetable with id " + id + " not found");
-        }
-    }
-
-    private Timetable getTimetable(Long id) {
-        Optional<Timetable> timetable = timetableRepository.findById(id);
-        if (timetable.isEmpty()) {
-            throw new ResourceNotFoundException("Timetable with id " + id + " not found");
-        } else {
-            return timetable.get();
-        }
+        Timetable timetableForTeacher = new Timetable();
+        timetableForTeacher.setEvents(events);
+        return timetableForTeacher;
     }
 
     public TimetableDTO generateAndSaveTimetable() throws IOException, InterruptedException, ParserConfigurationException, TransformerException {

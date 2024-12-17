@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.RoomDTO;
+import ru.nsu.timetable.models.dto.RoomInputDTO;
 import ru.nsu.timetable.services.RoomService;
 
 @RequiredArgsConstructor
@@ -33,8 +34,8 @@ public class RoomController {
     }
 
     @PostMapping("")
-    public RoomDTO createRoom(@RequestBody RoomDTO roomDTO) {
-        return roomService.saveRoom(roomDTO);
+    public RoomDTO createRoom(@RequestBody RoomInputDTO roomInputDTO) {
+        return roomService.saveRoom(roomInputDTO);
     }
 
     @DeleteMapping("/{id}")
@@ -43,7 +44,7 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public RoomDTO updateRoom(@PathVariable long id, @RequestBody RoomDTO roomDTO) {
-        return roomService.updateRoom(id, roomDTO);
+    public RoomDTO updateRoom(@PathVariable long id, @RequestBody RoomInputDTO roomInputDTO) {
+        return roomService.updateRoom(id, roomInputDTO);
     }
 }

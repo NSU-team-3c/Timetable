@@ -34,7 +34,7 @@ public class EventMapper {
                 : "Unknown Teacher";
 
         String subjectName = event.getSubject() != null ? event.getSubject().getName() : "Unknown Subject";
-        String roomName = event.getRoom() != null ? event.getRoom().getName() : "Unknown Room";
+        String roomName = event.getRoom() != null ? event.getRoom().getNumber() : "Unknown Room";
 
         return new EventDTO(
                 event.getId(),

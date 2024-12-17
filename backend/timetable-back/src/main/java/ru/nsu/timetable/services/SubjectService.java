@@ -6,14 +6,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.SubjectDTO;
-import ru.nsu.timetable.models.dto.SubjectGroupDTO;
 import ru.nsu.timetable.models.dto.SubjectRequestDTO;
 import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Subject;
+import ru.nsu.timetable.models.entities.Teacher;
 import ru.nsu.timetable.models.mappers.SubjectMapper;
 import ru.nsu.timetable.repositories.GroupRepository;
 import ru.nsu.timetable.repositories.SubjectRepository;
+import ru.nsu.timetable.repositories.TeacherRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +25,13 @@ public class SubjectService {
     private final SubjectRepository subjectRepository;
     private final SubjectMapper subjectMapper;
     private final GroupRepository groupRepository;
+    private final TeacherRepository teacherRepository;
 
     public List<SubjectDTO> getAllSubjects() {
         return subjectRepository
                 .findAll()
                 .stream()
+                .sorted(Comparator.comparingLong(Subject::getId))
                 .map(subjectMapper::toSubjectDTO)
                 .toList();
     }
@@ -51,43 +55,20 @@ public class SubjectService {
 
     public SubjectDTO updateSubject(@PathVariable long id, @RequestBody SubjectRequestDTO subjectRequestDTO) {
         Subject subject = getSubject(id);
-        if (subjectRequestDTO.name() != null) {
-            subject.setName(subjectRequestDTO.name());
-        }
-        if (subjectRequestDTO.code() != null) {
-            subject.setCode(subjectRequestDTO.code());
-        }
-        if (subjectRequestDTO.description() != null) {
-            subject.setDescription(subjectRequestDTO.description());
-        }
-        if (subjectRequestDTO.duration() > 0) {
-            subject.setDuration(subjectRequestDTO.duration());
-        }
-        if (subjectRequestDTO.audienceType() != null) {
-            subject.setAudienceType(Subject.AudienceType.valueOf(subjectRequestDTO.audienceType()));
-        }
-        return subjectMapper.toSubjectDTO(subjectRepository.save(subject));
-    }
+        subject.setName(subjectRequestDTO.name());
+        subject.setCode(subjectRequestDTO.code());
+        subject.setDescription(subjectRequestDTO.description());
+        subject.setDuration(subjectRequestDTO.duration());
+        subject.setAudienceType(Subject.AudienceType.valueOf(subjectRequestDTO.audienceType()));
 
-    public SubjectDTO assignGroupsToSubject(SubjectGroupDTO dto) {
-        Subject subject = getSubject(dto.subjectId());
-        List<Group> groups = groupRepository.findAllById(dto.groupIds());
-        subject.getGroups().addAll(groups);
-        return subjectMapper.toSubjectDTO(subjectRepository.save(subject));
-    }
-
-    public SubjectDTO updateGroupsForSubject(SubjectGroupDTO dto) {
-        Subject subject = getSubject(dto.subjectId());
         subject.getGroups().clear();
-        List<Group> groups = groupRepository.findAllById(dto.groupIds());
+        List<Group> groups = groupRepository.findAllById(subjectRequestDTO.groupIds());
         subject.getGroups().addAll(groups);
-        return subjectMapper.toSubjectDTO(subjectRepository.save(subject));
-    }
 
-    public SubjectDTO removeGroupsFromSubject(SubjectGroupDTO dto) {
-        Subject subject = getSubject(dto.subjectId());
-        List<Group> groups = groupRepository.findAllById(dto.groupIds());
-        subject.getGroups().removeAll(groups);
+        subject.getTeachers().clear();
+        List<Teacher> teachers = teacherRepository.findAllById(subjectRequestDTO.teacherIds());
+        subject.getTeachers().addAll(teachers);
+
         return subjectMapper.toSubjectDTO(subjectRepository.save(subject));
     }
 

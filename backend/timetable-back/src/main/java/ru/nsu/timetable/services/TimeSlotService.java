@@ -17,21 +17,18 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final TimeSlotMapper timeSlotMapper;
 
-    public List<TimeSlotDTO> getAllTimeSlots() {
+    public List<TimeSlot> getAllTimeSlots() {
         return timeSlotRepository
-                .findAll()
-                .stream()
-                .map(timeSlotMapper::toTimeSlotDTO)
-                .toList();
+                .findAll();
     }
 
-    public TimeSlotDTO getTimeSlotById(Long id) {
-        return timeSlotMapper.toTimeSlotDTO(getTimeSlot(id));
+    public TimeSlot getTimeSlotById(Long id) {
+        return getTimeSlot(id);
     }
 
-    public TimeSlotDTO saveTimeSlot(TimeSlotDTO timeSlotDTO) {
+    public TimeSlot saveTimeSlot(TimeSlotDTO timeSlotDTO) {
         TimeSlot timeSlot = timeSlotMapper.toTimeSlot(timeSlotDTO);
-        return timeSlotMapper.toTimeSlotDTO(timeSlotRepository.save(timeSlot));
+        return timeSlotRepository.save(timeSlot);
     }
 
     public void deleteTimeSlot(Long id) {
@@ -42,15 +39,11 @@ public class TimeSlotService {
         }
     }
 
-    public TimeSlotDTO updateTimeSlot(Long id, TimeSlotDTO timeSlotDTO) {
+    public TimeSlot updateTimeSlot(Long id, TimeSlotDTO timeSlotDTO) {
         TimeSlot timeSlot = getTimeSlot(id);
-        if (timeSlotDTO.startTime() != null) {
-            timeSlot.setStartTime(timeSlotDTO.startTime());
-        }
-        if (timeSlotDTO.endTime() != null) {
-            timeSlot.setEndTime(timeSlotDTO.endTime());
-        }
-        return timeSlotMapper.toTimeSlotDTO(timeSlotRepository.save(timeSlot));
+        timeSlot.setStartTime(timeSlotDTO.startTime());
+        timeSlot.setEndTime(timeSlotDTO.endTime());
+        return timeSlotRepository.save(timeSlot);
     }
 
     private TimeSlot getTimeSlot(Long id) {

@@ -3,6 +3,7 @@ package ru.nsu.timetable.models.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.nsu.timetable.models.dto.UserDTO;
+import ru.nsu.timetable.models.dto.UserRegisterDTO;
 import ru.nsu.timetable.models.entities.Role;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.constants.ERole;
@@ -36,6 +37,20 @@ public class UserMapper {
                 user.getAbout(),
                 user.getPhotoUrl(),
                 groupNumber
+        );
+    }
+
+    public UserRegisterDTO toUserRegisterDTO(User user) {
+        String roles = user.getRoles().stream()
+                .map(this::getRoleName)
+                .collect(Collectors.joining(", "));
+
+        return new UserRegisterDTO(
+                user.getId(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                roles
         );
     }
 

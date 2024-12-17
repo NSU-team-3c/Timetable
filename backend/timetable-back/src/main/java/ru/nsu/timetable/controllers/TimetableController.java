@@ -1,40 +1,36 @@
 package ru.nsu.timetable.controllers;
 
-import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
+import ru.nsu.timetable.exceptions.UnauthorizedException;
 import ru.nsu.timetable.models.dto.*;
-import ru.nsu.timetable.services.PrologIntegrationService;
-import ru.nsu.timetable.services.RequirementsXmlGeneratorService;
 import ru.nsu.timetable.services.TimetableService;
-import ru.nsu.timetable.services.XmlParserService;
-
-import ru.nsu.timetable.models.mappers.TimetableMapper;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/timetables")
 @Tag(name = "Timetable controller")
 public class TimetableController {
-
     private final TimetableService timetableService;
+    private final JwtUtils jwtUtils;
 
     @GetMapping("")
-    public List<TimetableDTO> getAllTimetables() {
-        return timetableService.getAllTimetables();
-    }
-
-    @GetMapping("/{id}")
-    public TimetableDTO getTimetableById(@PathVariable Long id) {
-        return timetableService.getTimetableById(id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteTimetable(@PathVariable Long id) {
-        timetableService.deleteTimetable(id);
+    @Operation(summary = "Get timetable for particular user", security = @SecurityRequirement(name = "bearerAuth"))
+    public TimetableDTO getTimetableForUser(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            String email = jwtUtils.getUserNameFromJwtToken(token);
+            return timetableService.getTimetableForUser(email);
+        }
+        throw new UnauthorizedException("Invalid or missing token");
     }
 
     @GetMapping("/generate")

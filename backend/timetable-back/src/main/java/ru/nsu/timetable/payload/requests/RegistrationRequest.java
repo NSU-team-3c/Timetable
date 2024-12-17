@@ -19,4 +19,8 @@ public class RegistrationRequest {
     @Schema(description = "Password", example = "12345")
     @NotBlank
     private String password;
+
+    private String name;
+
+    private String surname;
 }

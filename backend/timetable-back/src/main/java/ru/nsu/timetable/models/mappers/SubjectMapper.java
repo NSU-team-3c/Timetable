@@ -1,5 +1,6 @@
 package ru.nsu.timetable.models.mappers;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -40,6 +41,12 @@ public class SubjectMapper {
         subject.setDescription(subjectRequestDTO.description());
         subject.setDuration(subjectRequestDTO.duration());
         subject.setAudienceType(Subject.AudienceType.valueOf(subjectRequestDTO.audienceType()));
+
+        List<Teacher> teachers = teacherRepository.findAllById(subjectRequestDTO.teacherIds());
+        subject.getTeachers().addAll(teachers);
+
+        List<Group> groups = groupRepository.findAllById(subjectRequestDTO.groupIds());
+        subject.getGroups().addAll(groups);
         return subject;
     }
 }

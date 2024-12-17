@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.timetable.exceptions.InvalidDataException;
-import ru.nsu.timetable.models.dto.UserDTO;
+import ru.nsu.timetable.models.dto.UserRegisterDTO;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.payload.requests.*;
@@ -38,7 +38,7 @@ public class AdminController {
     @Operation(summary = "Registration of new student account in system")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Student account created successfully",
-                    content = {@Content(schema = @Schema(implementation = UserDTO.class), mediaType = "application/json")}),
+                    content = {@Content(schema = @Schema(implementation = UserRegisterDTO.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Email already exists",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", content = @Content)
@@ -46,14 +46,14 @@ public class AdminController {
     @PostMapping("/register_student")
     @Transactional
     @Tag(name = "Student Registration")
-    public UserDTO registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserDTO(registerUser(registrationRequest, "STUDENT"));
+    public UserRegisterDTO registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "STUDENT"));
     }
 
     @Operation(summary = "Registration of new teacher account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Teacher account created successfully",
-                    content = {@Content(schema = @Schema(implementation = UserDTO.class), mediaType = "application/json")}),
+                    content = {@Content(schema = @Schema(implementation = UserRegisterDTO.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Email already exists",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", content = @Content)
@@ -62,14 +62,14 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
     @Tag(name = "Teacher Registration")
-    public UserDTO registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserDTO(registerUser(registrationRequest, "TEACHER"));
+    public UserRegisterDTO registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "TEACHER"));
     }
 
     @Operation(summary = "Registration of new admin account in system", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Admin account created successfully",
-                    content = {@Content(schema = @Schema(implementation = UserDTO.class), mediaType = "application/json")}),
+                    content = {@Content(schema = @Schema(implementation = UserRegisterDTO.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Email already exists",
                     content = {@Content(schema = @Schema(implementation = MessageResponse.class), mediaType = "application/json")}),
             @ApiResponse(responseCode = "500", content = @Content)
@@ -78,13 +78,15 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
     @Tag(name = "Admin Registration")
-    public UserDTO registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserDTO(registerUser(registrationRequest, "ADMINISTRATOR"));
+    public UserRegisterDTO registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "ADMINISTRATOR"));
     }
 
     private User registerUser(RegistrationRequest request, String role) {
         String email = request.getEmail();
         String password = request.getPassword();
+        String name = request.getName();
+        String surname = request.getSurname();
 
         if (email == null || email.isEmpty()) {
             throw new InvalidDataException("Error: email is required");
@@ -98,10 +100,10 @@ public class AdminController {
 
         User newUser;
         switch (role) {
-            case "STUDENT" -> newUser = userService.saveNewUser(email, password);
-            case "TEACHER" -> newUser = userService.saveNewTeacher(email, password);
+            case "STUDENT" -> newUser = userService.saveNewUser(email, password, name, surname);
+            case "TEACHER" -> newUser = userService.saveNewTeacher(email, password, name, surname);
             case "ADMINISTRATOR" ->
-                    newUser = userService.saveNewAdmin(email, password);
+                    newUser = userService.saveNewAdmin(email, password, name, surname);
             default -> throw new IllegalArgumentException("Invalid role");
         }
 

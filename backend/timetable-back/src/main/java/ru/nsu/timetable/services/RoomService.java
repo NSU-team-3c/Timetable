@@ -1,5 +1,6 @@
 package ru.nsu.timetable.services;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.RoomDTO;
+import ru.nsu.timetable.models.dto.RoomInputDTO;
+import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Room;
 import ru.nsu.timetable.models.mappers.RoomMapper;
 import ru.nsu.timetable.repositories.RoomRepository;
@@ -21,6 +24,7 @@ public class RoomService {
         return roomRepository
                 .findAll()
                 .stream()
+                .sorted(Comparator.comparingLong(Room::getId))
                 .map(roomMapper::toRoomDTO)
                 .toList();
     }
@@ -29,8 +33,8 @@ public class RoomService {
         return roomMapper.toRoomDTO(getRoom(id));
     }
 
-    public RoomDTO saveRoom(RoomDTO roomDTO) {
-        Room room = roomMapper.toRoom(roomDTO);
+    public RoomDTO saveRoom(RoomInputDTO roomInputDTO) {
+        Room room = roomMapper.toRoom(roomInputDTO);
         return roomMapper.toRoomDTO(roomRepository.save(room));
     }
 
@@ -42,17 +46,11 @@ public class RoomService {
         }
     }
 
-    public RoomDTO updateRoom(Long id, RoomDTO roomDTO) {
+    public RoomDTO updateRoom(Long id, RoomInputDTO roomInputDTO) {
         Room room = getRoom(id);
-        if (roomDTO.name() != null) {
-            room.setName(roomDTO.name());
-        }
-        if (roomDTO.capacity() > 0) {
-            room.setCapacity(roomDTO.capacity());
-        }
-        if (roomDTO.type() != null) {
-            room.setType(Room.RoomType.valueOf(roomDTO.type()));
-        }
+        room.setNumber(roomInputDTO.number());
+        room.setCapacity(roomInputDTO.capacity());
+        room.setType(Room.RoomType.valueOf(roomInputDTO.type()));
         return roomMapper.toRoomDTO(roomRepository.save(room));
     }
 

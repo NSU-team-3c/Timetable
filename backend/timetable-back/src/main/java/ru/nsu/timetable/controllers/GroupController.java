@@ -44,7 +44,7 @@ public class GroupController {
     }
 
     @PutMapping("/{id}")
-    public GroupDTO updateGroup(@PathVariable Long id, GroupInputDTO groupInputDTO) {
+    public GroupDTO updateGroup(@PathVariable Long id, @RequestBody GroupInputDTO groupInputDTO) {
         return groupService.updateGroup(id, groupInputDTO);
     }
 }

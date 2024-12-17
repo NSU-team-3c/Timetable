@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.timetable.models.dto.SubjectDTO;
-import ru.nsu.timetable.models.dto.SubjectGroupDTO;
 import ru.nsu.timetable.models.dto.SubjectRequestDTO;
 import ru.nsu.timetable.services.SubjectService;
 
@@ -40,20 +39,5 @@ public class SubjectController {
     @PutMapping("/{id}")
     public SubjectDTO updateSubject(@PathVariable long id, @RequestBody SubjectRequestDTO subjectRequestDTO) {
         return subjectService.updateSubject(id, subjectRequestDTO);
-    }
-
-    @PostMapping("/assign-groups")
-    public SubjectDTO assignGroupsToSubject(@RequestBody SubjectGroupDTO dto) {
-        return subjectService.assignGroupsToSubject(dto);
-    }
-
-    @PutMapping("/update-groups")
-    public SubjectDTO updateGroupsForSubject(@RequestBody SubjectGroupDTO dto) {
-        return subjectService.updateGroupsForSubject(dto);
-    }
-
-    @DeleteMapping("/remove-groups")
-    public SubjectDTO removeGroupsFromSubject(@RequestBody SubjectGroupDTO dto) {
-        return subjectService.removeGroupsFromSubject(dto);
     }
 }

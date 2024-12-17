@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.TimeSlotDTO;
+import ru.nsu.timetable.models.entities.TimeSlot;
 import ru.nsu.timetable.services.TimeSlotService;
 
 @RequiredArgsConstructor
@@ -23,17 +24,17 @@ public class TimeSlotController {
     private final TimeSlotService timeSlotService;
 
     @GetMapping("")
-    public List<TimeSlotDTO> getAllTimeSlots() {
+    public List<TimeSlot> getAllTimeSlots() {
         return timeSlotService.getAllTimeSlots();
     }
 
     @GetMapping("/{id}")
-    public TimeSlotDTO getTimeSlotById(@PathVariable Long id) {
+    public TimeSlot getTimeSlotById(@PathVariable Long id) {
         return timeSlotService.getTimeSlotById(id);
     }
 
     @PostMapping("")
-    public TimeSlotDTO createTimeSlot(@RequestBody TimeSlotDTO timeSlotDTO) {
+    public TimeSlot createTimeSlot(@RequestBody TimeSlotDTO timeSlotDTO) {
         return timeSlotService.saveTimeSlot(timeSlotDTO);
     }
 
@@ -43,7 +44,7 @@ public class TimeSlotController {
     }
 
     @PutMapping("/{id}")
-    public TimeSlotDTO updateTimeSlot(@PathVariable long id, @RequestBody TimeSlotDTO timeSlotDTO) {
+    public TimeSlot updateTimeSlot(@PathVariable long id, @RequestBody TimeSlotDTO timeSlotDTO) {
         return timeSlotService.updateTimeSlot(id, timeSlotDTO);
     }
 }

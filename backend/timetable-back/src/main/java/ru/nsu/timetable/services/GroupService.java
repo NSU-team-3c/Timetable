@@ -2,7 +2,6 @@ package ru.nsu.timetable.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.GroupDTO;
 import ru.nsu.timetable.models.dto.GroupInputDTO;

@@ -1,5 +1,6 @@
 package ru.nsu.timetable.models.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +16,8 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String name;
+    @Column(name = "number", unique = true)
+    private String number;
 
     private int capacity;
 

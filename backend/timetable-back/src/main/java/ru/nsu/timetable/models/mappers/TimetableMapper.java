@@ -14,7 +14,6 @@ public class TimetableMapper {
 
     public TimetableDTO toTimetableDTO(Timetable timetable) {
         return new TimetableDTO(
-                timetable.getId(),
                 timetable.getEvents().stream()
                         .map(event -> {
                             System.out.println("Processing event: " + event.getId());
