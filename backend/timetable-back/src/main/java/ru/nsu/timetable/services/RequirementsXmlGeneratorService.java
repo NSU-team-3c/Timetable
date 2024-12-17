@@ -235,6 +235,11 @@ public class RequirementsXmlGeneratorService {
         calendar.setTime(timeSlot.getStartTime());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        if (dayOfWeek == Calendar.SUNDAY) {
+            return -1;
+        }
 
         for (Map.Entry<Integer, PairRange> entry : pairRanges.entrySet()) {
             PairRange range = entry.getValue();
