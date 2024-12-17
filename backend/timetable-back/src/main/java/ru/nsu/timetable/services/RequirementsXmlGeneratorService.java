@@ -121,7 +121,7 @@ public class RequirementsXmlGeneratorService {
         private int end;
     }
 
-    public void generateXml(List<Group> groups, List<Room> rooms, List<Teacher> teachers,
+    public void generateXml(List<Group> groups, List<Room> rooms, List<User> teachers,
                             int slotsPerWeek, int slotsPerDay, String filePath) {
         try {
             Requirements requirements = new Requirements();
@@ -139,7 +139,7 @@ public class RequirementsXmlGeneratorService {
 
                 List<Requirement> reqList = new ArrayList<>();
                 for (Subject subject : group.getSubjects()) {
-                    for (Teacher teacher : subject.getTeachers()) {
+                    for (User teacher : subject.getTeachers()) {
                         Requirement req = new Requirement();
                         req.setSubjectId(subject.getId());
                         req.setTeacherId(teacher.getId());
@@ -169,7 +169,7 @@ public class RequirementsXmlGeneratorService {
                 requirements.getRooms().add(roomElement);
             }
 
-            for (Teacher teacher : teachers) {
+            for (User teacher : teachers) {
                 TeacherAvailableSlots availableSlots = new TeacherAvailableSlots();
                 availableSlots.setTeacherId(teacher.getId());
 

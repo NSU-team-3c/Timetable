@@ -13,11 +13,13 @@ import ru.nsu.timetable.models.dto.UserInputDTO;
 import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Operations;
 import ru.nsu.timetable.models.entities.Role;
+import ru.nsu.timetable.models.entities.TimeSlot;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.repositories.GroupRepository;
 import ru.nsu.timetable.repositories.OperationsRepository;
 import ru.nsu.timetable.repositories.RoleRepository;
+import ru.nsu.timetable.repositories.TimeSlotRepository;
 import ru.nsu.timetable.repositories.UserRepository;
 
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final OperationsRepository operationsRepository;
     private final GroupRepository groupRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
     public User getUser(Long id) {
         Optional<User> user = userRepository.findById(id);
@@ -71,6 +74,29 @@ public class UserService {
             }
         }
         return userMapper.toUserDTO(userRepository.save(user));
+    }
+
+    public List<TimeSlot> getTeacherAvailabilityByEmail(String email) {
+        User teacher = getUserByEmail(email);
+        return teacher.getAvailableTimeSlots();
+    }
+
+    public List<TimeSlot> creareTeacherAvailabilityByEmail(String email, Long timeSlotId) {
+        User teacher = getUserByEmail(email);
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find timeslot with id " + timeSlotId));
+        teacher.getAvailableTimeSlots().add(timeSlot);
+        userRepository.save(teacher);
+        return teacher.getAvailableTimeSlots();
+    }
+
+    public List<TimeSlot> deleteTeacherAvailabilityByEmail(String email, Long timeSlotId) {
+        User teacher = getUserByEmail(email);
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find timeslot with id " + timeSlotId));
+        teacher.getAvailableTimeSlots().remove(timeSlot);
+        userRepository.save(teacher);
+        return teacher.getAvailableTimeSlots();
     }
 
     public boolean existByEmailCheck(String email) {

@@ -12,8 +12,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -64,4 +66,16 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "group_id", unique = true)
     private Group group;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<TimeSlot> availableTimeSlots = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<Subject> subjects = new ArrayList<>();
 }

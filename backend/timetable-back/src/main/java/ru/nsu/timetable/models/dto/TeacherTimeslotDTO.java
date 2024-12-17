@@ -2,5 +2,5 @@ package ru.nsu.timetable.models.dto;
 
 import java.util.List;
 
-public record TeacherTimeslotDTO(Long teacherId, List<Long> timeSlotIds) {
+public record TeacherTimeslotDTO(List<Long> timeSlotIds) {
 }

@@ -9,11 +9,11 @@ import ru.nsu.timetable.models.dto.SubjectDTO;
 import ru.nsu.timetable.models.dto.SubjectRequestDTO;
 import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Subject;
-import ru.nsu.timetable.models.entities.Teacher;
+import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.SubjectMapper;
 import ru.nsu.timetable.repositories.GroupRepository;
 import ru.nsu.timetable.repositories.SubjectRepository;
-import ru.nsu.timetable.repositories.TeacherRepository;
+import ru.nsu.timetable.repositories.UserRepository;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +25,7 @@ public class SubjectService {
     private final SubjectRepository subjectRepository;
     private final SubjectMapper subjectMapper;
     private final GroupRepository groupRepository;
-    private final TeacherRepository teacherRepository;
+    private final UserRepository userRepository;
 
     public List<SubjectDTO> getAllSubjects() {
         return subjectRepository
@@ -66,7 +66,7 @@ public class SubjectService {
         subject.getGroups().addAll(groups);
 
         subject.getTeachers().clear();
-        List<Teacher> teachers = teacherRepository.findAllById(subjectRequestDTO.teacherIds());
+        List<User> teachers = userRepository.findAllById(subjectRequestDTO.teacherIds());
         subject.getTeachers().addAll(teachers);
 
         return subjectMapper.toSubjectDTO(subjectRepository.save(subject));

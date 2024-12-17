@@ -33,7 +33,7 @@ public class Subject {
     private AudienceType audienceType;
 
     @ManyToMany(mappedBy = "subjects")
-    private List<Teacher> teachers = new ArrayList<>();
+    private List<User> teachers = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

@@ -25,10 +25,10 @@ public class TimetableService {
     private final PrologIntegrationService prologIntegrationService;
     private final XmlParserService xmlParserService;
     private final GroupRepository groupRepository;
-    private final TeacherRepository teacherRepository;
     private final RoomRepository roomRepository;
     private final EventRepository eventRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     public TimetableDTO getTimetableForUser(String email) {
         User user = userService.getUserByEmail(email);
@@ -87,7 +87,10 @@ public class TimetableService {
     public TimetableDTO generateAndSaveTimetable() throws IOException, InterruptedException, ParserConfigurationException, TransformerException {
         List<Group> groups = groupRepository.findAll();
         List<Room> rooms = roomRepository.findAll();
-        List<Teacher> teachers = teacherRepository.findAll();
+        List<User> teachers = userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_ADMINISTRATOR)))
+                .toList();
 
         System.out.println("Fetched " + groups.size() + " groups, " + rooms.size() + " rooms, " + teachers.size() + " teachers.");
 

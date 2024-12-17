@@ -32,13 +32,14 @@ public class XmlParserService {
 
     private final EventRepository eventRepository;
 
-    private final TeacherRepository teacherRepository;
 
     private final SubjectRepository subjectRepository;
 
     private final RoomRepository roomRepository;
 
     private final GroupRepository groupRepository;
+
+    private final UserRepository userRepository;
 
     public Timetable parseTimetable(String filePath) {
         try {
@@ -132,7 +133,7 @@ public class XmlParserService {
                 throw new RuntimeException("Room ID is empty in XML");
             }
 
-            Teacher teacher = teacherRepository.findById(parseLongSafe(teacherId))
+            User teacher = userRepository.findById(parseLongSafe(teacherId))
                     .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
             Subject subject = subjectRepository.findById(parseLongSafe(subjectId))
                     .orElseThrow(() -> new RuntimeException("Subject not found: " + subjectId));
