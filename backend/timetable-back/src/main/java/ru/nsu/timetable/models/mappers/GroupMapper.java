@@ -1,36 +1,22 @@
 package ru.nsu.timetable.models.mappers;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 import ru.nsu.timetable.models.dto.GroupDTO;
+import ru.nsu.timetable.models.dto.GroupInputDTO;
 import ru.nsu.timetable.models.entities.Group;
-import ru.nsu.timetable.models.entities.Subject;
-import ru.nsu.timetable.repositories.SubjectRepository;
 
 @Component
 public class GroupMapper {
-    private final SubjectRepository subjectRepository;
-
-    public GroupMapper(SubjectRepository subjectRepository) {
-        this.subjectRepository = subjectRepository;
-    }
-
     public GroupDTO toGroupDTO(Group group) {
-        return new GroupDTO(group.getId(), group.getNumber(), group.getStudents(),
-                group.getSubjects().stream()
-                        .map(Subject::getId)
-                        .collect(Collectors.toList()));
+        return new GroupDTO(group.getId(), group.getNumber(), group.getCourse(), group.getDepartment(), group.getCapacity());
     }
 
-    public Group toGroup(GroupDTO groupDTO) {
+    public Group toGroup(GroupInputDTO groupInputDTO) {
         Group group = new Group();
-        group.setNumber(groupDTO.number());
-        group.setStudents(groupDTO.students());
-        group.setSubjects(subjectRepository.findAllById(groupDTO.subjectIds()));
-        if (groupDTO.id() != null) {
-            group.setId(groupDTO.id());
-        }
+        group.setNumber(groupInputDTO.number());
+        group.setCourse(groupInputDTO.course());
+        group.setDepartment(groupInputDTO.department());
+        group.setCapacity(groupInputDTO.capacity());
         return group;
     }
 }

@@ -11,4 +11,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findById(long id);
 
     Optional<Group> findByNumber(String number);
+
+    Boolean existsByNumber(String number);
 }

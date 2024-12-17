@@ -23,7 +23,11 @@ public class Group {
     @Column(name = "number", unique = true)
     private String number;
 
-    private List<String> students = new ArrayList<>();
+    private String course;
+
+    private String department;
+
+    private int capacity;
 
     @ManyToMany(mappedBy = "groups")
     private List<Subject> subjects = new ArrayList<>();
