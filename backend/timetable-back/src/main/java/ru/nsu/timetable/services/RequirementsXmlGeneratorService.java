@@ -20,20 +20,13 @@ public class RequirementsXmlGeneratorService {
         @XmlElement(name = "global")
         private Global global;
 
-        @XmlElementWrapper(name = "groups")
         @XmlElement(name = "group")
         private List<GroupRequirement> groups = new ArrayList<>();
 
-        @XmlElementWrapper(name = "rooms")
         @XmlElement(name = "room")
         private List<RoomXml> rooms = new ArrayList<>();
 
-//        @XmlElementWrapper(name = "freeday")
-//        @XmlElement(name = "teacher")
-//        private List<TeacherFreeDay> freeDays = new ArrayList<>();
-
-        @XmlElementWrapper(name = "availableTeacherSlots")
-        @XmlElement(name = "day")
+        @XmlElement(name = "availableTeacherSlots")
         private List<TeacherAvailableSlots> availableTeacherSlots = new ArrayList<>();
     }
 
@@ -61,7 +54,7 @@ public class RequirementsXmlGeneratorService {
     @Data
     public static class Requirement {
         @XmlAttribute(name = "subject")
-        private String subject;
+        private long subjectId;
 
         @XmlAttribute(name = "teacher")
         private long teacherId;
@@ -74,7 +67,7 @@ public class RequirementsXmlGeneratorService {
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class RoomXml {
         @XmlAttribute(name = "id")
-        private String id;
+        private long id;
 
         @XmlAttribute(name = "capacity")
         private int capacity;
@@ -102,40 +95,22 @@ public class RequirementsXmlGeneratorService {
         }
     }
 
-//    @Data
-//    @XmlAccessorType(XmlAccessType.FIELD)
-//    public static class TeacherFreeDay {
-//        @XmlAttribute(name = "teacher")
-//        private long teacherId;
-//
-//        @XmlAttribute(name = "day")
-//        private int day;
-//    }
-
     @Data
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class TeacherAvailableSlots {
         @XmlAttribute(name = "teacher")
         private long teacherId;
 
-        @XmlElementWrapper(name = "availableSlots")
-        @XmlElement(name = "day")
-        private List<DaySlots> availableSlots = new ArrayList<>();
-    }
-
-    @Data
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static class DaySlots {
-        @XmlAttribute(name = "number")
-        private int dayNumber;
-
         @XmlElement(name = "slot")
-        private List<XmlTimeSlot> timeSlots = new ArrayList<>();
+        private List<XmlTimeSlot> slots = new ArrayList<>();
     }
 
     @Data
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class XmlTimeSlot {
+        @XmlAttribute(name = "day")
+        private int day;
+
         @XmlAttribute(name = "start")
         private int start;
 
@@ -158,12 +133,14 @@ public class RequirementsXmlGeneratorService {
                 groupReq.setId(group.getId());
 
                 List<Requirement> reqList = new ArrayList<>();
+
                 for (Subject subject : group.getSubjects()) {
+
                     for (Teacher teacher : subject.getTeachers()) {
                         Requirement req = new Requirement();
-                        req.setSubject(subject.getName());
+                        req.setSubjectId(subject.getId());
                         req.setTeacherId(teacher.getId());
-                        req.setAmount(2);
+                        req.setAmount(subject.getDuration());
                         reqList.add(req);
                     }
                 }
@@ -173,7 +150,7 @@ public class RequirementsXmlGeneratorService {
 
             for (Room room : rooms) {
                 RoomXml roomElement = new RoomXml();
-                roomElement.setId("r" + room.getId());
+                roomElement.setId(room.getId());
                 roomElement.setCapacity(room.getCapacity());
 
                 List<RoomAllocate> allocations = new ArrayList<>();
@@ -189,17 +166,6 @@ public class RequirementsXmlGeneratorService {
                 requirements.getRooms().add(roomElement);
             }
 
-//            for (Teacher teacher : teachers) {
-//                for (int i = 0; i < 7; i++) {
-//                    if (teacher.isFreeOnDay(i)) {
-//                        TeacherFreeDay freeDay = new TeacherFreeDay();
-//                        freeDay.setTeacherId(teacher.getId());
-//                        freeDay.setDay(i);
-//                        requirements.getFreeDays().add(freeDay);
-//                    }
-//                }
-//            }
-
             for (Teacher teacher : teachers) {
                 TeacherAvailableSlots availableSlots = new TeacherAvailableSlots();
                 availableSlots.setTeacherId(teacher.getId());
@@ -213,23 +179,34 @@ public class RequirementsXmlGeneratorService {
                         slotsByDay.put(slotDay, new ArrayList<>());
                     }
 
-                    XmlTimeSlot xmlSlot = new XmlTimeSlot();
-                    xmlSlot.setStart((int) (timeSlot.getStartTime().getTime() / 1000));
-                    xmlSlot.setEnd((int) (timeSlot.getEndTime().getTime() / 1000));
-                    slotsByDay.get(slotDay).add(xmlSlot);
-                }
+                    int pairNumber = getPairNumber(timeSlot);
 
-                for (int day = 1; day <= 7; day++) {
-                    if (slotsByDay.containsKey(day)) {
-                        DaySlots daySlots = new DaySlots();
-                        daySlots.setDayNumber(day);
-                        daySlots.setTimeSlots(slotsByDay.get(day));
-                        availableSlots.getAvailableSlots().add(daySlots);
+                    if (pairNumber != -1) {
+                        XmlTimeSlot xmlSlot = new XmlTimeSlot();
+                        xmlSlot.setDay(slotDay);
+                        xmlSlot.setStart(pairNumber);
+                        xmlSlot.setEnd(pairNumber);
+
+                        slotsByDay.get(slotDay).add(xmlSlot);
                     }
                 }
 
-                requirements.getAvailableTeacherSlots().add(availableSlots);
+                for (Map.Entry<Integer, List<XmlTimeSlot>> entry : slotsByDay.entrySet()) {
+                    int day = entry.getKey();
+                    List<XmlTimeSlot> slots = entry.getValue();
+
+                    if (!slots.isEmpty()) {
+                        for (XmlTimeSlot slot : slots) {
+                            availableSlots.getSlots().add(slot);
+                        }
+                    }
+                }
+
+                if (!availableSlots.getSlots().isEmpty()) {
+                    requirements.getAvailableTeacherSlots().add(availableSlots);
+                }
             }
+
             JAXBContext context = JAXBContext.newInstance(Requirements.class);
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -238,6 +215,58 @@ public class RequirementsXmlGeneratorService {
             System.out.println("XML file successfully generated: " + filePath);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private int getPairNumber(TimeSlot timeSlot) {
+        Map<Integer, PairRange> pairRanges = new HashMap<>();
+        pairRanges.put(1, new PairRange("09:00", "10:35"));
+        pairRanges.put(2, new PairRange("10:50", "12:25"));
+        pairRanges.put(3, new PairRange("12:40", "14:15"));
+        pairRanges.put(4, new PairRange("14:30", "16:05"));
+        pairRanges.put(5, new PairRange("16:20", "17:55"));
+        pairRanges.put(6, new PairRange("18:10", "19:45"));
+        pairRanges.put(7, new PairRange("20:00", "21:35"));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(timeSlot.getStartTime());
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        for (Map.Entry<Integer, PairRange> entry : pairRanges.entrySet()) {
+            PairRange range = entry.getValue();
+            if (isTimeInRange(hour, minute, range.getStartTime(), range.getEndTime())) {
+                return entry.getKey();
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean isTimeInRange(int hour, int minute, String startTime, String endTime) {
+        String[] start = startTime.split(":");
+        String[] end = endTime.split(":");
+
+        int startHour = Integer.parseInt(start[0]);
+        int startMinute = Integer.parseInt(start[1]);
+        int endHour = Integer.parseInt(end[0]);
+        int endMinute = Integer.parseInt(end[1]);
+
+        int currentTimeInMinutes = hour * 60 + minute;
+        int startTimeInMinutes = startHour * 60 + startMinute;
+        int endTimeInMinutes = endHour * 60 + endMinute;
+
+        return currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
+    }
+
+    @Data
+    public static class PairRange {
+        private String startTime;
+        private String endTime;
+
+        public PairRange(String startTime, String endTime) {
+            this.startTime = startTime;
+            this.endTime = endTime;
         }
     }
 
