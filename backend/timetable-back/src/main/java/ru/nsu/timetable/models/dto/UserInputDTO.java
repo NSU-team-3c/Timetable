@@ -3,7 +3,6 @@ package ru.nsu.timetable.models.dto;
 import java.util.Date;
 
 public record UserInputDTO(
-        String password,
         String phone,
         String surname,
         String name,

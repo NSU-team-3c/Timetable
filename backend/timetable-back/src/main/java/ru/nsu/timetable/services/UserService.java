@@ -58,9 +58,6 @@ public class UserService {
 
     public UserDTO updateUserByEmail(String email, UserInputDTO userInputDTO) {
         User user = getUserByEmail(email);
-        if (userInputDTO.password() != null) {
-            user.setPassword(new BCryptPasswordEncoder().encode(userInputDTO.password()));
-        }
         user.setPhone(userInputDTO.phone());
         user.setSurname(userInputDTO.surname());
         user.setName(userInputDTO.name());
