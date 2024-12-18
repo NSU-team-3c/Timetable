@@ -14,42 +14,28 @@ sp_unit_profile(6, "Иртегов Д.В.", teacher).
 sp_unit_profile(7, "Мигинский Д.С.", teacher).
 sp_unit_profile(8, "Васкевич В.Л.", teacher).
 
-sp_unit_profile(9, "Вова", student).
-sp_unit_profile(10, "Руслан", student).
-sp_unit_profile(11, "Рустам", student).
-sp_unit_profile(12, "Света", student).
-sp_unit_profile(13, "Дима", student).
-sp_unit_profile(14, "Андрей", student).
-sp_unit_profile(15, "Игорь", student).
-sp_unit_profile(16, "Толя", student).
-
 faculties(1, "FIT").
 
 faculty_group(1, '22215').
 
-student_group(9, '22215').
-student_group(10, '22215').
-student_group(11, '22215').
-student_group(12, '22215').
-student_group(13, '22215').
-student_group(14, '22215').
-student_group(15, '22215').
-student_group(16, '22215').
+group_student_amount('22215', 8).
 
 classroom(100, "Small room").
 classroom(200, "Large room").
 
-room_cap(100, 20).
-room_cap(200, 20).
+
+classroom_capacity(100, 50).
+classroom_capacity(200, 50).
 
 % Доступность комнат
-classroom_available(Room, 1, 9, 18) :- classroom(Room, _). % Day 1, all rooms are available from 9 to 18
-classroom_available(Room, 2, 9, 18) :- classroom(Room, _). % Day 2, all rooms are available from 9 to 18
-classroom_available(Room, 3, 9, 18) :- classroom(Room, _). % Day 3, all rooms are available from 9 to 18
-classroom_available(Room, 4, 9, 18) :- classroom(Room, _). % Day 4, all rooms are available from 9 to 18
-classroom_available(Room, 5, 9, 18) :- classroom(Room, _). % Day 5, all rooms are available from 9 to 18
-classroom_available(Room, 6, 9, 18) :- classroom(Room, _). % Day 6, all rooms are available from 9 to 18
+classroom_available(Room, 1, 1, 7) :- classroom(Room, _). % Day 1, all rooms are available from 9 to 18
+classroom_available(Room, 2, 1, 7) :- classroom(Room, _). % Day 2, all rooms are available from 9 to 18
+classroom_available(Room, 3, 1, 7) :- classroom(Room, _). % Day 3, all rooms are available from 9 to 18
+classroom_available(Room, 4, 1, 7) :- classroom(Room, _). % Day 4, all rooms are available from 9 to 18
+classroom_available(Room, 5, 1, 7) :- classroom(Room, _). % Day 5, all rooms are available from 9 to 18
+classroom_available(Room, 6, 1, 7) :- classroom(Room, _). % Day 6, all rooms are available from 9 to 18
 
+group('22215').
 % Назначение группам предметов и преподавателей
 group_subject_teacher_times('22215', ks, "Пермяков Р.А.", 2).
 group_subject_teacher_times('22215', mobDev, "Букшев И.Е.", 2).

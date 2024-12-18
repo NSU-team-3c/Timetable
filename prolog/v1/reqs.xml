@@ -13,9 +13,25 @@
 		<free slot="0"/>
 		<free slot="1"/>
 	</group>
-	<room id="r1">
+	<roombind id="r1">
 		<allocate group="22215" subject="teamPr" lesson="0"/>
 		<allocate group="22215" subject="teamPr" lesson="1"/>
-	</room>
+	</roombind>
+	<rooms>
+		<room id="r1" capacity="20">
+			<allocate day="1" start="1" end="7"/>
+			<allocate day="2" start="1" end="7"/>
+		</room>
+	</rooms>
 	<freeday teacher="Иртегов Д.В." day="4"/>
+	<availableTeacherSlots techer="Иртегов Д.В.">
+		<day number="1">
+			<slot start="1" end="3">
+			<slot start="5" end="6">
+		</day>
+		<day number="1">
+			<slot start="1" end="3">
+			<slot start="5" end="6">
+		</day>
+	</freeSlots>
 </requirements>

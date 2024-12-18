@@ -1,0 +1,32 @@
+<timetable>
+	 <day number="1">
+		 <timeSlots>
+				 <id>4</id>
+					 <group id="22215"/>
+					 <subject id="kb"/>
+					 <teacher id="Permeckov"/>
+					 <room id="2128"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>3</id>
+					 <group id="22215"/>
+					 <subject id="kb"/>
+					 <teacher id="Permeckov"/>
+					 <room id="2128"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>2</id>
+					 <group id="22215"/>
+					 <subject id="math"/>
+					 <teacher id="Irtegov"/>
+					 <room id="2128"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>1</id>
+					 <group id="22215"/>
+					 <subject id="math"/>
+					 <teacher id="Irtegov"/>
+					 <room id="2128"/>
+		 </timeSlots>
+	 </day>
+</timetable>

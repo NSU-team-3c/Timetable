@@ -6,9 +6,9 @@
 				 <groups>
 					 <group id="22215" name="Group A"/>
 				 </groups>
-					 <subject id="teamPr" name="Team Project"/>
-					 <teacher id="t1" name="Иртегов Д.В."/>
-					 <room id="r1" name="Lecture Hall 1"/>
+					 <subject id="teamPr"/>
+					 <teacher id="t1"/>
+					 <room id="r1"/>
 			 </timeSlot>
 			 <timeSlot>
 				 <id>2</id>
