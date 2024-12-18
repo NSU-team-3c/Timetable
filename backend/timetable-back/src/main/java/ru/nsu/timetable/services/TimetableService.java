@@ -94,12 +94,12 @@ public class TimetableService {
 
         System.out.println("Fetched " + groups.size() + " groups, " + rooms.size() + " rooms, " + teachers.size() + " teachers.");
 
-        String requirementsFilePath = "reqs.xml";
+        String requirementsFilePath = "prolog/v2/reqs2.xml";
 
         requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
 
         System.out.println("Generating timetable using Prolog...");
-        String queryType = "create_timetable";
+        String queryType = "run";
         String outputFilePath = prologIntegrationService.generateTimetable(requirementsFilePath, queryType);
 
         if (outputFilePath == null || outputFilePath.isEmpty()) {
