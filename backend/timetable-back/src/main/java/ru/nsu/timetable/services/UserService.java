@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
+import ru.nsu.timetable.models.dto.TeacherDTO;
 import ru.nsu.timetable.models.dto.UserDTO;
 import ru.nsu.timetable.models.dto.UserInputDTO;
 import ru.nsu.timetable.models.entities.Group;
@@ -97,6 +98,14 @@ public class UserService {
         teacher.getAvailableTimeSlots().remove(timeSlot);
         userRepository.save(teacher);
         return teacher.getAvailableTimeSlots();
+    }
+
+    public List<TeacherDTO> getTeachers() {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_TEACHER)))
+                .map(userMapper::toTeacherDTO)
+                .toList();
     }
 
     public boolean existByEmailCheck(String email) {

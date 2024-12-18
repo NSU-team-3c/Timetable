@@ -89,7 +89,7 @@ public class TimetableService {
         List<Room> rooms = roomRepository.findAll();
         List<User> teachers = userRepository.findAll()
                 .stream()
-                .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_ADMINISTRATOR)))
+                .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_TEACHER)))
                 .toList();
 
         System.out.println("Fetched " + groups.size() + " groups, " + rooms.size() + " rooms, " + teachers.size() + " teachers.");

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
 import ru.nsu.timetable.exceptions.UnauthorizedException;
-import ru.nsu.timetable.models.dto.TeacherTimeslotDTO;
+import ru.nsu.timetable.models.dto.TeacherDTO;
 import ru.nsu.timetable.models.dto.UserDTO;
 import ru.nsu.timetable.models.dto.UserInputDTO;
 import ru.nsu.timetable.models.entities.TimeSlot;
@@ -63,6 +63,12 @@ public class UserController {
     public List<TimeSlot> deleteTeacherAvailability(HttpServletRequest request, @RequestBody Long timeSlotId) {
         String email = getEmailFromHeader(request);
         return userService.deleteTeacherAvailabilityByEmail(email, timeSlotId);
+    }
+
+    @GetMapping("/teachers")
+    @Operation(summary = "Get all users with role teacher")
+    public List<TeacherDTO> getTeachers() {
+        return userService.getTeachers();
     }
 
     private String getEmailFromHeader(HttpServletRequest request) {
