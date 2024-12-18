@@ -17,21 +17,18 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final TimeSlotMapper timeSlotMapper;
 
-    public List<TimeSlotDTO> getAllTimeSlots() {
+    public List<TimeSlot> getAllTimeSlots() {
         return timeSlotRepository
-                .findAll()
-                .stream()
-                .map(timeSlotMapper::toTimeSlotDTO)
-                .toList();
+                .findAll();
     }
 
-    public TimeSlotDTO getTimeSlotById(Long id) {
-        return timeSlotMapper.toTimeSlotDTO(getTimeSlot(id));
+    public TimeSlot getTimeSlotById(Long id) {
+        return getTimeSlot(id);
     }
 
-    public TimeSlotDTO saveTimeSlot(TimeSlotDTO timeSlotDTO) {
+    public TimeSlot saveTimeSlot(TimeSlotDTO timeSlotDTO) {
         TimeSlot timeSlot = timeSlotMapper.toTimeSlot(timeSlotDTO);
-        return timeSlotMapper.toTimeSlotDTO(timeSlotRepository.save(timeSlot));
+        return timeSlotRepository.save(timeSlot);
     }
 
     public void deleteTimeSlot(Long id) {
@@ -40,6 +37,13 @@ public class TimeSlotService {
         } else {
             throw new ResourceNotFoundException("TimeSlot with id " + id + " not found");
         }
+    }
+
+    public TimeSlot updateTimeSlot(Long id, TimeSlotDTO timeSlotDTO) {
+        TimeSlot timeSlot = getTimeSlot(id);
+        timeSlot.setStartTime(timeSlotDTO.startTime());
+        timeSlot.setEndTime(timeSlotDTO.endTime());
+        return timeSlotRepository.save(timeSlot);
     }
 
     private TimeSlot getTimeSlot(Long id) {

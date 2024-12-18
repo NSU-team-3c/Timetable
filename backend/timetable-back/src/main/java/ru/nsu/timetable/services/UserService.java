@@ -9,12 +9,17 @@ import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.UserDTO;
+import ru.nsu.timetable.models.dto.UserInputDTO;
+import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Operations;
 import ru.nsu.timetable.models.entities.Role;
+import ru.nsu.timetable.models.entities.TimeSlot;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
+import ru.nsu.timetable.repositories.GroupRepository;
 import ru.nsu.timetable.repositories.OperationsRepository;
 import ru.nsu.timetable.repositories.RoleRepository;
+import ru.nsu.timetable.repositories.TimeSlotRepository;
 import ru.nsu.timetable.repositories.UserRepository;
 
 @RequiredArgsConstructor
@@ -27,33 +32,10 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final OperationsRepository operationsRepository;
+    private final GroupRepository groupRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
-    public List<UserDTO> getAllUsers() {
-        return userRepository
-                .findAll()
-                .stream()
-                .map(userMapper::toUserDTO)
-                .toList();
-    }
-
-    public UserDTO getUserById(Long id) {
-        return userMapper.toUserDTO(getUser(id));
-    }
-
-    public UserDTO saveUser(UserDTO userDTO) {
-        User user = userMapper.toUser(userDTO);
-        return userMapper.toUserDTO(userRepository.save(user));
-    }
-
-    public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("User with id " + id + " not found");
-        }
-    }
-
-    private User getUser(Long id) {
+    public User getUser(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
@@ -62,13 +44,63 @@ public class UserService {
         }
     }
 
-    public boolean existByEmailCheck(String email) {
-        return userRepository.existsByEmail(email);
+    public UserDTO getUserInfoByEmail(String email) {
+        return userMapper.toUserDTO(getUserByEmail(email));
+
     }
 
-    public User findById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public User getUserByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User with id " + email + " not found");
+        } else {
+            return user.get();
+        }
+    }
+
+    public UserDTO updateUserByEmail(String email, UserInputDTO userInputDTO) {
+        User user = getUserByEmail(email);
+        user.setPhone(userInputDTO.phone());
+        user.setSurname(userInputDTO.surname());
+        user.setName(userInputDTO.name());
+        user.setPatronymic(userInputDTO.patronymic());
+        user.setBirthday(userInputDTO.birthday());
+        user.setAbout(userInputDTO.about());
+        user.setPhotoUrl(userInputDTO.photoUrl());
+        if (user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_USER))) {
+            if (userInputDTO.group() != null) {
+                Group group = groupRepository.findByNumber(userInputDTO.group()).orElseThrow();
+                user.setGroup(group);
+            }
+        }
+        return userMapper.toUserDTO(userRepository.save(user));
+    }
+
+    public List<TimeSlot> getTeacherAvailabilityByEmail(String email) {
+        User teacher = getUserByEmail(email);
+        return teacher.getAvailableTimeSlots();
+    }
+
+    public List<TimeSlot> creareTeacherAvailabilityByEmail(String email, Long timeSlotId) {
+        User teacher = getUserByEmail(email);
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find timeslot with id " + timeSlotId));
+        teacher.getAvailableTimeSlots().add(timeSlot);
+        userRepository.save(teacher);
+        return teacher.getAvailableTimeSlots();
+    }
+
+    public List<TimeSlot> deleteTeacherAvailabilityByEmail(String email, Long timeSlotId) {
+        User teacher = getUserByEmail(email);
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find timeslot with id " + timeSlotId));
+        teacher.getAvailableTimeSlots().remove(timeSlot);
+        userRepository.save(teacher);
+        return teacher.getAvailableTimeSlots();
+    }
+
+    public boolean existByEmailCheck(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     public String changeUserRoles(String email, Set<String> stringRoles) {
@@ -89,44 +121,35 @@ public class UserService {
         return "Role changed for user " + email;
     }
 
-    public String saveNewAdmin(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
-                ERole.ROLE_USER.name(),
-                ERole.ROLE_ADMINISTRATOR.name()));
+    public User saveNewAdmin(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_ADMINISTRATOR, name, surname);
     }
 
-    public String saveNewTeacher(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
-                ERole.ROLE_USER.name(),
-                ERole.ROLE_TEACHER.name()));
+    public User saveNewTeacher(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_TEACHER, name, surname);
     }
 
-    public String saveNewUser(String email, String fullName, String phone, String password) {
-        return saveNewUserWithRoles(email, fullName, phone, password, Set.of(
-                ERole.ROLE_USER.name()));
+    public User saveNewUser(String email, String password, String name, String surname) {
+        return saveNewUserWithRole(email, password, ERole.ROLE_USER, name, surname);
     }
 
-    private String saveNewUserWithRoles(String email, String fullName, String phone, String password, Set<String> roles) {
+    private User saveNewUserWithRole(String email, String password, ERole role, String name, String surname) {
         User newUser = new User();
-        newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());
-        newUser.setPhone(phone);
+        newUser.setName(name);
+        newUser.setSurname(surname);
 
-        Set<Role> userRoles = new HashSet<>();
-        for (String role : roles) {
-            Role userRole = roleRepository.findByName(ERole.valueOf(role))
-                    .orElseThrow(() -> new RuntimeException("Role not found"));
-            userRoles.add(userRole);
-        }
-        newUser.setRoles(userRoles);
+        Role userRole = roleRepository.findByName(role)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        newUser.setRoles(Set.of(userRole));
 
         newUser.setPassword(encoder.encode(password));
         userRepository.save(newUser);
 
-        saveOperation("Admin", "Created new user with name '" + fullName + "' and email " + email);
+        saveOperation("Admin", "Created new user with email " + email);
 
-        return "User " + fullName + " created";
+        return newUser;
     }
 
     private void saveOperation(String userAccount, String description) {

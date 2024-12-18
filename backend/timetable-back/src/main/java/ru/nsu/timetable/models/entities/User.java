@@ -12,8 +12,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -21,7 +23,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,8 +34,7 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    // Связь ManyToMany с сущностью Role
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -45,12 +45,37 @@ public class User {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "full_name", unique = true)
-    private String fullName;
-
     @NotBlank
     @ToString.Exclude
     @JsonIgnore
     @Column(name = "password")
     private String password;
+
+    private String surname;
+
+    private String name;
+
+    private String patronymic;
+
+    private Date birthday;
+
+    private String about;
+
+    private String photoUrl;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "group_id", unique = true)
+    private Group group;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<TimeSlot> availableTimeSlots = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<Subject> subjects = new ArrayList<>();
 }

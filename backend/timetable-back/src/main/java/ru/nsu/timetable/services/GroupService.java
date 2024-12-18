@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.GroupDTO;
+import ru.nsu.timetable.models.dto.GroupInputDTO;
 import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.mappers.GroupMapper;
 import ru.nsu.timetable.repositories.GroupRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,7 @@ public class GroupService {
         return groupRepository
                 .findAll()
                 .stream()
+                .sorted(Comparator.comparingLong(Group::getId))
                 .map(groupMapper::toGroupDTO)
                 .toList();
     }
@@ -29,8 +32,8 @@ public class GroupService {
         return groupMapper.toGroupDTO(getGroup(id));
     }
 
-    public GroupDTO saveGroup(GroupDTO groupDTO) {
-        Group group = groupMapper.toGroup(groupDTO);
+    public GroupDTO saveGroup(GroupInputDTO groupInputDTO) {
+        Group group = groupMapper.toGroup(groupInputDTO);
         return groupMapper.toGroupDTO(groupRepository.save(group));
     }
 
@@ -42,7 +45,16 @@ public class GroupService {
         }
     }
 
-    private Group getGroup(Long id) {
+    public GroupDTO updateGroup(Long id, GroupInputDTO groupInputDTO) {
+        Group group = getGroup(id);
+        group.setNumber(groupInputDTO.number());
+        group.setCourse(groupInputDTO.course());
+        group.setDepartment(groupInputDTO.department());
+        group.setCapacity(groupInputDTO.capacity());
+        return groupMapper.toGroupDTO(groupRepository.save(group));
+    }
+
+    public Group getGroup(Long id) {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isEmpty()) {
             throw new ResourceNotFoundException("Group with id " + id + " not found");

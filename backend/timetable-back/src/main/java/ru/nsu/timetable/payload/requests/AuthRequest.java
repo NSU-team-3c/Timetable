@@ -16,11 +16,11 @@ public class AuthRequest {
 
     @NotBlank
     @Email
-    @Schema(description = "Email", example = "admin@gmail.com")
+    @Schema(description = "Email", example = "admin@example.com")
     @NotNull(message = "Email is required")
     private String email;
 
-    @Schema(description = "Password", example = "test")
+    @Schema(description = "Password", example = "password")
     @NotBlank(message = "Password is required")
     @NotNull(message = "Password cannot be null")
     private String password;

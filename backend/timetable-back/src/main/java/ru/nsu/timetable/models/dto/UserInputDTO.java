@@ -2,10 +2,8 @@ package ru.nsu.timetable.models.dto;
 
 import java.util.Date;
 
-public record UserDTO(
-        String email,
+public record UserInputDTO(
         String phone,
-        String role,
         String surname,
         String name,
         String patronymic,

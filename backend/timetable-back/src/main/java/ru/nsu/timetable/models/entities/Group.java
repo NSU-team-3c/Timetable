@@ -1,13 +1,14 @@
 package ru.nsu.timetable.models.entities;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -18,12 +19,19 @@ public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
 
-    @OneToMany
-    private Set<Student> students = new HashSet<>();
+    @Column(name = "number", unique = true)
+    private String number;
 
-    public void addStudent(Student student) {
-        students.add(student);
-    }
+    private String course;
+
+    private String department;
+
+    private int capacity;
+
+    @ManyToMany(mappedBy = "groups")
+    private List<Subject> subjects = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "groups")
+    private List<Event> events;
 }

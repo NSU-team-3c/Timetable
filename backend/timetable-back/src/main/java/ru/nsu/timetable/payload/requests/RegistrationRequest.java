@@ -16,17 +16,11 @@ public class RegistrationRequest {
     @Schema(description = "Email", example = "admin@mail.ru")
     private String email;
 
-    @Schema(description = "Group number", example = "22214")
-    private String group;
-
-    @NotBlank
-    @Schema(description = "Full name", example = "Surname Name Patronymic")
-    private String fullName;
-
     @Schema(description = "Password", example = "12345")
     @NotBlank
     private String password;
 
-    @Schema(description = "Phone number", example = "00000000000")
-    private String phone;
+    private String name;
+
+    private String surname;
 }

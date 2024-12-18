@@ -1,6 +1,4 @@
 package ru.nsu.timetable.models.dto;
 
-import java.util.Set;
-
-public record GroupDTO(Long id, String name, Set<Long> studentIds) {
+public record GroupDTO(Long id, String number, String course, String department, Integer capacity) {
 }
