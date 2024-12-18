@@ -8,11 +8,11 @@ import java.io.*;
 public class PrologIntegrationService {
     public String generateTimetable(String inputRequirementsPath, String queryType) throws IOException, InterruptedException {
 
-        String prologExecutable = "./scryer-prolog";
+        String prologExecutable = "prolog/scryer-prolog";
         //String prologExecutableWin = "./scryer-prolog.exe";
-        String prologScript = "generation.pl";
-        String queryFile = "query.txt";
-        String outputFilePath = "timetable.xml";
+        String prologScript = "prolog/v2/generation2.pl";
+        String queryFile = "prolog/v2/query.txt";
+        String outputFilePath = "prolog/v2/timetable.xml";
         // writeQueryFile(queryType);
 
         try {
