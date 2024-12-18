@@ -73,11 +73,12 @@ public class XmlParserService {
             }
 
             Timetable timetable = new Timetable();
+            timetable.setId(1L);
             timetable.setEvents(events);
 
             System.out.println("Saving timetable with " + events.size() + " events to the database.");
 
-            //timetable = timetableRepository.save(timetable);
+            timetable = timetableRepository.save(timetable);
 
             return timetable;
         } catch (Exception e) {
@@ -90,69 +91,66 @@ public class XmlParserService {
     private List<Event> parseEvents(Element dayElement, int dayNumber) {
         List<Event> events = new ArrayList<>();
 
-        NodeList timeSlotNodes = dayElement.getElementsByTagName("timeSlot");
+        NodeList timeSlotNodes = dayElement.getElementsByTagName("timeSlots");
         for (int j = 0; j < timeSlotNodes.getLength(); j++) {
             Element timeSlotElement = (Element) timeSlotNodes.item(j);
 
-            Long id = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
+            Long originalId = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
 
-            String teacherId = timeSlotElement.getElementsByTagName("teacher").item(0).getAttributes().getNamedItem("id").getTextContent();
-            String subjectId = timeSlotElement.getElementsByTagName("subject").item(0).getAttributes().getNamedItem("id").getTextContent();
-            String roomId = timeSlotElement.getElementsByTagName("room").item(0).getAttributes().getNamedItem("id").getTextContent();
+            String groupId = getElementAttribute(timeSlotElement, "group", "id");
+            String subjectId = getElementAttribute(timeSlotElement, "subject", "id");
+            String teacherId = getElementAttribute(timeSlotElement, "teacher", "id");
+            String roomId = getElementAttribute(timeSlotElement, "room", "id");
+
             System.out.println("Processing time slot: " +
-                    "Teacher ID = " + teacherId +
+                    "Group ID = " + groupId +
                     ", Subject ID = " + subjectId +
+                    ", Teacher ID = " + teacherId +
                     ", Room ID = " + roomId);
 
-            if (teacherId.isEmpty() || subjectId.isEmpty() || roomId.isEmpty()) {
-                System.err.println("Empty field detected: Teacher ID = " + teacherId + ", Subject ID = " + subjectId + ", Room ID = " + roomId);
+            if (groupId.isEmpty() || subjectId.isEmpty() || teacherId.isEmpty() || roomId.isEmpty()) {
+                System.err.println("Empty field detected: Group ID = " + groupId + ", Subject ID = " + subjectId + ", Teacher ID = " + teacherId + ", Room ID = " + roomId);
                 continue;
             }
-            NodeList groupNodes = timeSlotElement.getElementsByTagName("group");
+
             List<Group> groups = new ArrayList<>();
-            for (int k = 0; k < groupNodes.getLength(); k++) {
-                Element groupElement = (Element) groupNodes.item(k);
-                String groupId = groupElement.getAttribute("id");
+            Group group = groupRepository.findById(Long.parseLong(groupId))
+                    .orElseThrow(() -> new RuntimeException("Group not found: " + groupId));
+            groups.add(group);
 
-                Long groupIdLong = Long.parseLong(groupId);
-
-                Group group = groupRepository.findById(groupIdLong)
-                        .orElseThrow(() -> new RuntimeException("Group not found: " + groupId));
-                groups.add(group);
-            }
-
-            Date[] startEndTimes = calculateTimes(dayNumber, id.intValue());
-
-            if (teacherId == null || teacherId.trim().isEmpty()) {
-                throw new RuntimeException("Teacher ID is empty in XML");
-            }
-            if (subjectId == null || subjectId.trim().isEmpty()) {
-                throw new RuntimeException("Subject ID is empty in XML");
-            }
-            if (roomId == null || roomId.trim().isEmpty()) {
-                throw new RuntimeException("Room ID is empty in XML");
-            }
-
-            User teacher = userRepository.findById(parseLongSafe(teacherId))
-                    .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
-            Subject subject = subjectRepository.findById(parseLongSafe(subjectId))
+            Subject subject = subjectRepository.findById(Long.parseLong(subjectId))
                     .orElseThrow(() -> new RuntimeException("Subject not found: " + subjectId));
-            Room room = roomRepository.findById(parseLongSafe(roomId))
+            User teacher = userRepository.findById(Long.parseLong(teacherId))
+                    .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
+            Room room = roomRepository.findById(Long.parseLong(roomId))
                     .orElseThrow(() -> new RuntimeException("Room not found: " + roomId));
 
+            Date[] startEndTimes = calculateTimes(dayNumber, originalId.intValue());
+
+            Long eventId = Long.parseLong(dayNumber + "" + originalId);
+
             Event event = new Event();
-            event.setId(id);
+            event.setId(eventId);
             event.setStartTime(startEndTimes[0]);
             event.setEndTime(startEndTimes[1]);
-            event.setTeacher(teacher);
-            event.setSubject(subject);
-            event.setRoom(room);
             event.setGroups(groups);
+            event.setSubject(subject);
+            event.setTeacher(teacher);
+            event.setRoom(room);
 
             events.add(event);
         }
 
         return eventRepository.saveAll(events);
+    }
+
+    private String getElementAttribute(Element parent, String tagName, String attributeName) {
+        NodeList nodeList = parent.getElementsByTagName(tagName);
+        if (nodeList.getLength() > 0) {
+            Element element = (Element) nodeList.item(0);
+            return element.getAttribute(attributeName);
+        }
+        return "";
     }
 
     private Long parseLongSafe(String str) {
@@ -197,3 +195,4 @@ public class XmlParserService {
         return (list.getLength() > 0) ? list.item(0).getTextContent() : "";
     }
 }
+
