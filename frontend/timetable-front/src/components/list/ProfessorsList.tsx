@@ -74,7 +74,6 @@ const ProfessorList: React.FC = () => {
               <TableCell><strong>Имя</strong></TableCell>
               <TableCell><strong>Фамилия</strong></TableCell>
               <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Роль</strong></TableCell>
               <TableCell><strong>Действия</strong></TableCell>
             </TableRow>
           </TableHead>

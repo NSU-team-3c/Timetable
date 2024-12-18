@@ -10,7 +10,7 @@ import { AppState, dispatch } from '../../store/Store';
 
 interface Auditory {
   id: number;
-  name: string;
+  number: string;
   type: string;
   capacity: number;
 }
@@ -26,12 +26,12 @@ const ClassroomList: React.FC = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: editingAuditory?.name || '',
+      number: editingAuditory?.number || '',
       type: editingAuditory?.type || '',
       capacity: editingAuditory?.capacity || 0,
     },
     validationSchema: yup.object({
-      name: yup.string().required('Номер аудитории обязателен'),
+      number: yup.string().required('Номер аудитории обязателен'),
       type: yup.string().required('Здание обязательно'),
       capacity: yup.number().required('Вместимость обязательна').min(1, 'Вместимость должна быть больше 0'),
     }),
@@ -84,7 +84,7 @@ const ClassroomList: React.FC = () => {
           <TableBody>
             {auditories.map((auditory) => (
               <TableRow key={auditory.id}>
-                <TableCell>{auditory.name}</TableCell>
+                <TableCell>{auditory.number}</TableCell>
                 <TableCell>{auditory.type}</TableCell>
                 <TableCell>{auditory.capacity}</TableCell>
                 <TableCell>
@@ -111,9 +111,9 @@ const ClassroomList: React.FC = () => {
               fullWidth
               margin="normal"
               variant="outlined"
-              {...formik.getFieldProps('name')}
-              error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
+              {...formik.getFieldProps('number')}
+              error={formik.touched.number && Boolean(formik.errors.number)}
+              helperText={formik.touched.number && formik.errors.number}
             />
             <FormControl fullWidth margin="normal" error={formik.touched.type && Boolean(formik.errors.type)}>
               <InputLabel>Тип аудитории</InputLabel>

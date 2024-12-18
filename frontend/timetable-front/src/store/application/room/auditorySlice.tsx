@@ -4,7 +4,7 @@ import axiosInstance from '../../../utils/axios';
 
 interface Auditory {
   id: number;
-  name: string;
+  number: string;
   type: string;
   capacity: number;
 }
