@@ -4,51 +4,43 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { mockEvents } from '../../_mockApis/events'; 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { AppState, dispatch } from '../../store/Store';
+import { fetchEvents } from '../../store/application/table/eventSlice';
 
 const localizer = momentLocalizer(moment);
 
 interface MyEvent {
   id:  string | number;
-  title: string;
-  start: Date;
-  end: Date;
-  professor: string;
-  subject: string;
-  recurrenceInterval?: number;  
+  startTime: Date;
+  endTime: Date;
+  teacherName: string;
+  subjectName: string;
+  roomName: string;
 }
 
 const Table: React.FC = () => {
-  const [events, setEvents] = useState<MyEvent[]>([]);
+  const {events} = useSelector((state: AppState) => state.events)
+  //const [events, setEvents] = useState<MyEvent[]>([]);
   const [open, setOpen] = useState(false); 
   const [currentEvent, setCurrentEvent] = useState<MyEvent | null>(null);
   
   const generateRecurringEvents = (event: MyEvent) => {
     const recurringEvents: MyEvent[] = [];
-    const startDate = moment(event.start); 
-    const endDate = moment(event.end);     
-
-
-    if (event.recurrenceInterval === 0) {
-      recurringEvents.push({
-        ...event,
-        id: `${event.id}-0`,
-        start: startDate.toDate(),
-        end: endDate.toDate(),
-      });
-      return recurringEvents; 
-    }
+    const startDate = moment(event.startTime); 
+    const endDate = moment(event.endTime);     
   
     const repeatCount = 12; 
   
     for (let i = 0; i < repeatCount; i++) {
-      const newStartDate = startDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
-      const newEndDate = endDate.clone().add(i * (event.recurrenceInterval || 1), 'weeks');
+      const newStartDate = startDate.clone().add(i, 'weeks');
+      const newEndDate = endDate.clone().add(i, 'weeks');
       
       recurringEvents.push({
         ...event,
         id: `${event.id}-${i}`,
-        start: newStartDate.toDate(),
-        end: newEndDate.toDate(),
+        startTime: newStartDate.toDate(),
+        endTime: newEndDate.toDate(),
       });
     }
   
@@ -57,15 +49,15 @@ const Table: React.FC = () => {
   
 
   useEffect(() => {
+    dispatch(fetchEvents());
     const allEvents: MyEvent[] = [];
 
-    mockEvents.forEach((event) => {
+    events.forEach((event) => {
       const recurringEvents = generateRecurringEvents(event);
       allEvents.push(...recurringEvents); 
     });
 
-    setEvents(allEvents); 
-  }, []);
+  }, [dispatch]);
 
   const eventPropGetter = (event: MyEvent) => {
     return {
@@ -92,8 +84,8 @@ const Table: React.FC = () => {
       <Calendar
         localizer={localizer}
         events={events}
-        startAccessor="start"
-        endAccessor="end"
+        startAccessor="startTime"
+        endAccessor="endTime"
         style={{ height: 700, fontSize: 20}}
         eventPropGetter={eventPropGetter} 
         onSelectEvent={handlerEvent}
@@ -109,16 +101,19 @@ const Table: React.FC = () => {
         <DialogTitle>Событие</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
-            Предмет: {currentEvent ? currentEvent.subject : ''}
+            Предмет: {currentEvent ? currentEvent.subjectName : ''}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Преподаватель: {currentEvent ? currentEvent.professor : ''}
+            Преподаватель: {currentEvent ? currentEvent.teacherName : ''}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Начало: {currentEvent ? moment(currentEvent.start).format('HH:mm') : ''}
+            Преподаватель: {currentEvent ? currentEvent.roomName : ''}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Конец: {currentEvent ? moment(currentEvent.end).format('HH:mm') : ''}
+            Начало: {currentEvent ? moment(currentEvent.startTime).format('HH:mm') : ''}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Конец: {currentEvent ? moment(currentEvent.endTime).format('HH:mm') : ''}
           </Typography>
         </DialogContent>
         <DialogActions>

@@ -1,67 +1,96 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography} from '@mui/material';
+import { Box, Button, Typography} from '@mui/material';
 import { Link } from 'react-router-dom'; 
-import { mockProfileData } from '../../_mockApis/profile';
-import { ProfileData } from '../../types/user/user';
 import Spinner from '../../views/spinner/Spinner';
+import { AppState, dispatch, useSelector } from '../../store/Store';
+import { fetchProfile } from '../../store/profile/profileSlice';
+import axiosInstance from '../../utils/axios';
 
 
 const Profile: React.FC = () => {
   const [photoView, setPhotoView] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
-
-
+  const {profile} = useSelector((state: AppState) => state.profile);
+  
   useEffect(() => {
-    setTimeout(() => {
-      setProfileData(mockProfileData);
+    dispatch(fetchProfile())
 
-      if (mockProfileData.photo) {
-        setPhotoView(URL.createObjectURL(mockProfileData.photo));
-      }
-    }, 1000);
-  }, []);
+    if (profile?.photo) {
+      setPhotoView(URL.createObjectURL(profile.photo));
+    }
+
+  }, [dispatch]);
+
+  const sendRequest = async () => {
+    await axiosInstance.get('/api/v1/timetables/generate');
+  }
 
   const groupView = () => {
     return (
         <Typography variant="body1" gutterBottom>
-            Группа: {profileData?.group}
+            Группа: {profile?.group}
         </Typography>
     );
   }
 
   const additionLinkView = () => {
-    return (
-      <Box>
-        <Link to="/admin/add-professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-          <Typography color="primary">Добавление преподавателей {'>'} </Typography>
-        </Link>
 
-        <Link to="/admin/add-subject" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-          <Typography color="primary">Добавление предметов {'>'} </Typography>
-        </Link>
+    const ans = (<Box/>);
 
-        <Link to="/admin/add-classroom" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-          <Typography color="primary">Добавление комнат {'>'} </Typography>
+    const role = profile?.role.split(', ');
+
+    console.log(role);
+
+    if (role?.includes('administrator', 0)) {
+      console.log(0);
+      return (
+        <Box>
+          <Link to="/admin/add-professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Добавление преподавателей {'>'} </Typography>
+          </Link>
+
+          <Link to="/admin/add-subject" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Добавление предметов {'>'} </Typography>
+          </Link>
+
+          <Link to="/admin/add-classroom" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Добавление комнат {'>'} </Typography>
+          </Link>
+
+          <Link to="/admin/add-group" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Добавление групп {'>'} </Typography>
+          </Link>
+
+          <Box>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={sendRequest}
+            >
+              Сгенерировать расписание
+            </Button>
+          </Box>
+        </Box>
+      )
+    }
+
+    if (role?.includes('teacher')) {
+      return (
+        <Link to="/profile/professor/availability" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+            <Typography color="primary">Указать предпочтительное время работы {'>'} </Typography>
         </Link>
-        
-        <Link to="/admin/add-group" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-          <Typography color="primary">Добавление групп {'>'} </Typography>
-        </Link>
-      </Box>      
-    )
+      )
+    }
   }
 
-  if (!profileData) {
+  if (!profile) {
     return <Spinner />;
   }
 
+  
+
   return (
     <Box sx={{ width: 800, margin: '0 auto', padding: 2, position: 'relative' }}>
-
-        <Typography variant="body1" gutterBottom>
-            {profileData ? (profileData.role ==='professor' ? "Статус преподавателя подтвержден" : '' ) : ''}
-        </Typography>  
-
 
         <Box sx={{ position: 'absolute', top: 0, right: 0, zIndex: 1, }}>
             {photoView ? (
@@ -79,33 +108,35 @@ const Profile: React.FC = () => {
 
         <Box display="flex" flexDirection="column" gap={2} padding={"10%"}>
             <Typography variant="body1" gutterBottom>
-                Фамилия: {profileData ? profileData.surname : ''}
+                Фамилия: {profile ? profile.surname : ''}
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Имя: {profileData ? profileData.name : ''}
+                Имя: {profile ? profile.name : ''}
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Отчество: {profileData ? profileData.patronymic : ''}
+                Отчество: {profile ? profile.patronymic : ''}
             </Typography>
 
-            {profileData ? (profileData.role ==='student' ? groupView() : '' ) : ''}
+            { profile ? (!(profile.role.split(', ').includes('student') || 
+              (profile.role.split(', ').includes('administrator'))) ? groupView() : '' ) : ''
+            }
 
             <Typography variant="body1" gutterBottom>
-                Дата рождения: {profileData ? profileData.birthday : ''}
-            </Typography>
-
-            <Typography variant="body1" gutterBottom>
-                email: {profileData ? profileData.email : ''}
-            </Typography>
-
-            <Typography variant="body1" gutterBottom>
-                Номер телефона: {profileData ? profileData.phone : ''}
+                Дата рождения: {profile ? profile.birthday : ''}
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                О себе: {profileData ? profileData.about : ''}
+                email: {profile ? profile.email : ''}
+            </Typography>
+
+            <Typography variant="body1" gutterBottom>
+                Номер телефона: {profile ? profile.phone : ''}
+            </Typography>
+
+            <Typography variant="body1" gutterBottom>
+                О себе: {profile ? profile.about : ''}
             </Typography>
 
 
@@ -117,7 +148,7 @@ const Profile: React.FC = () => {
             <Typography color="primary">Редактировать профиль {'>'}</Typography>
           </Link>
 
-          {profileData ? (profileData.role === 'adminUser' ? additionLinkView() : '' ) : ''}
+          {additionLinkView()}
 
         </Box>
     </Box>

@@ -1,33 +1,136 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText, Autocomplete, Chip, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, 
+  TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, 
+  DialogTitle, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText,
+  Autocomplete, Chip, List, ListItem, ListItemText } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { mockSubjects } from '../../_mockApis/subjects'; 
-import { mockAvailableGroups } from '../../_mockApis/groups';
+import { useSelector } from 'react-redux';
+import { AppState, dispatch } from '../../store/Store';
+import { createSubject, deleteSubject, fetchSubjects, updateSubject } from '../../store/application/subject/subjectSlice';
+import { Group } from './GroupList';
+import { fetchGroups } from '../../store/application/group/groupSlice';
+import { Professor } from './ProfessorsList';
+import { fetchProfessors } from '../../store/application/professor/professorSlice';
 
 interface Subject {
-  id: number;
-  name: string;
-  code: string;
-  description: string;
-  duration: number;
-  audienceType: string, 
-  groups: number[]
+  id: number,
+  name: string,
+  code: string,
+  description: string,
+  duration: number,
+  audienceType: string,
+  teacherIds: number[],
+  groupIds: number[]
 }
 
 const SubjectListPage: React.FC = () => {
-  const [subjects, setSubjects] = useState<Subject[]>(mockSubjects);
+  const { subjects } = useSelector((state: AppState) => state.subjects)
+  const { groups } = useSelector((state: AppState) => state.groups)
+  const { professors } = useSelector((state: AppState) => state.professors)
   const [open, setOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
-  const [availableGroups, setAvalilableGroups] = useState<number[]>([]);
 
   useEffect(() => {
-    setTimeout(() => {
-      setAvalilableGroups(mockAvailableGroups); 
-    }, 1000);
-  }, []);
+    dispatch(fetchSubjects()); 
+
+    dispatch(fetchGroups());
+
+    dispatch(fetchProfessors());
+
+  }, [dispatch]);
+  
+
+  const getGroups = (groupIds: number[] | undefined) => {
+    const ans: Group[] = [];
+
+    if (groupIds === undefined) {
+      return ans;
+    }
+
+    for (let index = 0; index < groups.length; index++) {
+
+      if (groupIds.includes(groups[index].id)) {
+        ans.push(groups[index])
+      }
+    }
+    
+    return ans;
+  }
+
+  const getProfessors = (professorIds: number[] | undefined) => {
+    const ans: Professor[] = [];
+
+    if (professorIds === undefined) {
+      return ans;
+    }
+
+    for (let index = 0; index < professors.length; index++) {
+
+      if (professorIds.includes(professors[index].id)) {
+        ans.push(professors[index])
+      }
+    }
+    
+    return ans;
+  }
+
+
+  const professorsToIds = (localprofessors : Professor[]) => {
+    const ans: number[] = [];
+
+    for (let index = 0; index < localprofessors.length; index++) {
+      ans.push(localprofessors[index].id)
+    }
+    
+    return ans;
+  }
+
+  const groupsToIds = (localgroups : Group[]) => {
+    const ans: number[] = [];
+
+    for (let index = 0; index < localgroups.length; index++) {
+      ans.push(localgroups[index].id)
+    }
+    
+    return ans;
+  }
+
+
+  const listForGroups = (ids: number[], groups: Group[]) => {
+    return (
+      <List>
+        {ids.map((id) => {
+          const group = groups.find((el) => el.id === id);
+  
+          return group ? (
+            <ListItem key={id} sx={{ padding: 0 }}>
+              <ListItemText primary={group.number} />
+            </ListItem>
+          ) : null;
+        })}
+      </List>
+    );
+  };
+
+  const listForProfessors = (ids: number[], professors: Professor[]) => {
+    return (
+      <List>
+        {ids.map((id) => {
+          const professor = professors.find((el) => el.id === id);
+          
+          return professor ? (
+            <ListItem key={id} sx={{ padding: 0 }}>
+              <ListItemText primary={professor.firstName.concat(' ').concat(professor.lastName)} />
+            </ListItem>
+          ) : null;
+        })}
+      </List>
+    );
+  };
+
 
   const formik = useFormik({
     initialValues: {
@@ -36,7 +139,8 @@ const SubjectListPage: React.FC = () => {
       description: editingSubject?.description || '',
       duration: editingSubject?.duration || 0,
       audienceType: editingSubject?.audienceType || 'common', 
-      groups: editingSubject?.groups || [],
+      groups: getGroups(editingSubject?.groupIds) || [],
+      professors: getProfessors(editingSubject?.teacherIds) || []
     },
     validationSchema: yup.object({
       name: yup.string().required('Название курса обязательно'),
@@ -45,16 +149,18 @@ const SubjectListPage: React.FC = () => {
       duration: yup.number().required('Продолжительность курса обязательна').min(1, 'Продолжительность должна быть больше 0'),
       audienceType: yup.string(),
       groups: yup.array().min(1, 'Необходимо выбрать хотя бы одну группу').required('Группа обязательна'), 
+      professors: yup.array().min(1, 'Необходимо выбрать хотя бы одного преподавателя').required('Преподаватель обязателен'), 
     }),
     onSubmit: (values) => {
+
       if (editingSubject) {
-        setSubjects(subjects.map(subject => subject.id === editingSubject.id ? { ...subject, ...values } : subject));
+        dispatch(updateSubject({ ...editingSubject, ...values }));  
       } else {
-        const newSubject: Subject = {
-          id: subjects[subjects.length - 1].id + 1, 
-          ...values,
-        };
-        setSubjects([...subjects, newSubject]);
+        dispatch(createSubject({
+          id: Date.now(), ...values,
+          groupIds: groupsToIds(values.groups),
+          teacherIds: professorsToIds(values.professors)
+        }));  
       }
       formik.resetForm();
       setEditingSubject(null);
@@ -63,7 +169,7 @@ const SubjectListPage: React.FC = () => {
   });
 
   const handleDelete = (id: number) => {
-    setSubjects(subjects.filter(subject => subject.id !== id));
+    dispatch(deleteSubject(id));  
   };
 
   const handleOpenDialog = (subject?: Subject) => {
@@ -104,6 +210,7 @@ const SubjectListPage: React.FC = () => {
               <TableCell><strong>Название курса</strong></TableCell>
               <TableCell><strong>Код курса</strong></TableCell>
               <TableCell><strong>Описание</strong></TableCell>
+              <TableCell><strong>Преподаватели</strong></TableCell>
               <TableCell><strong>Группы</strong></TableCell>
               <TableCell><strong>Тип аудитории</strong></TableCell>
               <TableCell><strong>Продолжительность (часы)</strong></TableCell>
@@ -116,7 +223,8 @@ const SubjectListPage: React.FC = () => {
                 <TableCell>{subject.name}</TableCell>
                 <TableCell>{subject.code}</TableCell>
                 <TableCell>{subject.description}</TableCell>
-                <TableCell>{list(subject.groups)}</TableCell>
+                <TableCell>{listForGroups(subject.groupIds, groups)}</TableCell>
+                <TableCell>{listForProfessors(subject.teacherIds, professors)}</TableCell>
                 <TableCell>{subject.audienceType}</TableCell>
                 <TableCell>{subject.duration}</TableCell>
                 <TableCell>
@@ -185,17 +293,67 @@ const SubjectListPage: React.FC = () => {
             <Autocomplete
                 multiple
                 id="groups"
-                options={availableGroups}
+                options={groups}
+                getOptionLabel={(option) => String(option.number)} 
                 value={formik.values.groups}
                 onChange={(_, newValue) => formik.setFieldValue('groups', newValue)}
                 renderInput={(params) => (
-                    <TextField
+                  <TextField
                     {...params}
                     label="Группы"
                     variant="outlined"
                     margin="normal"
                     error={formik.touched.groups && Boolean(formik.errors.groups)}
-                    helperText={formik.touched.groups && formik.errors.groups}
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip label={String(option.number)} 
+                      {...getTagProps({ index })} key={index} sx={{ margin: 0.5 }} /> 
+                  ))
+                }
+            />
+
+
+            <Autocomplete
+                multiple
+                id="professors"
+                options={professors}
+                getOptionLabel={(option) => option.firstName.concat(' ').concat(option.lastName)} 
+                value={formik.values.professors}
+                onChange={(_, newValue) => formik.setFieldValue('professors', newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Преподаватели"
+                    variant="outlined"
+                    margin="normal"
+                    error={formik.touched.professors && Boolean(formik.errors.professors)}
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip label={option.firstName.concat(' ').concat(option.lastName)} 
+                      {...getTagProps({ index })} key={index} sx={{ margin: 0.5 }} />
+                  ))
+                }
+            />
+
+
+            {/* <Autocomplete
+                multiple
+                id="professors"
+                options={availableProfessors}
+                value={formik.values.teacherIds}
+                onChange={(_, newValue) => formik.setFieldValue('professors', newValue)}
+                renderInput={(params) => (
+                    <TextField
+                    {...params}
+                    label="Преподаватели"
+                    variant="outlined"
+                    margin="normal"
+                    error={formik.touched.teacherIds && Boolean(formik.errors.teacherIds)}
+                    helperText={formik.touched.teacherIds && formik.errors.teacherIds}
                     />
                 )}
                 renderTags={(value, getTagProps) =>
@@ -203,7 +361,7 @@ const SubjectListPage: React.FC = () => {
                     <Chip label={option} {...getTagProps({ index })} key={index} sx={{ margin: 0.5 }} />
                     ))
                 }
-            />
+            /> */}
             
             <TextField
               label="Продолжительность (часы)"

@@ -81,7 +81,6 @@ const Router = [
       { path: '/admin/add-subject',     element: <AddSubject /> },
       { path: '/admin/add-classroom',   element: <AddClassroom /> },
       { path: '/admin/add-group',       element: <AddGroup /> },
-
     ],
   },
   {

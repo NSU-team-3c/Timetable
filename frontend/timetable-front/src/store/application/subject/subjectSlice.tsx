@@ -2,13 +2,14 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 interface Subject {
-    id: number;
-    name: string;
-    code: string;
-    description: string;
-    duration: number;
-    audienceType: string, 
-    groups: number[]
+    id: number,
+    name: string,
+    code: string,
+    description: string,
+    duration: number,
+    audienceType: string,
+    teacherIds: number[],
+    groupIds: number[]
   }
 
 interface subjectState {

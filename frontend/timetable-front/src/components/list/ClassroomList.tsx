@@ -4,9 +4,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { fetchAuditories, createAuditory, updateAuditory, deleteAuditory } from '../../store/application/room/auditorySlice'; 
-import { AppState, AppDispatch } from '../../store/Store';  
+import { AppState, dispatch } from '../../store/Store';  
 
 interface Auditory {
   id: number;
@@ -16,7 +16,6 @@ interface Auditory {
 }
 
 const ClassroomList: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>(); 
   const { auditories, loading, error } = useSelector((state: AppState) => state.rooms);  
   const [open, setOpen] = React.useState(false);
   const [editingAuditory, setEditingAuditory] = React.useState<Auditory | null>(null);

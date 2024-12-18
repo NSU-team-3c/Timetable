@@ -4,29 +4,29 @@ import * as yup from 'yup';
 import { Button, TextField, Box, FormControl, FormHelperText } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { Link, useNavigate } from 'react-router-dom'; 
-import { mockProfileData } from '../../../_mockApis/profile';
 import { ProfileData } from '../../../types/user/user';
+import { AppState, dispatch, useSelector } from '../../../store/Store';
+import { fetchProfile, updateProfile } from '../../../store/profile/profileSlice';
 
 
 const ProfileForm: React.FC = () => {
+  const {profile} = useSelector((state: AppState) => state.profile);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);    
   const navigate = useNavigate();
 
 
   useEffect(() => {
-    setTimeout(() => {
-      setProfileData(mockProfileData);
+    dispatch(fetchProfile())
 
-      if (mockProfileData.photo) {
-        setPhotoPreview(URL.createObjectURL(mockProfileData.photo));
-      }
-    }, 1000);
-  }, []);
+    if (profile?.photo) {
+      setPhotoPreview(URL.createObjectURL(profile.photo));
+    }
+
+  }, [dispatch]);
 
   const formik = useFormik<ProfileData>({
     enableReinitialize: true,
-    initialValues: profileData || {
+    initialValues: profile || {
       surname: '',
       name: '',
       patronymic: '',
@@ -36,17 +36,18 @@ const ProfileForm: React.FC = () => {
       about: '',
       photo: null, 
       role: '',
-      group: 0,
+      group: null,
     },
 
     validationSchema: yup.object({
       name: yup.string().required('Имя обязательно'),
       surname: yup.string().required('Фамилия обязательна'),
-      patronymic: yup.string(),
-      birthday: yup.date().required('Дата рождения обязательна'),
+      patronymic: yup.string().nullable(),
+      birthday: yup.date().nullable(),
       email: yup.string().email('Неверный формат почты').required('Почта обязательна'),
-      phone: yup.string(),
-      about: yup.string(),
+      phone: yup.string().nullable(),
+      about: yup.string().nullable(),
+      group: yup.number().nullable(),
       photo: yup
         .mixed()
         .nullable()
@@ -68,7 +69,7 @@ const ProfileForm: React.FC = () => {
     }),
 
     onSubmit: async (values) => {
-      console.log('Форма отправлена', values);
+      dispatch(updateProfile(values));
       navigate('/profile', { replace: true });
     },
   });
@@ -181,15 +182,21 @@ const ProfileForm: React.FC = () => {
             placeholder="ДД.ММ.ГГГГ"
           />
 
-          <TextField
-            label="Электронная почта"
-            fullWidth
-            variant="outlined"
-            margin="normal"
-            {...formik.getFieldProps('email')}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-          />
+
+          { profile ? (!(profile.role.split(', ').includes('student') || 
+            (profile.role.split(', ').includes('administrator'))) ? 
+              <TextField
+                label="Группа"
+                fullWidth
+                variant="outlined"
+                margin="normal"
+                {...formik.getFieldProps('group')}
+                error={formik.touched.group && Boolean(formik.errors.group)}
+                helperText={formik.touched.group && formik.errors.group}
+              />
+            : '' ) : ''
+          }
+          
 
           <TextField
             label="Номер телефона"

@@ -1,12 +1,12 @@
 export interface ProfileData {
   surname: string;
   name: string;
-  patronymic: string;
-  birthday: string;
+  patronymic: string | null;
+  birthday: string | null;
   email: string;
-  phone: string;
-  about: string;
-  photo: File | null;
+  phone: string | null;
+  about: string | null;
+  photo: File   | null;
   group: number | null;
   role: string;
 }

@@ -5,12 +5,11 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { mockProfessors } from '../../_mockApis/professorList';  
 
-interface Professor {
+export interface Professor {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
 }
 
 const ProfessorList: React.FC = () => {
@@ -22,14 +21,12 @@ const ProfessorList: React.FC = () => {
       firstName: '',
       lastName: '',
       email: '',
-      role: 'professor',
       password: '',
     },
     validationSchema: yup.object({
       firstName: yup.string().required('Имя обязательно'),
       lastName: yup.string().required('Фамилия обязательна'),
       email: yup.string().email('Неверный формат почты').required('Почта обязательна'),
-      role: yup.string().oneOf(['professor', 'admin'], 'Роль должна быть преподавателем или администратором').required('Выберите роль'),
       password: yup.string().min(6, 'Пароль должен собрать не менее 6 символов').required('Пароль обязателен'),
     }),
     onSubmit: (values) => {
@@ -86,7 +83,6 @@ const ProfessorList: React.FC = () => {
                 <TableCell>{professor.firstName}</TableCell>
                 <TableCell>{professor.lastName}</TableCell>
                 <TableCell>{professor.email}</TableCell>
-                <TableCell>{professor.role}</TableCell>
                 <TableCell>
                   <IconButton color="secondary" onClick={() => handleDelete(professor.id)}>
                     <DeleteIcon />
@@ -140,22 +136,6 @@ const ProfessorList: React.FC = () => {
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
             />
-            <TextField
-              label="Роль"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              select
-              {...formik.getFieldProps('role')}
-              error={formik.touched.role && Boolean(formik.errors.role)}
-              helperText={formik.touched.role && formik.errors.role}
-              SelectProps={{
-                native: true,
-              }}
-            >
-              <option value="professor">Преподаватель</option>
-              <option value="adminUser">Администратор</option>
-            </TextField>
             <DialogActions>
               <Button onClick={handleCloseDialog} color="secondary">
                 Отмена

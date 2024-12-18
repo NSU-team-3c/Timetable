@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axios';
 
 interface Group {
   id: number;
@@ -22,22 +23,22 @@ const initialState: GroupState = {
 };
 
 export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
-  const response = await axios.get('/api/groups');
+  const response = await axiosInstance.get('/api/v1/groups');
   return response.data;
 });
 
 export const createGroup = createAsyncThunk('groups/createGroup', async (group: Group) => {
-  const response = await axios.post('/api/groups', group);
+  const response = await axiosInstance.post('/api/v1/groups', group);
   return response.data;
 });
 
 export const updateGroup = createAsyncThunk('groups/updateGroup', async (group: Group) => {
-  const response = await axios.put(`/api/groups/${group.id}`, group);
+  const response = await axiosInstance.put(`/api/v1/groups/${group.id}`, group);
   return response.data;
 });
 
 export const deleteGroup = createAsyncThunk('groups/deleteGroup', async (id: number) => {
-  await axios.delete(`/api/groups/${id}`);
+  await axiosInstance.delete(`/api/v1/groups/${id}`);
   return id; 
 });
 

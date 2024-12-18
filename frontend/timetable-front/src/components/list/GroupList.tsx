@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { mockGroups } from '../../_mockApis/groupList'; 
+import { AppState, dispatch, useSelector } from '../../store/Store';
+import { createGroup, deleteGroup, fetchGroups, updateGroup } from '../../store/application/group/groupSlice';
 
-interface Group {
+export interface Group {
   id: number;
   number: number | string;
   course: number;
@@ -15,9 +16,14 @@ interface Group {
 }
 
 const GroupList: React.FC = () => {
-  const [groups, setGroups] = useState<Group[]>(mockGroups);
+  const { groups, loading, error } = useSelector((state: AppState) => state.groups);  
+
   const [open, setOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+
+  useEffect(() => {
+    dispatch(fetchGroups()); 
+  }, [dispatch]);
 
   const formik = useFormik({
     initialValues: {
@@ -32,23 +38,21 @@ const GroupList: React.FC = () => {
       department: yup.string().required('Отделение обязательно'),
     }),
     onSubmit: (values) => {
+
       if (editingGroup) {
-        setGroups(groups.map(group => group.id === editingGroup.id ? { ...group, ...values } : group));
+        dispatch(updateGroup({ ...editingGroup, ...values }));  
       } else {
-        const newGroup: Group = {
-          id: groups[groups.length - 1].id + 1, 
-          ...values,
-        };
-        setGroups([...groups, newGroup]);
+        dispatch(createGroup({ id: Date.now(), ...values }));  
       }
       formik.resetForm();
       setEditingGroup(null);
       setOpen(false);
     },
+    enableReinitialize: true,  
   });
 
   const handleDelete = (id: number) => {
-    setGroups(groups.filter(group => group.id !== id));
+    dispatch(deleteGroup(id));  
   };
 
   const handleOpenDialog = (group?: Group) => {

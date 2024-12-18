@@ -11,9 +11,8 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    //console.log(config);
 
-    const token = localStorage.getItem('authToken');
+    const token = sessionStorage.getItem('authToken');
     
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -37,7 +36,7 @@ axiosInstance.interceptors.response.use(
       const status = error.response.status;
       switch (status) {
         case 401:
-          localStorage.removeItem('authToken');
+          sessionStorage.removeItem('authToken');
           console.log('Unauthorized, please login again.');
           break;
         case 403:

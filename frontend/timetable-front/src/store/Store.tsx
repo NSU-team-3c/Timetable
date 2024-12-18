@@ -2,10 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import CustomizerReducer from './customizer/CustomizerSlice';
 import { combineReducers } from 'redux';
 import  ProfileReducer  from './profile/profileSlice';
-import ProfessorReducer from './profile/professorSlice'
-import AuditoryReducer from './application/room/auditorySlice'
+import ProfessorsReducer from './application/professor/professorSlice'
+import AuditoryReducer from './application/room/auditorySlice';
 import AuthReducer from './auth/authSlice';
-import AvailabilityReducer from './professor/avaliabilitySlice'
+import AvailabilityReducer from './professor/avaliabilitySlice';
+import GroupReducer from './application/group/groupSlice';
+import EventReducer from './application/table/eventSlice';
+import SubjectReducer from './application/subject/subjectSlice'
+
 import {
   useDispatch as useAppDispatch,
   useSelector as useAppSelector,
@@ -17,9 +21,12 @@ export const store = configureStore({
     customizer: CustomizerReducer,
     auth: AuthReducer,
     profile: ProfileReducer,
-    professor: ProfessorReducer,
+    professors: ProfessorsReducer,
     rooms: AuditoryReducer,
     availability: AvailabilityReducer,
+    groups: GroupReducer,
+    events: EventReducer,
+    subjects: SubjectReducer,
   },
 });
 
@@ -27,9 +34,12 @@ const rootReducer = combineReducers({
   customizer: CustomizerReducer,
   auth: AuthReducer,
   profile: ProfileReducer,
-  professor: ProfessorReducer,
+  professors: ProfessorsReducer,
   rooms: AuditoryReducer,
   availability: AvailabilityReducer,
+  groups: GroupReducer,
+  events: EventReducer,
+  subjects: SubjectReducer,
 });
 
 export type AppState = ReturnType<typeof rootReducer>;

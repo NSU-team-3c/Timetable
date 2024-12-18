@@ -1,14 +1,15 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../../utils/axios';
 
 interface MyEvent {
   id: string | number;
   title: string;
-  start: Date;
-  end: Date;
-  professor: string;
-  subject: string;
-  recurrenceInterval?: number;  
+  startTime: Date;
+  endTime: Date;
+  teacherName: string;
+  subjectName: string;
+  roomName: string
+  //recurrenceInterval?: number;  
 }
 
 interface EventState {
@@ -24,7 +25,7 @@ const initialState: EventState = {
 };
 
 export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
-  const response = await axios.get('/api/events');
+  const response = await axiosInstance.get('/api/v1/timetables');
   return response.data;
 });
 

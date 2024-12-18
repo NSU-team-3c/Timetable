@@ -13,7 +13,7 @@ const localizer = dateFnsLocalizer({
   parse,
   startOfWeek,
   getDay,
-  locales: { 'ru': ru }, // Локализация на русском
+  locales: { 'ru': ru }, 
 });
 
 const fixedWeekStart = new Date(2024, 9, 20, 9, 0); 
