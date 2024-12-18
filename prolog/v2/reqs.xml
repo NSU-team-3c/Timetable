@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <requirements>
 	<global slotsperweek="42" slotsperday="7"/>
-	<group id="22215" amount="12">
+	<group id="22215" amount="13">
 		<!-- <req subject="ks" teacher="Пермяков Р.А." amount="2"/>
         <req subject="mobDev" teacher="Букшев И.Е." amount="2"/>
         <req subject="ml" teacher="Неделько В.М." amount="2"/>
@@ -10,22 +10,26 @@
         <req subject="prog" teacher="Мигинский Д.С." amount="2"/>
 		<req subject="math" teacher="Васкевич В.Л." amount="2"/>
 	</group>
-	<group id="22214" amount="13">
-		<!-- <req subject="ks" teacher="Пермяков Р.А." amount="2"/>
+	<!-- <group id="22214" amount="13">
+		<req subject="ks" teacher="Пермяков Р.А." amount="2"/>
         <req subject="mobDev" teacher="Букшев И.Е." amount="2"/>
         <req subject="ml" teacher="Неделько В.М." amount="2"/>
-        <req subject="dpas" teacher="Куталев А. В." amount="2"/> -->
-        <!-- <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
+        <req subject="dpas" teacher="Куталев А. В." amount="2"/>
+        <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
         <req subject="prog" teacher="Мигинский Д.С." amount="2"/>
-		<req subject="math" teacher="Васкевич В.Л." amount="2"/> -->
-	</group>
-	<room id="3107" name="Lectureroom" capacity="13">
+		<req subject="math" teacher="Васкевич В.Л." amount="2"/>
+	</group> -->
+	<room id="3107" capacity="13">
 		<allocate day="1" start="1" end="7"/>
 		<allocate day="2" start="1" end="7"/>
+		<allocate day="3" start="1" end="7"/>
+		<allocate day="4" start="1" end="7"/>
 	</room>
-	<room id="2128" name="Lectureroom" capacity="13">
+	<room id="2128" capacity="13">
 		<allocate day="1" start="1" end="7"/>
 		<allocate day="2" start="1" end="7"/>
+		<allocate day="3" start="1" end="7"/>
+		<allocate day="4" start="1" end="7"/>
 	</room>
 	<availableTeacherSlots teacher="Иртегов Д.В.">
 		<slot day="1" start="1" end="7"/>
@@ -34,9 +38,13 @@
 	<availableTeacherSlots teacher="Мигинский Д.С.">
 		<slot day="1" start="1" end="7"/>
 		<slot day="2" start="1" end="7"/>
+		<slot day="3" start="1" end="7"/>
+		<slot day="4" start="1" end="7"/>
 	</availableTeacherSlots>
 	<availableTeacherSlots teacher="Васкевич В.Л.">
 		<slot day="1" start="1" end="7"/>
 		<slot day="2" start="1" end="7"/>
+		<slot day="3" start="1" end="7"/>
+		<slot day="4" start="1" end="7"/>
 	</availableTeacherSlots>
 </requirements>

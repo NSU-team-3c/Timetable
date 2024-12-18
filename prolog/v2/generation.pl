@@ -292,10 +292,9 @@ print_day(Events) :-
 
 print_event(Events) :-
 	setof(event(Group, Lesson, _, Teacher, Day, Slot), Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
-	classroom(RoomID, RoomName),
 	format("~s:~n", [RoomID]),
-	% quicksort_events_by_time(Result, Sorted),
-	print(Result).
+	quicksort_events_by_time(Result, Sorted),
+	print(Sorted).
 
 
 quicksort_events_by_time([], []).
@@ -306,15 +305,15 @@ quicksort_events_by_time([X | Tail], Sorted):-
     concatenate(SortedSmall, [X| SortedBig], Sorted).
 
 split2(X, [], [], []).
-split2(event(_, _, _, _, Day1, Slot1), [event(_, _, _, _, Day2, Slot2)| Tail], [event(_, _, _, _, Day2, Slot2) | Small], Big):-
-    (Day1 > Day2;
+split2(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), [event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2)| Tail], [event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2) | Small], Big):-
+    (Day1 #> Day2;
         (
             Day1 == Day2,
-            Slot1 > Slot2
+            Slot1 #> Slot2
         )
     ),
     !,
-    split2(event(_, _, _, _, Day1, Slot1), Tail, Small, Big).
+    split2(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), Tail, Small, Big).
 split2(X, [Y| Tail], Small, [Y | Big]):-
     split2(X, Tail, Small, Big).
 
@@ -414,7 +413,7 @@ process_room(Node) -->
 
 process_teacher(Node) -->
         { attrs_values(Node, [teacher], [Teacher]) },
-        process_nodes(allocate, Node, teacher_timeslot_allocation(Teacher, Node)).
+        process_nodes(slot, Node, teacher_timeslot_allocation(Teacher)).
 
 teacher_timeslot_allocation(Teacher, Node) -->
         { attrs_values(Node, [day, start, end], [Day, Start, End]) },
@@ -489,4 +488,4 @@ timetable(FileName) :-
         ).
 
 
-run :- timetable("reqs2.xml").
+run :- timetable("reqs.xml").
