@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axios';
 
 interface Professor {
   id: number;
@@ -22,7 +23,7 @@ const initialState: professorState = {
 };
 
 export const fetchProfessors = createAsyncThunk('professors/fetchProfessors', async () => {
-  const response = await axios.get('/api/professors');
+  const response = await axiosInstance.get('/api/professors');
   return response.data.map((professor: Professor) => {
     const { password, ...professorWithoutPassword } = professor;
     return professorWithoutPassword; 
@@ -30,17 +31,17 @@ export const fetchProfessors = createAsyncThunk('professors/fetchProfessors', as
 });
 
 export const createProfessor = createAsyncThunk('professors/createProfessor', async (professor: Professor) => {
-  const response = await axios.post('/api/professors', professor);
+  const response = await axiosInstance.post('/api/admin/register_teacher', professor);
   return response.data;
 });
 
 export const updateProfessor = createAsyncThunk('professors/updateProfessor', async (professor: Professor) => {
-  const response = await axios.put(`/api/professors/${professor.id}`, professor);
+  const response = await axiosInstance.put(`/api/professors/${professor.id}`, professor);
   return response.data;
 });
 
 export const deleteProfessor = createAsyncThunk('professors/deleteProfessor', async (id: number) => {
-  await axios.delete(`/api/professors/${id}`);
+  await axiosInstance.delete(`/api/professors/${id}`);
   return id;
 });
 

@@ -4,6 +4,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { mockProfessors } from '../../_mockApis/professorList';  
+import { dispatch } from '../../store/Store';
+import { createProfessor } from '../../store/application/professor/professorSlice';
 
 export interface Professor {
   id: number;
@@ -30,14 +32,13 @@ const ProfessorList: React.FC = () => {
       password: yup.string().min(6, 'Пароль должен собрать не менее 6 символов').required('Пароль обязателен'),
     }),
     onSubmit: (values) => {
-        // добавить преподавателя на бэке
 
       const newProfessor: Professor = {
         id: professors[professors.length - 1].id + 1, 
         ...values,
       };
 
-      console.log(newProfessor.id)
+      dispatch(createProfessor(newProfessor));
       setProfessors([...professors, newProfessor]);
       formik.resetForm();
       setOpen(false);
