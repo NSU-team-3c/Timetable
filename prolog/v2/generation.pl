@@ -407,8 +407,8 @@ globals(Content) -->
         [slots_per_day(SPD),slots_per_week(SPW)].
 
 process_room(Node) -->
-        { attrs_values(Node, [id, name, capacity], [Id, Name, Capacity]) },
-        [classroom(Id, Name), classroom_capacity(Id, Capacity)],
+        { attrs_values(Node, [id, capacity], [Id, Capacity]) },
+        [classroom_capacity(Id, Capacity)],
         process_nodes(allocate, Node, process_allocation(Id)).
 
 process_teacher(Node) -->

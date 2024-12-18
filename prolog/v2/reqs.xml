@@ -22,14 +22,10 @@
 	<room id="3107" capacity="13">
 		<allocate day="1" start="1" end="7"/>
 		<allocate day="2" start="1" end="7"/>
-		<allocate day="3" start="1" end="7"/>
-		<allocate day="4" start="1" end="7"/>
 	</room>
 	<room id="2128" capacity="13">
 		<allocate day="1" start="1" end="7"/>
 		<allocate day="2" start="1" end="7"/>
-		<allocate day="3" start="1" end="7"/>
-		<allocate day="4" start="1" end="7"/>
 	</room>
 	<availableTeacherSlots teacher="Иртегов Д.В.">
 		<slot day="1" start="1" end="7"/>
