@@ -17,7 +17,7 @@ import java.util.*;
 @Service
 public class XmlParserService {
 
-    private static final String BASE_DATE = "2024-04-29";
+    private static final String BASE_DATE = "2024-12-16";
     private static final Map<Integer, String> PAIR_TIMES = Map.of(
             1, "09:00-10:35",
             2, "10:50-12:25",
@@ -31,7 +31,6 @@ public class XmlParserService {
     private final TimetableRepository timetableRepository;
 
     private final EventRepository eventRepository;
-
 
     private final SubjectRepository subjectRepository;
 
@@ -127,10 +126,7 @@ public class XmlParserService {
 
             Date[] startEndTimes = calculateTimes(dayNumber, originalId.intValue());
 
-            Long eventId = Long.parseLong(dayNumber + "" + originalId);
-
             Event event = new Event();
-            event.setId(eventId);
             event.setStartTime(startEndTimes[0]);
             event.setEndTime(startEndTimes[1]);
             event.setGroups(groups);
@@ -169,8 +165,13 @@ public class XmlParserService {
     private Date[] calculateTimes(int dayNumber, int pairNumber) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            Calendar calendar = Calendar.getInstance();
+
+            TimeZone timeZone = TimeZone.getTimeZone("Asia/Novosibirsk");
+            dateFormat.setTimeZone(timeZone);
+
+            Calendar calendar = Calendar.getInstance(timeZone);
             calendar.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(BASE_DATE));
+
             calendar.add(Calendar.DAY_OF_YEAR, dayNumber - 1);
 
             String[] timeRange = PAIR_TIMES.get(pairNumber).split("-");
@@ -195,4 +196,3 @@ public class XmlParserService {
         return (list.getLength() > 0) ? list.item(0).getTextContent() : "";
     }
 }
-
