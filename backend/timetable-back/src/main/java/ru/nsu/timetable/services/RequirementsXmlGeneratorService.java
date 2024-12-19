@@ -134,7 +134,6 @@ public class RequirementsXmlGeneratorService {
             for (Group group : groups) {
                 GroupRequirement groupReq = new GroupRequirement();
                 groupReq.setId(group.getId());
-
                 groupReq.setAmount(group.getCapacity());
 
                 List<Requirement> reqList = new ArrayList<>();
@@ -143,7 +142,13 @@ public class RequirementsXmlGeneratorService {
                         Requirement req = new Requirement();
                         req.setSubjectId(subject.getId());
                         req.setTeacherId(teacher.getId());
-                        req.setAmount(subject.getDuration());
+
+                        int semesterDuration = subject.getDuration();
+                        int weeksInSemester = 15;
+
+                        int weeklyAmount = semesterDuration / weeksInSemester;
+
+                        req.setAmount(weeklyAmount);
                         reqList.add(req);
                     }
                 }
@@ -176,32 +181,24 @@ public class RequirementsXmlGeneratorService {
                 Map<Integer, List<XmlTimeSlot>> slotsByDay = new HashMap<>();
 
                 for (TimeSlot timeSlot : teacher.getAvailableTimeSlots()) {
-                    int slotDay = getDayOfWeek(timeSlot);
-
-                    if (!slotsByDay.containsKey(slotDay)) {
-                        slotsByDay.put(slotDay, new ArrayList<>());
-                    }
+                    int dayOfWeek = getDayOfWeek(timeSlot.getStartTime());
 
                     int pairNumber = getPairNumber(timeSlot);
 
                     if (pairNumber != -1) {
                         XmlTimeSlot xmlSlot = new XmlTimeSlot();
-                        xmlSlot.setDay(slotDay);
+                        xmlSlot.setDay(dayOfWeek);
                         xmlSlot.setStart(pairNumber);
                         xmlSlot.setEnd(pairNumber);
 
-                        slotsByDay.get(slotDay).add(xmlSlot);
+                        slotsByDay.computeIfAbsent(dayOfWeek, k -> new ArrayList<>()).add(xmlSlot);
                     }
                 }
 
-                for (Map.Entry<Integer, List<XmlTimeSlot>> entry : slotsByDay.entrySet()) {
-                    int day = entry.getKey();
-                    List<XmlTimeSlot> slots = entry.getValue();
-
+                for (List<XmlTimeSlot> slots : slotsByDay.values()) {
                     if (!slots.isEmpty()) {
-                        for (XmlTimeSlot slot : slots) {
-                            availableSlots.getSlots().add(slot);
-                        }
+                        List<XmlTimeSlot> mergedSlots = mergeConsecutiveSlots(slots);
+                        availableSlots.getSlots().addAll(mergedSlots);
                     }
                 }
 
@@ -222,65 +219,59 @@ public class RequirementsXmlGeneratorService {
     }
 
     private int getPairNumber(TimeSlot timeSlot) {
-        Map<Integer, PairRange> pairRanges = new HashMap<>();
-        pairRanges.put(1, new PairRange("09:00", "10:35"));
-        pairRanges.put(2, new PairRange("10:50", "12:25"));
-        pairRanges.put(3, new PairRange("12:40", "14:15"));
-        pairRanges.put(4, new PairRange("14:30", "16:05"));
-        pairRanges.put(5, new PairRange("16:20", "17:55"));
-        pairRanges.put(6, new PairRange("18:10", "19:45"));
-        pairRanges.put(7, new PairRange("20:00", "21:35"));
-
+        Date startTime = timeSlot.getStartTime();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(timeSlot.getStartTime());
+        calendar.setTime(startTime);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
-        if (dayOfWeek == Calendar.SUNDAY) {
-            return -1;
+        if (hour == 9 && minute >= 0 && minute < 40) {
+            return 1;
+        } else if (hour == 10 && minute >= 40 && minute < 55) {
+            return 2;
+        } else if (hour == 12 && minute >= 0 && minute < 35) {
+            return 3;
+        } else if (hour == 14 && minute >= 30 && minute < 55) {
+            return 4;
+        } else if (hour == 16 && minute >= 0 && minute < 35) {
+            return 5;
+        } else if (hour == 18 && minute >= 0 && minute < 30) {
+            return 6;
+        } else if (hour == 20 && minute >= 0 && minute < 35) {
+            return 7;
         }
-
-        for (Map.Entry<Integer, PairRange> entry : pairRanges.entrySet()) {
-            PairRange range = entry.getValue();
-            if (isTimeInRange(hour, minute, range.getStartTime(), range.getEndTime())) {
-                return entry.getKey();
-            }
-        }
-
         return -1;
     }
 
-    private boolean isTimeInRange(int hour, int minute, String startTime, String endTime) {
-        String[] start = startTime.split(":");
-        String[] end = endTime.split(":");
+    private List<XmlTimeSlot> mergeConsecutiveSlots(List<XmlTimeSlot> slots) {
+        List<XmlTimeSlot> mergedSlots = new ArrayList<>();
+        XmlTimeSlot currentSlot = null;
 
-        int startHour = Integer.parseInt(start[0]);
-        int startMinute = Integer.parseInt(start[1]);
-        int endHour = Integer.parseInt(end[0]);
-        int endMinute = Integer.parseInt(end[1]);
-
-        int currentTimeInMinutes = hour * 60 + minute;
-        int startTimeInMinutes = startHour * 60 + startMinute;
-        int endTimeInMinutes = endHour * 60 + endMinute;
-
-        return currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes < endTimeInMinutes;
-    }
-
-    @Data
-    public static class PairRange {
-        private String startTime;
-        private String endTime;
-
-        public PairRange(String startTime, String endTime) {
-            this.startTime = startTime;
-            this.endTime = endTime;
+        for (XmlTimeSlot slot : slots) {
+            if (currentSlot == null) {
+                currentSlot = slot;
+            } else if (currentSlot.getEnd() + 1 == slot.getStart()) {
+                currentSlot.setEnd(slot.getEnd());
+            } else {
+                mergedSlots.add(currentSlot);
+                currentSlot = slot;
+            }
         }
+        if (currentSlot != null) {
+            mergedSlots.add(currentSlot);
+        }
+        return mergedSlots;
     }
 
-    private int getDayOfWeek(TimeSlot timeSlot) {
+    private int getDayOfWeek(Date date) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(timeSlot.getStartTime());
-        return calendar.get(Calendar.DAY_OF_WEEK);
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        if (dayOfWeek == Calendar.SUNDAY) {
+            return 7;
+        } else {
+            return dayOfWeek - 1;
+        }
     }
 }

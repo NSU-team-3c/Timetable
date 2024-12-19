@@ -70,12 +70,4 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<TimeSlot> availableTimeSlots = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable(
-            name = "teacher_subject",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "subject_id")
-    )
-    private List<Subject> subjects = new ArrayList<>();
 }

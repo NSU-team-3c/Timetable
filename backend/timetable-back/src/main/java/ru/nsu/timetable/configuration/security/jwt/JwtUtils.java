@@ -2,10 +2,12 @@ package ru.nsu.timetable.configuration.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.nsu.timetable.exceptions.UnauthorizedException;
 import ru.nsu.timetable.services.UserDetailsImpl;
 
 import java.security.Key;
@@ -46,6 +48,15 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String getEmailFromHeader(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            return getUserNameFromJwtToken(token);
+        }
+        throw new UnauthorizedException("Invalid or missing token");
     }
 
     public boolean validateJwtToken(String authToken) {

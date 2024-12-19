@@ -3,6 +3,7 @@ package ru.nsu.timetable.models.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,7 +33,12 @@ public class Subject {
     @Enumerated(EnumType.STRING)
     private AudienceType audienceType;
 
-    @ManyToMany(mappedBy = "subjects")
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(
+            name = "teacher_subject",
+            joinColumns = @JoinColumn(name = "subject_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> teachers = new ArrayList<>();
 
     @ManyToMany

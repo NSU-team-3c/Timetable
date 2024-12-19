@@ -10,7 +10,7 @@ public class PrologIntegrationService {
 
         String prologExecutable = "prolog/scryer-prolog";
         //String prologExecutableWin = "./scryer-prolog.exe";
-        String prologScript = "prolog/v2/generation2.pl";
+        String prologScript = "prolog/v2/generation.pl";
         String queryFile = "prolog/v2/query.txt";
         String outputFilePath = "prolog/v2/timetable.xml";
         // writeQueryFile(queryType);
