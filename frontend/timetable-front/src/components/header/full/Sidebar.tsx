@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Drawer, List, ListItem, IconButton, useTheme, Typography } from '@mui/material';
+import { Box, Drawer, List, ListItem, IconButton, useTheme, Typography, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ const Sidebar = () => {
         transition: theme.transitions.create('width', {
             duration: theme.transitions.duration.shortest,
         }),
-        width: open ? '17%' : 0,  
+        width: open ? '20%' : 0,  
         boxSizing: 'border-box',
     };
 
@@ -38,25 +38,46 @@ const Sidebar = () => {
             >
                 <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <List>
+                <ListItem component={Link} to="/profile">
+                        <Typography
+                            sx={{
+                                marginTop: 1,
+                                marginBottom: 3,
+                                width: '20%',
+                                fontSize: 24,
+                                color: 'secondary.main',
+                            }}
+                        >
+                            TimeTable
+                         </Typography>
+                         </ListItem>
                         <ListItem component={Link} to="/profile">
-                            <Typography variant="body1" sx={{ fontSize: '1.2rem', mb: 2 }}>
+                            <Button color='primary' sx={{ mb: 1, mt: 2}}>
+                            <Typography fontSize={20}>
                                 Личный кабинет
                             </Typography>
+                            </Button>
                         </ListItem>
                         <ListItem component={Link} to="/profile/timetable">
-                            <Typography variant="body1" sx={{ fontSize: '1.2rem', mb: 2 }}>
+                            <Button color='primary' sx={{ mb: 1 }}>
+                            <Typography fontSize={20}>
                                 Мое расписание
                             </Typography>
+                            </Button>
                         </ListItem>
                         <ListItem component={Link} to="/faculties">
-                            <Typography variant="body1" sx={{ fontSize: '1.2rem', mb: 2 }}>
+                        <Button color='primary' sx={{ mb: 1 }}>
+                            <Typography  fontSize={20}>
                                 По факультетам
                             </Typography>
+                            </Button>
                         </ListItem>
                         <ListItem component={Link} to="/auth/faq">
-                            <Typography variant="body1" sx={{ fontSize: '1.2rem', mb: 2 }}>
+                        <Button color='primary' sx={{ mb: 1 }}>
+                            <Typography fontSize={20}>
                                 Поддержка
                             </Typography>
+                            </Button>
                         </ListItem>
                     </List>
                 </Box>
