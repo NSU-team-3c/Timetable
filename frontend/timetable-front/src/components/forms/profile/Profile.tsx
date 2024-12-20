@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ProfileData } from '../../../types/user/user';
 import { AppState, dispatch, useSelector } from '../../../store/Store';
 import { fetchProfile, updateProfile } from '../../../store/profile/profileSlice';
+import { format } from 'date-fns';
 
 
 const ProfileForm: React.FC = () => {
@@ -14,29 +15,28 @@ const ProfileForm: React.FC = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     dispatch(fetchProfile())
 
-    if (profile?.photo) {
-      setPhotoPreview(URL.createObjectURL(profile.photo));
+    if (profile?.photoUrl) {
+      setPhotoPreview(URL.createObjectURL(profile.photoUrl));
     }
 
   }, [dispatch]);
 
   const formik = useFormik<ProfileData>({
     enableReinitialize: true,
-    initialValues: profile || {
-      surname: '',
-      name: '',
-      patronymic: '',
-      birthday: '',
-      email: '',
-      phone: '',
-      about: '',
-      photo: null, 
-      role: '',
-      group: null,
+    initialValues: {
+      surname: profile?.surname || '',
+      name: profile?.name || '',
+      patronymic: profile?.patronymic || '',
+      birthday: profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : '', 
+      email: profile?.email || '',
+      phone: profile?.phone || '',
+      about: profile?.about || '',
+      photoUrl: profile?.photoUrl || null,
+      role: profile?.role || '',
+      group: profile?.group || null,
     },
 
     validationSchema: yup.object({
@@ -69,6 +69,7 @@ const ProfileForm: React.FC = () => {
     }),
 
     onSubmit: async (values) => {
+      console.log('Submitting profile:', values); // Добавьте это для отладки
       dispatch(updateProfile(values));
       navigate('/profile', { replace: true });
     },
@@ -133,8 +134,8 @@ const ProfileForm: React.FC = () => {
                 )}
               </Box>
             </label>
-            {formik.touched.photo && formik.errors.photo && (
-              <FormHelperText error>{formik.errors.photo}</FormHelperText>
+            {formik.touched.photoUrl && formik.errors.photoUrl && (
+              <FormHelperText error>{formik.errors.photoUrl}</FormHelperText>
             )}
           </FormControl>
         </Box>
@@ -229,6 +230,7 @@ const ProfileForm: React.FC = () => {
             variant="contained"
             color="primary"
             disabled={formik.isSubmitting}
+            onClick={() => console.log('Button clicked')}
           >
             Сохранить
           </Button>

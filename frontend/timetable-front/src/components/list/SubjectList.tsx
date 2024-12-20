@@ -123,7 +123,7 @@ const SubjectListPage: React.FC = () => {
           
           return professor ? (
             <ListItem key={id} sx={{ padding: 0 }}>
-              <ListItemText primary={professor.firstName.concat(' ').concat(professor.lastName)} />
+              <ListItemText primary={professor.name.concat(' ').concat(professor.surname)} />
             </ListItem>
           ) : null;
         })}
@@ -319,7 +319,7 @@ const SubjectListPage: React.FC = () => {
                 multiple
                 id="professors"
                 options={professors}
-                getOptionLabel={(option) => option.firstName.concat(' ').concat(option.lastName)} 
+                getOptionLabel={(option) => option.name.concat(' ').concat(option.surname)} 
                 value={formik.values.professors}
                 onChange={(_, newValue) => formik.setFieldValue('professors', newValue)}
                 renderInput={(params) => (
@@ -333,36 +333,12 @@ const SubjectListPage: React.FC = () => {
                 )}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
-                    <Chip label={option.firstName.concat(' ').concat(option.lastName)} 
+                    <Chip label={option.name.concat(' ').concat(option.surname)} 
                       {...getTagProps({ index })} key={index} sx={{ margin: 0.5 }} />
                   ))
                 }
             />
-
-
-            {/* <Autocomplete
-                multiple
-                id="professors"
-                options={availableProfessors}
-                value={formik.values.teacherIds}
-                onChange={(_, newValue) => formik.setFieldValue('professors', newValue)}
-                renderInput={(params) => (
-                    <TextField
-                    {...params}
-                    label="Преподаватели"
-                    variant="outlined"
-                    margin="normal"
-                    error={formik.touched.teacherIds && Boolean(formik.errors.teacherIds)}
-                    helperText={formik.touched.teacherIds && formik.errors.teacherIds}
-                    />
-                )}
-                renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                    <Chip label={option} {...getTagProps({ index })} key={index} sx={{ margin: 0.5 }} />
-                    ))
-                }
-            /> */}
-            
+                        
             <TextField
               label="Продолжительность (часы)"
               fullWidth

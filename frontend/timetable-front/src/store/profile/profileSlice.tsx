@@ -20,15 +20,9 @@ export const fetchProfile = createAsyncThunk<ProfileData>('profile/fetchProfile'
   return response.data;
 });
 
-export const updateProfile = createAsyncThunk<ProfileData, ProfileData>('profile/updateProfile', async (profileData) => {
-  // const formData = new FormData();
-  // Object.keys(profileData).forEach((key) => {
-  //   const typedKey = key as keyof ProfileData;
-  //   if (profileData[typedKey] !== null) {
-  //     formData.append(key, profileData[typedKey] as string | File);
-  //   }
-  // });
-  
+export const updateProfile = createAsyncThunk<ProfileData, ProfileData>('profile/updateProfile', async (profileData) => {  
+
+  profileData.birthday = new Date(profileData.birthday).toISOString();
   const response = await axiosInstance.put('/api/v1/users', profileData);
   return response.data;
 });

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axios';
 
 interface Subject {
     id: number,
@@ -25,22 +26,22 @@ const initialState: subjectState = {
 };
 
 export const fetchSubjects = createAsyncThunk('subjects/fetchSubjects', async () => {
-  const response = await axios.get('/api/subjects');
+  const response = await axiosInstance.get('/api/v1/subjects');
   return response.data;
 });
 
 export const createSubject = createAsyncThunk('subjects/createSubject', async (subject: Subject) => {
-  const response = await axios.post('/api/subjects', subject);
+  const response = await axiosInstance.post('/api/v1/subjects', subject);
   return response.data;
 });
 
 export const updateSubject = createAsyncThunk('subjects/updateSubject', async (subject: Subject) => {
-  const response = await axios.put(`/api/v/${subject.id}`, subject);
+  const response = await axiosInstance.put(`/api/v1/${subject.id}`, subject);
   return response.data;
 });
 
 export const deleteSubject = createAsyncThunk('subjects/deleteSubject', async (id: number) => {
-  await axios.delete(`/api/subjects/${id}`);
+  await axiosInstance.delete(`/api/v1/subjects/${id}`);
   return id;
 });
 

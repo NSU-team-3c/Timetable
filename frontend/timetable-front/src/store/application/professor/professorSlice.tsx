@@ -4,8 +4,8 @@ import axiosInstance from '../../../utils/axios';
 
 interface Professor {
   id: number;
-  firstName: string;
-  lastName: string;
+  name: string;
+  surname: string;
   email: string;
   password?: string; 
 }
@@ -23,11 +23,8 @@ const initialState: professorState = {
 };
 
 export const fetchProfessors = createAsyncThunk('professors/fetchProfessors', async () => {
-  const response = await axiosInstance.get('/api/professors');
-  return response.data.map((professor: Professor) => {
-    const { password, ...professorWithoutPassword } = professor;
-    return professorWithoutPassword; 
-  });
+  const response = await axiosInstance.get('/api/v1/users/teachers');
+  return response.data;
 });
 
 export const createProfessor = createAsyncThunk('professors/createProfessor', async (professor: Professor) => {

@@ -28,7 +28,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Интерсептор ответа для обработки ошибок
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

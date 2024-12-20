@@ -5,6 +5,7 @@ import Spinner from '../../views/spinner/Spinner';
 import { AppState, dispatch, useSelector } from '../../store/Store';
 import { fetchProfile } from '../../store/profile/profileSlice';
 import axiosInstance from '../../utils/axios';
+import { format } from 'date-fns';
 
 
 const Profile: React.FC = () => {
@@ -14,8 +15,8 @@ const Profile: React.FC = () => {
   useEffect(() => {
     dispatch(fetchProfile())
 
-    if (profile?.photo) {
-      setPhotoView(URL.createObjectURL(profile.photo));
+    if (profile?.photoUrl) {
+      setPhotoView(URL.createObjectURL(profile.photoUrl));
     }
 
   }, [dispatch]);
@@ -124,7 +125,7 @@ const Profile: React.FC = () => {
             }
 
             <Typography variant="body1" gutterBottom>
-                Дата рождения: {profile ? profile.birthday : ''}
+                  Дата рождения: {profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : ''}
             </Typography>
 
             <Typography variant="body1" gutterBottom>
