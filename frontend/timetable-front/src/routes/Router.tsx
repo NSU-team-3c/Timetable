@@ -4,58 +4,94 @@ import React, { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
+import GuestGuard from '../guards/guestGuard'
+import AuthGuard from '../guards/authGuard';
+
 /* ***Layouts**** */
-const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
-import AuthGuard from 'src/guards/authGuard/AuthGuard';
-import GuestGuard from 'src/guards/authGuard/GuestGaurd';
+const GuestLayout = Loadable(lazy(() => import('../layouts/guest/GuestLayout')));
+const FullLayout  = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 
-/* ****Pages***** */
-const SamplePage = Loadable(lazy(() => import('../views/sample-page/SamplePage')));
-const Error = Loadable(lazy(() => import('../views/authentication/Error')));
+const Error       = Loadable(lazy(() => import('../views/auth/Error')));
 
-// authentication
-const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
-const Login2 = Loadable(lazy(() => import('../views/authentication/auth2/Login2')));
-const Register = Loadable(lazy(() => import('../views/authentication/auth1/Register')));
-const Register2 = Loadable(lazy(() => import('../views/authentication/auth2/Register2')));
+/* ***Auth*** */
+const Login             = Loadable(lazy(() => import('../views/auth/Login')));
+const Register          = Loadable(lazy(() => import('../views/auth/Register')));
+const ForgotPassword    = Loadable(lazy(() => import('../views/auth/ForgotPassword')));
+
+/* ***Profile*** */
+const Profile           = Loadable(lazy(() => import('../views/profile/Profile')));
+const ProfileEdit       = Loadable(lazy(() => import('../views/profile/ProfileEdit')));
+const ChangePassword    = Loadable(lazy(() => import('../views/profile/ChangePassword')));
+const ProfessorProfile  = Loadable(lazy(() => import('../views/profile/Professor')));
+
+
+/* ***Admin*** */
+const AddProfessor  = Loadable(lazy(() => import('../views/add/AddProfessor')));
+const AddSubject    = Loadable(lazy(() => import('../views/add/AddSubject')));
+const AddClassroom  = Loadable(lazy(() => import('../views/add/AddClassroom')));
+const AddGroup      = Loadable(lazy(() => import('../views/add/AddGroup')));
+
+const Timetable         = Loadable(lazy(() => import('../views/table/Table')));
+const CreateCourse      = Loadable(lazy(() => import('../views/courses/Course')));
+const AvaliabilityTime  = Loadable(lazy(() => import('../views/table/AvailableTime')));
 
 const Router = [
   {
     path: '/',
     element: (
-      <AuthGuard>
-        <FullLayout />
-      </AuthGuard>
-    ),
-    children: [
-      { path: '/', element: <Navigate to="/sample-page" /> },
-      { path: '/sample-page', exact: true, element: <SamplePage /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
-    ],
-  },
-  {
-    path: '/auth',
-    element: (
       <GuestGuard>
-        <BlankLayout />
+        <GuestLayout />
       </GuestGuard>
     ),
     children: [
-      { path: '/auth/login', element: <Login /> },
-      { path: '/auth/login2', element: <Login2 /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '/auth/register2', element: <Register2 /> },
+      { path: '/',                      element: <Navigate to="/auth/login" /> },
+      { path: '/auth/login',            element: <Login /> },
+      { path: '/auth/register',         element: <Register /> },
+      { path: '/auth/forgot-password',  element: <ForgotPassword /> },
     ],
   },
   {
-    path: '/auth',
+    path: '/profile',
+    element: (
+      <AuthGuard>
+        <FullLayout/>
+      </AuthGuard>
+    ),
+    children: [
+      { path: '/profile',                         element: <Profile /> },
+      { path: '/profile/profile-edit',            element: <ProfileEdit /> },
+      { path: '/profile/timetable',               element: <Timetable /> },
+      { path: '/profile/change-password',         element: <ChangePassword /> },
+      { path: '/profile/professor',               element: <ProfessorProfile /> },
+      { path: '/profile/professor/course',        element: <CreateCourse /> },
+      { path: '/profile/professor/availability',  element: <AvaliabilityTime /> }
+    ],
+  },
+
+  {
+    path: '/admin',
+    element: (
+      <AuthGuard>
+        <FullLayout/>
+      </AuthGuard>
+    ),
+    children: [
+      { path: '/admin/add-professor',  element: <AddProfessor /> },
+      { path: '/admin/add-subject',     element: <AddSubject /> },
+      { path: '/admin/add-classroom',   element: <AddClassroom /> },
+      { path: '/admin/add-group',       element: <AddGroup /> },
+    ],
+  },
+  {
+    path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '404', element: <Error /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
+        { path: '404',  element: <Error /> },
+        { path: '*',    element: <Navigate to="/404" /> },
     ],
   },
 ];
 
 export default Router;
+
