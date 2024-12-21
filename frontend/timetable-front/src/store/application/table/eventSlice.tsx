@@ -3,13 +3,11 @@ import axiosInstance from '../../../utils/axios';
 
 interface MyEvent {
   id: string | number;
-  title: string;
   startTime: Date;
   endTime: Date;
   teacherName: string;
   subjectName: string;
   roomName: string
-  //recurrenceInterval?: number;  
 }
 
 interface EventState {
@@ -26,7 +24,13 @@ const initialState: EventState = {
 
 export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
   const response = await axiosInstance.get('/api/v1/timetables');
-  return response.data;
+
+  if (response.data.events) {
+    return response.data.events;
+  }
+
+  return [];
+  
 });
 
 const eventSlice = createSlice({
@@ -38,6 +42,9 @@ const eventSlice = createSlice({
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    setEvents(state, action: PayloadAction<MyEvent[]>) {
+      state.events = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -57,6 +64,6 @@ const eventSlice = createSlice({
   },
 });
 
-export const { setLoading, setError } = eventSlice.actions;
+export const { setLoading, setError, setEvents } = eventSlice.actions;
 
 export default eventSlice.reducer;
