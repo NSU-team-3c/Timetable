@@ -52,7 +52,6 @@ const TeacherAvailabilityForm: React.FC = () => {
   const handleDelete = useCallback((eventToDelete: Availability) => {
     if (eventToDelete) {
       dispatch(deleteTimeslot(eventToDelete.id));
-      dispatch(removeTimeslot(eventToDelete.id))
       setOpenDeleteDialog(false);
     }
   }, [dispatch, eventToDelete]);
@@ -85,11 +84,11 @@ const TeacherAvailabilityForm: React.FC = () => {
   };
 
   const handlerEvent = useCallback((event: Availability) => {
-    if (timeslots.find(e => isTimeConflict(e, event)) === undefined) {
+    const conflictedEvent = timeslots.find(e => isTimeConflict(e, event));
+    if (conflictedEvent === undefined) {
       dispatch(updateTimeslot(event));
-      dispatch(addTimeslot(event));
     } else {
-      handleDeleteDialogOpen(event);  
+      handleDeleteDialogOpen(conflictedEvent);  
     }
   }, [dispatch, timeslots]);
 
