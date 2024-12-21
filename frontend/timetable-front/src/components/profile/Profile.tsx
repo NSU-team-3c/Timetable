@@ -27,7 +27,7 @@ const Profile: React.FC = () => {
 
   const groupView = () => {
     return (
-        <Typography variant="body1" gutterBottom>
+        <Typography fontWeight={600} variant="body1" gutterBottom>
             Группа: {profile?.group}
         </Typography>
     );

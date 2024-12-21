@@ -69,7 +69,7 @@ const ProfileForm: React.FC = () => {
     }),
 
     onSubmit: async (values) => {
-      console.log('Submitting profile:', values); // Добавьте это для отладки
+      console.log('Submitting profile:', values); 
       dispatch(updateProfile(values));
       navigate('/profile', { replace: true });
     },

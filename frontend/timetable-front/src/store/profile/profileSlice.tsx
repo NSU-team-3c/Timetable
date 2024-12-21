@@ -20,9 +20,11 @@ export const fetchProfile = createAsyncThunk<ProfileData>('profile/fetchProfile'
   return response.data;
 });
 
-export const updateProfile = createAsyncThunk<ProfileData, ProfileData>('profile/updateProfile', async (profileData) => {  
-
-  profileData.birthday = new Date(profileData.birthday).toISOString();
+export const updateProfile = createAsyncThunk<ProfileData, ProfileData>('profile/updateProfile', async (profileData) => { 
+  
+  if (profileData.birthday) {
+    profileData.birthday = new Date(profileData.birthday).toISOString();
+  }
   const response = await axiosInstance.put('/api/v1/users', profileData);
   return response.data;
 });
