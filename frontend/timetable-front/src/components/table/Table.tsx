@@ -6,7 +6,7 @@ import { mockEvents } from '../../_mockApis/events';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { AppState, dispatch } from '../../store/Store';
-import { fetchEvents } from '../../store/application/table/eventSlice';
+import { fetchEvents, setEvents } from '../../store/application/table/eventSlice';
 
 const localizer = momentLocalizer(moment);
 
@@ -20,15 +20,15 @@ interface MyEvent {
 }
 
 const Table: React.FC = () => {
-  const {events} = useSelector((state: AppState) => state.events)
+  const {events, loading} = useSelector((state: AppState) => state.events)
   //const [events, setEvents] = useState<MyEvent[]>([]);
   const [open, setOpen] = useState(false); 
   const [currentEvent, setCurrentEvent] = useState<MyEvent | null>(null);
   
   const generateRecurringEvents = (event: MyEvent) => {
     const recurringEvents: MyEvent[] = [];
-    const startDate = moment(event.startTime); 
-    const endDate = moment(event.endTime);     
+    const startDate = moment(new Date(event.startTime)); 
+    const endDate = moment(new Date(event.endTime));     
   
     const repeatCount = 12; 
   
@@ -49,14 +49,23 @@ const Table: React.FC = () => {
   
 
   useEffect(() => {
+    console.log(events)
     dispatch(fetchEvents());
-    const allEvents: MyEvent[] = [];
+    console.log(events)
+  }, [dispatch]);
 
-    events.forEach((event) => {
-      const recurringEvents = generateRecurringEvents(event);
-      allEvents.push(...recurringEvents); 
-    });
+  useEffect(() => {    
+    if (!loading && events.length > 0) {
+      console.log(events)
+      const allEvents: MyEvent[] = [];
 
+      events.forEach((event) => {
+        const recurringEvents = generateRecurringEvents(event);
+        allEvents.push(...recurringEvents); 
+      });
+
+      dispatch(setEvents(allEvents));
+    }
   }, [dispatch]);
 
   const eventPropGetter = (event: MyEvent) => {
