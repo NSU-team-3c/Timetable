@@ -1,6 +1,7 @@
 // store/timeslotsSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axios';
+import { dispatch } from '../Store';
 
 interface TimeSlot {
   id: number;
@@ -23,7 +24,13 @@ const initialState: TimeslotsState = {
 // Получение всех timeslots с сервера
 export const fetchTimeslots = createAsyncThunk('timeslots/fetchTimeslots', async () => {
   const response = await axiosInstance.get('/api/v1/timeslots');
-  return response.data; 
+  return response.data.map((timeslot: { id: any; startTime: string; endTime: string; }) => {
+    return {
+      id: timeslot.id,
+      startTime: new Date(timeslot.startTime), 
+      endTime: new Date(timeslot.endTime),
+    };
+  });
 });
 
 // Обновление события (timeslot) по его ID
@@ -31,7 +38,10 @@ export const updateTimeslot = createAsyncThunk(
   'timeslots/updateTimeslot',
   async (timeslot: TimeSlot, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/api/v1/timeslots`, timeslot);
+      const response = await axiosInstance.post(`/api/v1/timeslots`, [{
+        startTime: timeslot.startTime.toISOString(),
+        endTime: timeslot.endTime.toISOString(),
+      }] );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Ошибка при обновлении');
@@ -44,7 +54,7 @@ export const deleteTimeslot = createAsyncThunk(
   'timeslots/deleteTimeslot',
   async (id: number, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/api/v1/timeslots/${id}`);
+      await axiosInstance.delete(`/api/v1/timeslots`, {data: [id]});
       return id; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Ошибка при удалении');
@@ -57,7 +67,7 @@ const timeslotsSlice = createSlice({
   initialState,
   reducers: {
     addTimeslot: (state, action: PayloadAction<TimeSlot>) => {
-      state.timeslots.push(action.payload); // Добавить новое событие
+      state.timeslots.push(action.payload); 
     },
     removeTimeslot: (state, action: PayloadAction<number>) => {
       state.timeslots = state.timeslots.filter((timeslot) => timeslot.id !== action.payload);
@@ -82,10 +92,7 @@ const timeslotsSlice = createSlice({
       .addCase(updateTimeslot.fulfilled, (state, action) => {
         state.loading = false;
         const updatedTimeslot = action.payload;
-        const index = state.timeslots.findIndex((timeslot) => timeslot.id === updatedTimeslot.id);
-        if (index !== -1) {
-          state.timeslots[index] = updatedTimeslot; // Обновляем событие в локальном состоянии
-        }
+        state.timeslots = updatedTimeslot;
       })
       .addCase(updateTimeslot.rejected, (state, action) => {
         state.loading = false;
