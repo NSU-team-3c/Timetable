@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography} from '@mui/material';
+import { Box, Button, ButtonBase, Typography} from '@mui/material';
 import { Link } from 'react-router-dom'; 
 import Spinner from '../../views/spinner/Spinner';
 import { AppState, dispatch, useSelector } from '../../store/Store';
@@ -44,22 +44,24 @@ const Profile: React.FC = () => {
     if (role?.includes('administrator', 0)) {
       console.log(0);
       return (
-        <Box>
-          <Link to="/admin/add-professor" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Добавление преподавателей {'>'} </Typography>
-          </Link>
+        <Box mt={2} sx={{boxShadow: 15}} p={2} mb={2}>
+          <Typography color={"secondary"} fontSize={18} mb={3} textAlign={'center'} fontWeight={600}>Генерация расписания </Typography>
 
-          <Link to="/admin/add-subject" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to={"/admin/add-professor"}>
+              <Typography color="primary">Добавление преподавателей {'>'} </Typography>
+          </Button>
+
+          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-subject">
             <Typography color="primary">Добавление предметов {'>'} </Typography>
-          </Link>
+          </Button>
 
-          <Link to="/admin/add-classroom" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-classroom">
             <Typography color="primary">Добавление комнат {'>'} </Typography>
-          </Link>
+          </Button>
 
-          <Link to="/admin/add-group" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
+          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-group">
             <Typography color="primary">Добавление групп {'>'} </Typography>
-          </Link>
+          </Button>
 
           <Box>
             <Button
@@ -108,15 +110,15 @@ const Profile: React.FC = () => {
         </Box>
 
         <Box display="flex" flexDirection="column" gap={2} padding={"10%"}>
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 Фамилия: {profile ? profile.surname : ''}
             </Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 Имя: {profile ? profile.name : ''}
             </Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 Отчество: {profile ? profile.patronymic : ''}
             </Typography>
 
@@ -124,19 +126,19 @@ const Profile: React.FC = () => {
               (profile.role.split(', ').includes('administrator'))) ? groupView() : '' ) : ''
             }
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                   Дата рождения: {profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : ''}
             </Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 email: {profile ? profile.email : ''}
             </Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 Номер телефона: {profile ? profile.phone : ''}
             </Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography fontWeight={600} variant="body1" gutterBottom>
                 О себе: {profile ? profile.about : ''}
             </Typography>
 

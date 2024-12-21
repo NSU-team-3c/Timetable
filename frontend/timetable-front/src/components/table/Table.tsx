@@ -4,10 +4,11 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { mockEvents } from '../../_mockApis/events'; 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { AppState, dispatch } from '../../store/Store';
+
+import { AppState, dispatch, useSelector } from '../../store/Store';
 import { fetchEvents, setEvents } from '../../store/application/table/eventSlice';
 import Spinner from '../../views/spinner/Spinner';
+import { delay } from 'lodash';
 
 const localizer = momentLocalizer(moment);
 
@@ -47,13 +48,17 @@ const Table: React.FC = () => {
   
     return recurringEvents;
   };
-  
-  useEffect(() => {
-    dispatch(fetchEvents());
-  }, [dispatch]);
 
-  useEffect(() => {    
-    if (!loading && events.length > 0) {
+
+  function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+  
+useEffect(() => {
+  if (!loading && events.length > 0) {
+    console.log(events);
+    console.log(events)
+      
       const allEvents: MyEvent[] = [];
 
       events.forEach((event) => {
@@ -62,8 +67,21 @@ const Table: React.FC = () => {
       });
 
       dispatch(setEvents(allEvents));
-    }
-  }, [dispatch, events, loading]);
+  }
+}, [loading]);
+
+
+  useEffect(() => {
+    const loadData = async () => {
+      await dispatch(fetchEvents()); 
+    };
+
+    loadData();
+    
+  }, [dispatch]);
+
+  
+
 
   const eventPropGetter = (event: MyEvent) => {
     return {
@@ -85,7 +103,7 @@ const Table: React.FC = () => {
   };
 
   if (loading) {
-    return <Spinner/>;
+    return <Spinner/>
   }
 
   return (

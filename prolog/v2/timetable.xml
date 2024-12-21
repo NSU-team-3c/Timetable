@@ -1,0 +1,46 @@
+<timetable>
+	 <day number="1">
+		 <timeSlots>
+				 <id>6</id>
+					 <group id="22215"/>
+					 <subject id="math"/>
+					 <teacher id="Васкевич В.Л."/>
+					 <room id="3107"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>5</id>
+					 <group id="22215"/>
+					 <subject id="math"/>
+					 <teacher id="Васкевич В.Л."/>
+					 <room id="3107"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>4</id>
+					 <group id="22215"/>
+					 <subject id="prog"/>
+					 <teacher id="Мигинский Д.С."/>
+					 <room id="3107"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>3</id>
+					 <group id="22215"/>
+					 <subject id="prog"/>
+					 <teacher id="Мигинский Д.С."/>
+					 <room id="3107"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>2</id>
+					 <group id="22215"/>
+					 <subject id="teamPr"/>
+					 <teacher id="Иртегов Д.В."/>
+					 <room id="3107"/>
+		 </timeSlots>
+		 <timeSlots>
+				 <id>1</id>
+					 <group id="22215"/>
+					 <subject id="teamPr"/>
+					 <teacher id="Иртегов Д.В."/>
+					 <room id="3107"/>
+		 </timeSlots>
+	 </day>
+</timetable>

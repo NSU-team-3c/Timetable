@@ -7,11 +7,10 @@ import SubjectList from '../../components/list/SubjectList';
 const AddSubject = () => (
     <PageContainer title="Профиль" description="this is Profile page">
         <Box
-            p={24}
+            p={2}
             sx={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: 0,
-                padding: '10%',
             }}
         >
             <SubjectList />
