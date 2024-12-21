@@ -94,7 +94,7 @@ public class TimetableService {
 
         System.out.println("Fetched " + groups.size() + " groups, " + rooms.size() + " rooms, " + teachers.size() + " teachers.");
 
-        String requirementsFilePath = "prolog/v2/reqs.xml";
+        String requirementsFilePath = "../../prolog/v2/reqs.xml";
 
         requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
 
