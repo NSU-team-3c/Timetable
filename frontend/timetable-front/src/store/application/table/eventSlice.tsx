@@ -26,8 +26,8 @@ const initialState: EventState = {
 
 export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
   const response = await axiosInstance.get('/api/v1/timetables');
-  console.log(response.data)
   if (response.data.events) {
+    console.log(response.data.events)
     return response.data.events
   }
   return [];
@@ -54,8 +54,8 @@ const eventSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchEvents.fulfilled, (state, action: PayloadAction<MyEvent[]>) => {
+        state.events = action.payload 
         state.loading = false;
-        state.events = action.payload;  
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
