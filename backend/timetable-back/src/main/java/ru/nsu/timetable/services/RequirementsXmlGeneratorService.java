@@ -227,15 +227,15 @@ public class RequirementsXmlGeneratorService {
 
         if (hour == 9 && minute >= 0 && minute < 40) {
             return 1;
-        } else if (hour == 10 && minute >= 40 && minute < 55) {
+        } else if (hour == 10 && minute >= 50 && minute < 55) {
             return 2;
-        } else if (hour == 12 && minute >= 0 && minute < 35) {
+        } else if (hour == 12 && minute >= 40 && minute < 55) {
             return 3;
         } else if (hour == 14 && minute >= 30 && minute < 55) {
             return 4;
-        } else if (hour == 16 && minute >= 0 && minute < 35) {
+        } else if (hour == 16 && minute >= 20 && minute < 55) {
             return 5;
-        } else if (hour == 18 && minute >= 0 && minute < 30) {
+        } else if (hour == 18 && minute >= 10 && minute < 45) {
             return 6;
         } else if (hour == 20 && minute >= 0 && minute < 35) {
             return 7;
