@@ -4,6 +4,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { mockEvents } from '../../_mockApis/events'; 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+
 import { AppState, dispatch, useSelector } from '../../store/Store';
 import { fetchEvents, setEvents } from '../../store/application/table/eventSlice';
 import Spinner from '../../views/spinner/Spinner';
@@ -104,7 +105,6 @@ useEffect(() => {
   if (loading) {
     return <Spinner/>
   }
-
 
   return (
     <Box>

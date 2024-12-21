@@ -3,6 +3,8 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, TextField, Box, Typography } from '@mui/material';
 import { Register } from '../../../types/auth/auth';
+import { dispatch } from '../../../store/Store';
+import { register } from '../../../store/auth/authSlice';
 
 
 const RegisterForm: React.FC = () => {
@@ -22,10 +24,7 @@ const RegisterForm: React.FC = () => {
                     .required('Подтверждение пароля обязательно'),
     }),
     onSubmit: (values: Register) => {
-      console.log('Форма отправлена', values);
-
-      // Здесь можно отправить запрос на сервер для регистрации пользователя
-
+      dispatch(register(values));
     },
   });
 

@@ -9,7 +9,6 @@ interface MyEvent {
   teacherName: string;
   subjectName: string;
   roomName: string
-  //recurrenceInterval?: number;  
 }
 
 interface EventState {
