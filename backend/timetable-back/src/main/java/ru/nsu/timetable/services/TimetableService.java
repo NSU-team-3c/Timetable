@@ -65,9 +65,9 @@ public class TimetableService {
                 })
                 .toList();
 
-        Timetable timetableForStudent = new Timetable();
-        timetableForStudent.setEvents(events);
-        return timetableForStudent;
+        return Timetable.builder()
+                .events(events)
+                .build();
     }
 
     private Timetable getTimetableForTeacher(User user) {
@@ -77,9 +77,9 @@ public class TimetableService {
                 .filter(event -> event.getTeacher().getId().equals(user.getId()))
                 .toList();
 
-        Timetable timetableForTeacher = new Timetable();
-        timetableForTeacher.setEvents(events);
-        return timetableForTeacher;
+        return Timetable.builder()
+                .events(events)
+                .build();
     }
 
     public TimetableDTO generateAndSaveTimetable() {

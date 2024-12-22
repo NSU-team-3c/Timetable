@@ -12,11 +12,11 @@ public class GroupMapper {
     }
 
     public Group toGroup(GroupInputDTO groupInputDTO) {
-        Group group = new Group();
-        group.setNumber(groupInputDTO.number());
-        group.setCourse(groupInputDTO.course());
-        group.setDepartment(groupInputDTO.department());
-        group.setCapacity(groupInputDTO.capacity());
-        return group;
+        return Group.builder()
+                .number(groupInputDTO.number())
+                .course(groupInputDTO.course())
+                .capacity(groupInputDTO.capacity())
+                .department(groupInputDTO.department())
+                .build();
     }
 }

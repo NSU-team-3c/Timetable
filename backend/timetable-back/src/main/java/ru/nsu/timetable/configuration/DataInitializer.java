@@ -1,7 +1,7 @@
 package ru.nsu.timetable.configuration;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -26,30 +26,32 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (roleRepository.findByName(ROLE_USER).isEmpty()) {
-            Role newRole = new Role();
-            newRole.setName(ERole.ROLE_USER);
+            Role newRole = Role.builder()
+                    .name(ERole.ROLE_USER)
+                    .build();
             roleRepository.save(newRole);
         }
         if (roleRepository.findByName(ROLE_TEACHER).isEmpty()) {
-            Role newRole = new Role();
-            newRole.setName(ROLE_TEACHER);
+            Role newRole = Role.builder()
+                    .name(ROLE_TEACHER)
+                    .build();
             roleRepository.save(newRole);
         }
         if (roleRepository.findByName(ROLE_ADMINISTRATOR).isEmpty()) {
-            Role newRole = new Role();
-            newRole.setName(ROLE_ADMINISTRATOR);
+            Role newRole = Role.builder()
+                    .name(ROLE_ADMINISTRATOR)
+                    .build();
             roleRepository.save(newRole);
         }
         if (userRepository.findByEmail("admin@example.com").isEmpty()) {
-            User admin = new User();
-            admin.setEmail("admin@example.com");
-            admin.setPassword(new BCryptPasswordEncoder().encode("password")); // Хеширование пароля
-            admin.setDateOfCreation(new Date());
             Role adminRole = roleRepository.findByName(ROLE_ADMINISTRATOR)
                     .orElseThrow(() -> new IllegalStateException("Role ADMINISTRATOR not found"));
-            Role userRole = roleRepository.findByName(ROLE_USER)
-                    .orElseThrow(() -> new IllegalStateException("Role USER not found"));
-            admin.getRoles().addAll(List.of(adminRole, userRole));
+            User admin = User.builder()
+                    .email("admin@example.com")
+                    .password(new BCryptPasswordEncoder().encode("password"))
+                    .dateOfCreation(new Date())
+                    .roles(Set.of(adminRole))
+                    .build();
             userRepository.save(admin);
         }
     }

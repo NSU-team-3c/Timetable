@@ -2,16 +2,23 @@ package ru.nsu.timetable.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "operations")
-@NoArgsConstructor
-@Data
 public class Operations {
 
     @Id

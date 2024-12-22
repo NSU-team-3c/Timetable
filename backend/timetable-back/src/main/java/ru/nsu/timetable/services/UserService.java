@@ -122,17 +122,18 @@ public class UserService {
             throw new BadRequestException("User with email " + email + " already exists");
         }
 
-        User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setDateOfCreation(new Date());
-        newUser.setName(name);
-        newUser.setSurname(surname);
-
         Role userRole = roleRepository.findByName(role)
                 .orElseThrow(() -> new ResourceNotFoundException("Role " + role + " not found"));
-        newUser.setRoles(Set.of(userRole));
 
-        newUser.setPassword(encoder.encode(password));
+        User newUser = User.builder()
+                .email(email)
+                .dateOfCreation(new Date())
+                .name(name)
+                .surname(surname)
+                .roles(Set.of(userRole))
+                .password(encoder.encode(password))
+                .build();
+
         userRepository.save(newUser);
 
         saveOperation("Admin", "Created new user with email " + email);
@@ -141,10 +142,11 @@ public class UserService {
     }
 
     private void saveOperation(String userAccount, String description) {
-        Operations operations = new Operations();
-        operations.setDateOfCreation(new Date());
-        operations.setUserAccount(userAccount);
-        operations.setDescription(description);
+        Operations operations = Operations.builder()
+                .dateOfCreation(new Date())
+                .userAccount(userAccount)
+                .description(description)
+                .build();
         operationsRepository.save(operations);
     }
 }

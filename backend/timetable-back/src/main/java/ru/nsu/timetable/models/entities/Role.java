@@ -2,16 +2,22 @@ package ru.nsu.timetable.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.nsu.timetable.models.constants.ERole;
 
 import jakarta.persistence.*;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "roles")
-@NoArgsConstructor
-@Data
 public class Role {
 
     @Id

@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidDataException.class)
-    public ResponseEntity<MessageResponse> handleInvalidDataException(AuthException ex) {
+    public ResponseEntity<MessageResponse> handleInvalidDataException(InvalidDataException ex) {
         return ResponseEntity.badRequest().body(new MessageResponse(ex.getMessage()));
     }
 

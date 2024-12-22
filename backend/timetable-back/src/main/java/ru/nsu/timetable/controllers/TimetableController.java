@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
-import ru.nsu.timetable.exceptions.UnauthorizedException;
 import ru.nsu.timetable.models.dto.*;
 import ru.nsu.timetable.services.TimetableService;
 
@@ -24,13 +23,8 @@ public class TimetableController {
     @GetMapping("")
     @Operation(summary = "Get timetable for particular user", security = @SecurityRequirement(name = "bearerAuth"))
     public TimetableDTO getTimetableForUser(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            String email = jwtUtils.getUserNameFromJwtToken(token);
-            return timetableService.getTimetableForUser(email);
-        }
-        throw new UnauthorizedException("Invalid or missing token");
+        String email = jwtUtils.getEmailFromHeader(request);
+        return timetableService.getTimetableForUser(email);
     }
 
     @GetMapping("/generate")

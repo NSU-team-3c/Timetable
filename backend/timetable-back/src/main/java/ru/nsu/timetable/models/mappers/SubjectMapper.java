@@ -1,6 +1,5 @@
 package ru.nsu.timetable.models.mappers;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -32,18 +31,14 @@ public class SubjectMapper {
     }
 
     public Subject toSubject(SubjectRequestDTO subjectRequestDTO) {
-        Subject subject = new Subject();
-        subject.setName(subjectRequestDTO.name());
-        subject.setCode(subjectRequestDTO.code());
-        subject.setDescription(subjectRequestDTO.description());
-        subject.setDuration(subjectRequestDTO.duration());
-        subject.setAudienceType(Subject.AudienceType.valueOf(subjectRequestDTO.audienceType()));
-
-        List<User> teachers = userRepository.findAllById(subjectRequestDTO.teacherIds());
-        subject.getTeachers().addAll(teachers);
-
-        List<Group> groups = groupRepository.findAllById(subjectRequestDTO.groupIds());
-        subject.getGroups().addAll(groups);
-        return subject;
+        return Subject.builder()
+                .name(subjectRequestDTO.name())
+                .code(subjectRequestDTO.code())
+                .description(subjectRequestDTO.description())
+                .duration(subjectRequestDTO.duration())
+                .audienceType(Subject.AudienceType.valueOf(subjectRequestDTO.audienceType()))
+                .teachers(userRepository.findAllById(subjectRequestDTO.teacherIds()))
+                .groups(groupRepository.findAllById(subjectRequestDTO.groupIds()))
+                .build();
     }
 }

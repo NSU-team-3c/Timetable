@@ -13,10 +13,10 @@ public class RoomMapper {
     }
 
     public Room toRoom(RoomInputDTO roomInputDTO) {
-        Room room = new Room();
-        room.setNumber(roomInputDTO.number());
-        room.setCapacity(roomInputDTO.capacity());
-        room.setType(Room.RoomType.valueOf(roomInputDTO.type()));
-        return room;
+        return Room.builder()
+                .number(roomInputDTO.number())
+                .capacity(roomInputDTO.capacity())
+                .type(Room.RoomType.valueOf(roomInputDTO.type()))
+                .build();
     }
 }

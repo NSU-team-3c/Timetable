@@ -8,12 +8,13 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-@Entity(name = "refresh_token")
-@NoArgsConstructor
-@ToString
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
+@Entity(name = "refresh_token")
+@ToString
 public class RefreshToken {
 
     @Id

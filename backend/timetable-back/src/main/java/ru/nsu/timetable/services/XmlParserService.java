@@ -75,9 +75,10 @@ public class XmlParserService {
                 events.addAll(parseEvents(dayElement, dayNumber));
             }
 
-            Timetable timetable = new Timetable();
-            timetable.setId(1L);
-            timetable.setEvents(events);
+            Timetable timetable = Timetable.builder()
+                    .id(1L)
+                    .events(events)
+                    .build();
 
             System.out.println("Saving timetable with " + events.size() + " events to the database.");
 
@@ -130,13 +131,14 @@ public class XmlParserService {
 
             Date[] startEndTimes = calculateTimes(dayNumber, (int) originalId);
 
-            Event event = new Event();
-            event.setStartTime(startEndTimes[0]);
-            event.setEndTime(startEndTimes[1]);
-            event.setGroups(groups);
-            event.setSubject(subject);
-            event.setTeacher(teacher);
-            event.setRoom(room);
+            Event event = Event.builder()
+                    .startTime(startEndTimes[0])
+                    .endTime(startEndTimes[1])
+                    .groups(groups)
+                    .subject(subject)
+                    .teacher(teacher)
+                    .room(room)
+                    .build();
 
             events.add(event);
         }

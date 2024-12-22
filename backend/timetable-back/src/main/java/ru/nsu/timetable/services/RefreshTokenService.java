@@ -35,11 +35,11 @@ public class RefreshTokenService {
     }
 
     public RefreshToken createRefreshToken(Long userId) {
-        RefreshToken refreshToken = new RefreshToken();
-
-        refreshToken.setUser(userRepository.findById(userId).get());
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-        refreshToken.setToken(UUID.randomUUID().toString());
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(userRepository.findById(userId).get())
+                .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                .token(UUID.randomUUID().toString())
+                .build();
 
         refreshToken = refreshTokenRepository.save(refreshToken);
         return refreshToken;

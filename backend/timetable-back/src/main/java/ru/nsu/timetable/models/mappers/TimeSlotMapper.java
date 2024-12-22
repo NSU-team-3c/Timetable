@@ -7,9 +7,9 @@ import ru.nsu.timetable.models.entities.TimeSlot;
 @Component
 public class TimeSlotMapper {
     public TimeSlot toTimeSlot(TimeSlotDTO timeSlotDTO) {
-        TimeSlot timeSlot = new TimeSlot();
-        timeSlot.setStartTime(timeSlotDTO.startTime());
-        timeSlot.setEndTime(timeSlotDTO.endTime());
-        return timeSlot;
+        return TimeSlot.builder()
+                .startTime(timeSlotDTO.startTime())
+                .endTime(timeSlotDTO.endTime())
+                .build();
     }
 }
