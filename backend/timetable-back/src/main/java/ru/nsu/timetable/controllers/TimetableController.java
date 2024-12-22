@@ -35,11 +35,7 @@ public class TimetableController {
 
     @GetMapping("/generate")
     public ResponseEntity<TimetableDTO> generateAndSaveTimetable() {
-        try {
-            TimetableDTO timetableDTO = timetableService.generateAndSaveTimetable();
-            return ResponseEntity.ok(timetableDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
-        }
+        TimetableDTO timetableDTO = timetableService.generateAndSaveTimetable();
+        return ResponseEntity.ok(timetableDTO);
     }
 }

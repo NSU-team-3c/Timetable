@@ -1,6 +1,7 @@
 package ru.nsu.timetable.services;
 
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.PrologExecutionException;
 
 import java.io.*;
 
@@ -9,15 +10,10 @@ public class PrologIntegrationService {
     public String generateTimetable(String inputRequirementsPath, String queryType) throws IOException, InterruptedException {
 
         String prologExecutable = "../scryer-prolog";
-        //String prologExecutableWin = "./scryer-prolog.exe";
+        //String prologExecutableWin = "../scryer-prolog.exe";
         String prologScript = "generation.pl";
         String queryFile = "../../prolog/v2/query.txt";
         String outputFilePath = "../../prolog/v2/timetable.xml";
-//        String prologExecutable = "../scryer-prolog";
-//        //String prologExecutableWin = "./scryer-prolog.exe";
-//        String prologScript = "generation.pl";
-//        String queryFile = "query.txt";
-//        String outputFilePath = "../../prolog/v2/timetable.xml";
         // writeQueryFile(queryType);
 
         try {
@@ -46,12 +42,16 @@ public class PrologIntegrationService {
             int exitCode = process.waitFor();
             outputThread.join();
             System.out.println("Process exited with code: " + exitCode);
+
+            if (exitCode != 0) {
+                throw new PrologExecutionException("Prolog process failed with exit code: " + exitCode);
+            }
+
         } catch (IOException e) {
-            System.err.println("Error starting process: " + e.getMessage());
-            e.printStackTrace();
+            throw new PrologExecutionException("Error starting or reading process: " + e.getMessage(), e);
         } catch (InterruptedException e) {
-            System.err.println("Process interrupted: " + e.getMessage());
             Thread.currentThread().interrupt();
+            throw new PrologExecutionException("Prolog process was interrupted: " + e.getMessage(), e);
         }
 
         System.out.println("Timetable file created successfully: " + outputFilePath);

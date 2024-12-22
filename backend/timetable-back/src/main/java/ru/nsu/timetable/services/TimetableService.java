@@ -7,14 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
+import ru.nsu.timetable.exceptions.TimetableGenerationException;
+import ru.nsu.timetable.exceptions.TimetableParsingException;
 import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.TimetableDTO;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.models.mappers.TimetableMapper;
 import ru.nsu.timetable.repositories.*;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 
 @RequiredArgsConstructor
 @Service
@@ -51,8 +50,7 @@ public class TimetableService {
     private Timetable getTimetableForStudent(User user) {
         Group group = user.getGroup();
         if (group == null) {
-            throw new InvalidDataException("Cannot find timetable for user " + user.getEmail() +
-                    " because the group has not been identified");
+            throw new InvalidDataException("Group not found for user " + user.getEmail());
         }
         Timetable fullTimetable = getGeneratedTimetable();
         List<Event> events = fullTimetable.getEvents()
@@ -76,7 +74,7 @@ public class TimetableService {
         Timetable fullTimetable = getGeneratedTimetable();
         List<Event> events = fullTimetable.getEvents()
                 .stream()
-                .filter(event -> event.getTeacher().getId() == user.getId())
+                .filter(event -> event.getTeacher().getId().equals(user.getId()))
                 .toList();
 
         Timetable timetableForTeacher = new Timetable();
@@ -84,54 +82,41 @@ public class TimetableService {
         return timetableForTeacher;
     }
 
-    public TimetableDTO generateAndSaveTimetable() throws IOException, InterruptedException, ParserConfigurationException, TransformerException {
-        List<Group> groups = groupRepository.findAll();
-        List<Room> rooms = roomRepository.findAll();
-        List<User> teachers = userRepository.findAll()
-                .stream()
-                .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_TEACHER)))
-                .toList();
+    public TimetableDTO generateAndSaveTimetable() {
+        try {
+            List<Group> groups = groupRepository.findAll();
+            List<Room> rooms = roomRepository.findAll();
+            List<User> teachers = userRepository.findAll()
+                    .stream()
+                    .filter(user -> user.getRoles().stream().map(Role::getName).anyMatch(eRole -> eRole.equals(ERole.ROLE_TEACHER)))
+                    .toList();
 
-        System.out.println("Fetched " + groups.size() + " groups, " + rooms.size() + " rooms, " + teachers.size() + " teachers.");
+            String requirementsFilePath = "../../prolog/v2/reqs.xml";
+            requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
 
-        String requirementsFilePath = "../../prolog/v2/reqs.xml";
+            String outputFilePath = prologIntegrationService.generateTimetable(requirementsFilePath, "run");
 
-        requirementsXmlGeneratorService.generateXml(groups, rooms, teachers, 42, 7, requirementsFilePath);
+            if (outputFilePath == null || outputFilePath.isEmpty()) {
+                throw new TimetableGenerationException("Failed to generate timetable. No output file returned");
+            }
 
-        System.out.println("Generating timetable using Prolog...");
-        String queryType = "run";
-        String outputFilePath = prologIntegrationService.generateTimetable(requirementsFilePath, queryType);
+            Timetable timetable = xmlParserService.parseTimetable(outputFilePath);
 
-        if (outputFilePath == null || outputFilePath.isEmpty()) {
-            System.out.println("Error: output file path is null or empty.");
-            throw new RuntimeException("Error generating timetable. No output file returned.");
+            if (timetable == null) {
+                throw new TimetableParsingException("Failed to parse timetable");
+            }
+
+            Timetable savedTimetable = timetableRepository.save(timetable);
+
+            for (Event event : timetable.getEvents()) {
+                event.setTimetable(savedTimetable);
+            }
+            eventRepository.saveAll(timetable.getEvents());
+
+            return timetableMapper.toTimetableDTO(savedTimetable);
+
+        } catch (IOException | InterruptedException e) {
+            throw new TimetableGenerationException("Error occurred during timetable generation", e);
         }
-
-        System.out.println("Timetable generated successfully. Output file path: " + outputFilePath);
-
-        Timetable timetable = xmlParserService.parseTimetable(outputFilePath);
-
-        if (timetable == null) {
-            System.out.println("Error: Timetable parsing failed.");
-            throw new RuntimeException("Failed to parse timetable.");
-        }
-
-        System.out.println("Timetable parsed successfully. Number of events: " + timetable.getEvents().size());
-
-        Timetable savedTimetable = timetableRepository.save(timetable);
-
-        System.out.println("Timetable saved with ID: " + savedTimetable.getId());
-
-        System.out.println("Saving events...");
-        for (Event event : timetable.getEvents()) {
-            event.setTimetable(savedTimetable);
-        }
-        eventRepository.saveAll(timetable.getEvents());
-
-        TimetableDTO timetableDTO = timetableMapper.toTimetableDTO(savedTimetable);
-
-        System.out.println("TimetableDTO created successfully.");
-
-        return timetableDTO;
     }
 }

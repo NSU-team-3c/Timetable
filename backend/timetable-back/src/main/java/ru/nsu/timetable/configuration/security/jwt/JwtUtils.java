@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.nsu.timetable.exceptions.InvalidTokenException;
 import ru.nsu.timetable.exceptions.UnauthorizedException;
 import ru.nsu.timetable.services.UserDetailsImpl;
 
@@ -42,12 +43,17 @@ public class JwtUtils {
     }
 
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            logger.error("Error parsing JWT token: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid JWT token.");
+        }
     }
 
     public String getEmailFromHeader(HttpServletRequest request) {
@@ -68,9 +74,10 @@ public class JwtUtils {
             return true;
         } catch (JwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid JWT token.");
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
+            throw new InvalidTokenException("JWT claims string is empty.");
         }
-        return false;
     }
 }

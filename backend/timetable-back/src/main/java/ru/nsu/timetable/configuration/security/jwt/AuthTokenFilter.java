@@ -10,6 +10,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.nsu.timetable.exceptions.AuthException;
+import ru.nsu.timetable.exceptions.InvalidTokenException;
 import ru.nsu.timetable.services.UserDetailsServiceImpl;
 
 import jakarta.servlet.FilterChain;
@@ -33,16 +35,29 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUserNameFromJwtToken(jwt);
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-                        userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (jwt == null) {
+                throw new InvalidTokenException("JWT token is missing or invalid");
             }
+
+            if (!jwtUtils.validateJwtToken(jwt)) {
+                throw new InvalidTokenException("Invalid JWT token");
+            }
+
+            String username = jwtUtils.getUserNameFromJwtToken(jwt);
+            if (username == null) {
+                throw new AuthException("Username from JWT token is null");
+            }
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (userDetails == null) {
+                throw new AuthException("User not found with username: " + username);
+            }
+
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
             log.error("Can't set user authentication: {}", e.getMessage());
         }

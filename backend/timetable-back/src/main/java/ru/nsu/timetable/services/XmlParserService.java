@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import ru.nsu.timetable.exceptions.BadRequestException;
+import ru.nsu.timetable.exceptions.ParsingException;
+import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.repositories.*;
 
@@ -80,10 +84,10 @@ public class XmlParserService {
             timetable = timetableRepository.save(timetable);
 
             return timetable;
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new ParsingException("Failed to parse XML file", e);
         } catch (Exception e) {
-            System.err.println("Error while parsing timetable XML file: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to parse XML file", e);
+            throw new RuntimeException("Unexpected error occurred while processing timetable", e);
         }
     }
 
@@ -94,7 +98,7 @@ public class XmlParserService {
         for (int j = 0; j < timeSlotNodes.getLength(); j++) {
             Element timeSlotElement = (Element) timeSlotNodes.item(j);
 
-            Long originalId = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
+            long originalId = Long.parseLong(getElementTextContent(timeSlotElement, "id"));
 
             String groupId = getElementAttribute(timeSlotElement, "group", "id");
             String subjectId = getElementAttribute(timeSlotElement, "subject", "id");
@@ -109,22 +113,22 @@ public class XmlParserService {
 
             if (groupId.isEmpty() || subjectId.isEmpty() || teacherId.isEmpty() || roomId.isEmpty()) {
                 System.err.println("Empty field detected: Group ID = " + groupId + ", Subject ID = " + subjectId + ", Teacher ID = " + teacherId + ", Room ID = " + roomId);
-                continue;
+                throw new BadRequestException("One or more required fields are missing: " + groupId + ", " + subjectId + ", " + teacherId + ", " + roomId);
             }
 
             List<Group> groups = new ArrayList<>();
             Group group = groupRepository.findById(Long.parseLong(groupId))
-                    .orElseThrow(() -> new RuntimeException("Group not found: " + groupId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Group not found: " + groupId));
             groups.add(group);
 
             Subject subject = subjectRepository.findById(Long.parseLong(subjectId))
-                    .orElseThrow(() -> new RuntimeException("Subject not found: " + subjectId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Subject not found: " + subjectId));
             User teacher = userRepository.findById(Long.parseLong(teacherId))
-                    .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
             Room room = roomRepository.findById(Long.parseLong(roomId))
-                    .orElseThrow(() -> new RuntimeException("Room not found: " + roomId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found: " + roomId));
 
-            Date[] startEndTimes = calculateTimes(dayNumber, originalId.intValue());
+            Date[] startEndTimes = calculateTimes(dayNumber, (int) originalId);
 
             Event event = new Event();
             event.setStartTime(startEndTimes[0]);

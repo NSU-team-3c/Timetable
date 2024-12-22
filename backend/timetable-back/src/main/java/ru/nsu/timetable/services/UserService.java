@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.BadRequestException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
 import ru.nsu.timetable.models.dto.TeacherDTO;
@@ -88,12 +89,12 @@ public class UserService {
 
     public String changeUserRoles(String email, Set<String> stringRoles) {
         User userByEmail = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
 
         Set<Role> roles = new HashSet<>();
         for (String sRole : stringRoles) {
             Role userRole = roleRepository.findByName(ERole.valueOf(sRole))
-                    .orElseThrow(() -> new RuntimeException("Role not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Role " + sRole + " not found"));
             roles.add(userRole);
         }
         userByEmail.setRoles(roles);
@@ -117,6 +118,10 @@ public class UserService {
     }
 
     private User saveNewUserWithRole(String email, String password, ERole role, String name, String surname) {
+        if (userRepository.existsByEmail(email)) {
+            throw new BadRequestException("User with email " + email + " already exists");
+        }
+
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setDateOfCreation(new Date());
@@ -124,7 +129,7 @@ public class UserService {
         newUser.setSurname(surname);
 
         Role userRole = roleRepository.findByName(role)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role " + role + " not found"));
         newUser.setRoles(Set.of(userRole));
 
         newUser.setPassword(encoder.encode(password));

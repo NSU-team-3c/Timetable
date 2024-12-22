@@ -102,9 +102,8 @@ public class AdminController {
         switch (role) {
             case "STUDENT" -> newUser = userService.saveNewUser(email, password, name, surname);
             case "TEACHER" -> newUser = userService.saveNewTeacher(email, password, name, surname);
-            case "ADMINISTRATOR" ->
-                    newUser = userService.saveNewAdmin(email, password, name, surname);
-            default -> throw new IllegalArgumentException("Invalid role");
+            case "ADMINISTRATOR" -> newUser = userService.saveNewAdmin(email, password, name, surname);
+            default -> throw new InvalidDataException("Error: Invalid role - " + role);
         }
 
         return newUser;

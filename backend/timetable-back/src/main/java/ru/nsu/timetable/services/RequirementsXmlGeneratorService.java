@@ -2,8 +2,11 @@ package ru.nsu.timetable.services;
 
 import lombok.Data;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.XmlGenerationException;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.models.entities.TimeSlot;
+
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
 import java.util.*;
 import javax.xml.bind.JAXBContext;
@@ -213,8 +216,10 @@ public class RequirementsXmlGeneratorService {
             marshaller.marshal(requirements, new File(filePath));
 
             System.out.println("XML file successfully generated: " + filePath);
+        } catch (JAXBException e) {
+            throw new XmlGenerationException("Error while generating XML: " + e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new XmlGenerationException("Unexpected error occurred while generating XML", e);
         }
     }
 

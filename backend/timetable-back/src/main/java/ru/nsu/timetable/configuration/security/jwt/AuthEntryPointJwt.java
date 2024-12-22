@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.nsu.timetable.exceptions.UnauthorizedException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +36,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         mapper.writeValue(response.getOutputStream(), body);
 
         if (!response.isCommitted()) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: unauthorized");
+            throw new UnauthorizedException("Error: Unauthorized access to " + request.getServletPath());
         }
     }
 }

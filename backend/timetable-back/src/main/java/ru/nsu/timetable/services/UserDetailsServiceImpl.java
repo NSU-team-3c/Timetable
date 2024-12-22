@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.repositories.UserRepository;
 import ru.nsu.timetable.models.entities.User;
 
@@ -23,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new ResourceNotFoundException("User with email " + username + " not found"));
 
         return UserDetailsImpl.build(user);
     }
