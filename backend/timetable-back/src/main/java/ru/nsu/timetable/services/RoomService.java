@@ -6,10 +6,10 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.RoomDTO;
 import ru.nsu.timetable.models.dto.RoomInputDTO;
-import ru.nsu.timetable.models.entities.Group;
 import ru.nsu.timetable.models.entities.Room;
 import ru.nsu.timetable.models.mappers.RoomMapper;
 import ru.nsu.timetable.repositories.RoomRepository;
@@ -34,6 +34,9 @@ public class RoomService {
     }
 
     public RoomDTO saveRoom(RoomInputDTO roomInputDTO) {
+        if (roomRepository.existsByNumber(roomInputDTO.number())) {
+            throw new InvalidDataException("Room with number " + roomInputDTO.number() + " already exists");
+        }
         Room room = roomMapper.toRoom(roomInputDTO);
         return roomMapper.toRoomDTO(roomRepository.save(room));
     }
