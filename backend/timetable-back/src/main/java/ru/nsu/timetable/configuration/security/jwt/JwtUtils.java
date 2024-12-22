@@ -43,17 +43,12 @@ public class JwtUtils {
     }
 
     public String getUserNameFromJwtToken(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
-        } catch (JwtException | IllegalArgumentException e) {
-            logger.error("Error parsing JWT token: {}", e.getMessage());
-            throw new InvalidTokenException("Invalid JWT token.");
-        }
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public String getEmailFromHeader(HttpServletRequest request) {
