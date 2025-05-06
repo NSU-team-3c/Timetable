@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.nsu.timetable.configuration.security.jwt.AuthEntryPointJwt;
 import ru.nsu.timetable.configuration.security.jwt.AuthTokenFilter;
-import static ru.nsu.timetable.configuration.sockets.AppConfig.corsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +40,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(unauthorizedHandler))
