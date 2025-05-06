@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import PageContainer from '../../components/container/PageContainer';
-import ClassroomList from '../../components/list/ClassroomList';
+import PageContainer from '../../../components/container/PageContainer';
+import ClassroomList from '../../../components/list/ClassroomList';
+
 
 
 const AddClassroom = () => (

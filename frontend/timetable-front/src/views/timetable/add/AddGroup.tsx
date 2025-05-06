@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import PageContainer from '../../components/container/PageContainer';
-import GroupList from '../../components/list/GroupList';
+import PageContainer from '../../../components/container/PageContainer';
+import GroupList from '../../../components/list/GroupList';
 
 
 const AddGroup = () => (
