@@ -6,6 +6,8 @@ import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 import GuestGuard from '../guards/guestGuard'
 import AuthGuard from '../guards/authGuard';
+import TimetableSettings from '../components/timetable/Timetable';
+import TimetableSettingsPage from '../views/timetable/TimetableSettingsPage';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -27,10 +29,10 @@ const ProfessorProfile  = Loadable(lazy(() => import('../views/profile/Professor
 
 
 /* ***Admin*** */
-const AddProfessor  = Loadable(lazy(() => import('../views/add/AddProfessor')));
-const AddSubject    = Loadable(lazy(() => import('../views/add/AddSubject')));
-const AddClassroom  = Loadable(lazy(() => import('../views/add/AddClassroom')));
-const AddGroup      = Loadable(lazy(() => import('../views/add/AddGroup')));
+const AddProfessor  = Loadable(lazy(() => import('../views/timetable/add/AddProfessor')));
+const AddSubject    = Loadable(lazy(() => import('../views/timetable/add/AddSubject')));
+const AddClassroom  = Loadable(lazy(() => import('../views/timetable/add/AddClassroom')));
+const AddGroup      = Loadable(lazy(() => import('../views/timetable/add/AddGroup')));
 
 const Timetable         = Loadable(lazy(() => import('../views/table/Table')));
 const CreateCourse      = Loadable(lazy(() => import('../views/courses/Course')));
@@ -77,10 +79,11 @@ const Router = [
       </AuthGuard>
     ),
     children: [
-      { path: '/admin/add-professor',  element: <AddProfessor /> },
-      { path: '/admin/add-subject',     element: <AddSubject /> },
-      { path: '/admin/add-classroom',   element: <AddClassroom /> },
-      { path: '/admin/add-group',       element: <AddGroup /> },
+      { path: '/admin/timetable/add-professor',  element: <AddProfessor /> },
+      { path: '/admin/timetable/add-subject',     element: <AddSubject /> },
+      { path: '/admin/timetable/add-classroom',   element: <AddClassroom /> },
+      { path: '/admin/timetable/add-group',       element: <AddGroup /> },
+      { path: '/admin/timetable',       element: <TimetableSettingsPage /> }
     ],
   },
   {

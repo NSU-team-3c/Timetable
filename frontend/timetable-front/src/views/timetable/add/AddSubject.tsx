@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import PageContainer from '../../components/container/PageContainer';
-import ProfessorsList from '../../components/list/ProfessorsList';
+import PageContainer from '../../../components/container/PageContainer';
+import SubjectList from '../../../components/list/SubjectList';
 
 
-const AddProfessor = () => (
+const AddSubject = () => (
     <PageContainer title="Профиль" description="this is Profile page">
         <Box
             p={2}
@@ -13,9 +13,9 @@ const AddProfessor = () => (
                 borderRadius: 0,
             }}
         >
-            <ProfessorsList />
+            <SubjectList />
         </Box>
     </PageContainer>
 );
 
-export default AddProfessor;
+export default AddSubject;

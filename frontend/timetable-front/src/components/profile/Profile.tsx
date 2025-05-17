@@ -33,59 +33,6 @@ const Profile: React.FC = () => {
     );
   }
 
-  const additionLinkView = () => {
-
-    const ans = (<Box/>);
-
-    const role = profile?.role.split(', ');
-
-    console.log(role);
-
-    if (role?.includes('administrator', 0)) {
-      console.log(0);
-      return (
-        <Box mt={2} sx={{boxShadow: 15}} p={2} mb={2}>
-          <Typography color={"secondary"} fontSize={18} mb={3} textAlign={'center'} fontWeight={600}>Генерация расписания </Typography>
-
-          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to={"/admin/add-professor"}>
-              <Typography color="primary">Добавление преподавателей {'>'} </Typography>
-          </Button>
-
-          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-subject">
-            <Typography color="primary">Добавление предметов {'>'} </Typography>
-          </Button>
-
-          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-classroom">
-            <Typography color="primary">Добавление комнат {'>'} </Typography>
-          </Button>
-
-          <Button sx={{marginBottom: 1}} color={'inherit'} component={Link} to="/admin/add-group">
-            <Typography color="primary">Добавление групп {'>'} </Typography>
-          </Button>
-
-          <Box>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={sendRequest}
-            >
-              Сгенерировать расписание
-            </Button>
-          </Box>
-        </Box>
-      )
-    }
-
-    if (role?.includes('teacher')) {
-      return (
-        <Link to="/profile/professor/availability" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Указать предпочтительное время работы {'>'} </Typography>
-        </Link>
-      )
-    }
-  }
-
   if (!profile) {
     return <Spinner />;
   }
@@ -150,8 +97,6 @@ const Profile: React.FC = () => {
           <Link to="/profile/profile-edit" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
             <Typography color="primary">Редактировать профиль {'>'}</Typography>
           </Link>
-
-          {additionLinkView()}
 
         </Box>
     </Box>
