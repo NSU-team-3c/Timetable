@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class AdminController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Operation(summary = "Registration of new student account in system")
     @ApiResponses({
@@ -47,7 +49,9 @@ public class AdminController {
     @Transactional
     @Tag(name = "Student Registration")
     public UserRegisterDTO registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "STUDENT"));
+        User user = registerUser(registrationRequest, "STUDENT");
+        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый студент зарегистрирован: " + user.getEmail());
+        return userMapper.toUserRegisterDTO(user);
     }
 
     @Operation(summary = "Registration of new teacher account in system", security = @SecurityRequirement(name = "bearerAuth"))
@@ -63,7 +67,9 @@ public class AdminController {
     @Transactional
     @Tag(name = "Teacher Registration")
     public UserRegisterDTO registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "TEACHER"));
+        User user = registerUser(registrationRequest, "TEACHER");
+        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый преподаватель зарегистрирован: " + user.getEmail());
+        return userMapper.toUserRegisterDTO(user);
     }
 
     @Operation(summary = "Registration of new admin account in system", security = @SecurityRequirement(name = "bearerAuth"))
@@ -79,7 +85,9 @@ public class AdminController {
     @Transactional
     @Tag(name = "Admin Registration")
     public UserRegisterDTO registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return userMapper.toUserRegisterDTO(registerUser(registrationRequest, "ADMINISTRATOR"));
+        User user = registerUser(registrationRequest, "ADMINISTRATOR");
+        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый администратор зарегистрирован: " + user.getEmail());
+        return userMapper.toUserRegisterDTO(user);
     }
 
     private User registerUser(RegistrationRequest request, String role) {
