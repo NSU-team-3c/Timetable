@@ -1,41 +1,57 @@
 import { useEffect, useRef, useState } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { useDispatch } from '../store/Store';
+import { setGroupUpdateFlag } from '../store/application/group/groupSlice';
 
-export function useWebSocket(url: string) {
-  const socketRef = useRef<WebSocket | null>(null);
+export function useWebSocket(url: string, token: string) {
+  const socketRef = useRef<Client | null>(null);
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socket = new WebSocket(url);
-    socketRef.current = socket;
 
-    socket.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-    };
+    const client = new Client({
+      brokerURL: url,
+      connectHeaders : {
+        Authorization: `Bearer ${token}`,
+      },
+      webSocketFactory: () => SockJS(url),
+      onConnect: () => {
+        console.log('STOMP connected');
+        setIsConnected(true);
+      },
+      onStompError: (error) => {
+        console.error('STOMP error:', error);
+      },
+      onWebSocketClose: () => {
+        console.log('WebSocket disconnected');
+        setIsConnected(false);
+      },
+    });
 
-    socket.onmessage = (event: MessageEvent) => {
-      console.log('Received:', event.data);
-      setMessages(prev => [...prev, event.data]);
-    };
+    socketRef.current = client;
 
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    client.subscribe('chanтel/to/recive/message', (message) => {
+      JSON.parse(message.body);
+          
+      dispatch(setGroupUpdateFlag());
+    });
 
-    socket.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-    };
+    client.activate();
+
 
     return () => {
-      socket.close();
+      if (socketRef.current) {
+        socketRef.current.deactivate();
+      }
     };
-  }, [url]);
+  }, [url, token]);
 
   const sendMessage = (message: string) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(message);
+    if (socketRef.current && socketRef.current.connected) {
+      socketRef.current.publish({ destination: 'chanтel/to/send/message', body: message });
     } else {
       console.warn('WebSocket is not open.');
     }

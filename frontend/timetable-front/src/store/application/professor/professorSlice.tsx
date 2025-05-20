@@ -14,12 +14,14 @@ interface professorState {
   professors: Professor[];
   loading: boolean;
   error: string | null;
+  dataUpdated: boolean;
 }
 
 const initialState: professorState = {
   professors: [],
   loading: false,
   error: null,
+  dataUpdated: false,
 };
 
 export const fetchProfessors = createAsyncThunk('professors/fetchProfessors', async () => {
@@ -42,6 +44,10 @@ export const deleteProfessor = createAsyncThunk('professors/deleteProfessor', as
   return id;
 });
 
+export const setProfessorUpdateFlag = createAsyncThunk('professors/setProfessorUpdateFlag', () => {
+  return true; 
+});
+
 const professorSlice = createSlice({
   name: 'professors',
   initialState,
@@ -51,6 +57,9 @@ const professorSlice = createSlice({
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    resetDataUpdatedFlag(state) {
+      state.dataUpdated = false; 
     },
   },
   extraReducers: (builder) => {
@@ -62,6 +71,7 @@ const professorSlice = createSlice({
       .addCase(fetchProfessors.fulfilled, (state, action: PayloadAction<Professor[]>) => {
         state.loading = false;
         state.professors = action.payload;
+        state.dataUpdated = false;
       })
       .addCase(fetchProfessors.rejected, (state, action) => {
         state.loading = false;
@@ -74,6 +84,7 @@ const professorSlice = createSlice({
       .addCase(createProfessor.fulfilled, (state, action: PayloadAction<Professor>) => {
         state.loading = false;
         state.professors.push(action.payload);
+        state.dataUpdated = false;
       })
       .addCase(createProfessor.rejected, (state, action) => {
         state.loading = false;
@@ -88,6 +99,7 @@ const professorSlice = createSlice({
         const index = state.professors.findIndex((professor) => professor.id === action.payload.id);
         if (index !== -1) {
           state.professors[index] = action.payload;
+          state.dataUpdated = false;
         }
       })
       .addCase(updateProfessor.rejected, (state, action) => {
@@ -101,10 +113,15 @@ const professorSlice = createSlice({
       .addCase(deleteProfessor.fulfilled, (state, action: PayloadAction<number>) => {
         state.loading = false;
         state.professors = state.professors.filter((professor) => professor.id !== action.payload);
+        state.dataUpdated = false;
       })
       .addCase(deleteProfessor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete professor';
+      })
+
+      .addCase(setProfessorUpdateFlag.fulfilled, (state) => {
+        state.dataUpdated = true; 
       });
   },
 });

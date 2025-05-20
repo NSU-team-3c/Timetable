@@ -17,12 +17,14 @@ interface subjectState {
   subjects: Subject[];
   loading: boolean;
   error: string | null;
+  dataUpdated: boolean;
 }
 
 const initialState: subjectState = {
   subjects: [],
   loading: false,
   error: null,
+  dataUpdated: false,
 };
 
 export const fetchSubjects = createAsyncThunk('subjects/fetchSubjects', async () => {
@@ -45,6 +47,10 @@ export const deleteSubject = createAsyncThunk('subjects/deleteSubject', async (i
   return id;
 });
 
+export const setSubjectUpdateFlag = createAsyncThunk('subjects/setSubjectUpdateFlag', () => {
+  return true; 
+});
+
 const subjectSlice = createSlice({
   name: 'subjects',
   initialState,
@@ -54,6 +60,9 @@ const subjectSlice = createSlice({
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    resetDataUpdatedFlag(state) {
+      state.dataUpdated = false; 
     },
   },
   extraReducers: (builder) => {
@@ -65,6 +74,7 @@ const subjectSlice = createSlice({
       .addCase(fetchSubjects.fulfilled, (state, action: PayloadAction<Subject[]>) => {
         state.loading = false;
         state.subjects = action.payload;
+        state.dataUpdated = false;
       })
       .addCase(fetchSubjects.rejected, (state, action) => {
         state.loading = false;
@@ -77,6 +87,7 @@ const subjectSlice = createSlice({
       .addCase(createSubject.fulfilled, (state, action: PayloadAction<Subject>) => {
         state.loading = false;
         state.subjects.push(action.payload);
+        state.dataUpdated = false;
       })
       .addCase(createSubject.rejected, (state, action) => {
         state.loading = false;
@@ -91,6 +102,7 @@ const subjectSlice = createSlice({
         const index = state.subjects.findIndex((subject) => subject.id === action.payload.id);
         if (index !== -1) {
           state.subjects[index] = action.payload;
+          state.dataUpdated = false;
         }
       })
       .addCase(updateSubject.rejected, (state, action) => {
@@ -104,10 +116,15 @@ const subjectSlice = createSlice({
       .addCase(deleteSubject.fulfilled, (state, action: PayloadAction<number>) => {
         state.loading = false;
         state.subjects = state.subjects.filter((subject) => subject.id !== action.payload);
+        state.dataUpdated = false;
       })
       .addCase(deleteSubject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete subject';
+      })
+
+      .addCase(setSubjectUpdateFlag.fulfilled, (state) => {
+        state.dataUpdated = true; 
       });
   },
 });
