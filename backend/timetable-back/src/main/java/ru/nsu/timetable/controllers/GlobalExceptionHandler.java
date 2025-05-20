@@ -77,4 +77,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new MessageResponse("XML generation failed: " + ex.getMessage()));
     }
+
+    @ExceptionHandler(GenerationInProgressException.class)
+    public ResponseEntity<MessageResponse> handleGenerationInProgressException(GenerationInProgressException ex) {
+        return ResponseEntity.status(HttpStatus.LOCKED)
+                .body(new MessageResponse("Generation in progress: " + ex.getMessage()));
+    }
 }
