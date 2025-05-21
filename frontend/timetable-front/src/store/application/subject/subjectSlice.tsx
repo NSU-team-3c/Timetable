@@ -61,7 +61,7 @@ const subjectSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    resetDataUpdatedFlag(state) {
+    resetSubjectUpdatedFlag(state) {
       state.dataUpdated = false; 
     },
   },
@@ -129,6 +129,6 @@ const subjectSlice = createSlice({
   },
 });
 
-export const { setLoading, setError } = subjectSlice.actions;
+export const { setLoading, setError, resetSubjectUpdatedFlag } = subjectSlice.actions;
 
 export default subjectSlice.reducer;

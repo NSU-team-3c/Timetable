@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client';
 import { useDispatch } from '../store/Store';
 import { setGroupUpdateFlag } from '../store/application/group/groupSlice';
 
-export function useWebSocket(url: string, token: string) {
+export function useWebSocket(url: string, token: string | null) {
   const socketRef = useRef<Client | null>(null);
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<string[]>([]);

@@ -58,7 +58,7 @@ const groupSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    resetDataUpdatedFlag(state) {
+    resetGroupUpdatedFlag(state) {
       state.dataUpdated = false; 
     },
   },
@@ -130,6 +130,6 @@ const groupSlice = createSlice({
   },
 });
 
-export const { setLoading, setError } = groupSlice.actions;
+export const { setLoading, setError, resetGroupUpdatedFlag } = groupSlice.actions;
 
 export default groupSlice.reducer;

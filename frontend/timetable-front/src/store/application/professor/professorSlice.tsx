@@ -58,7 +58,7 @@ const professorSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    resetDataUpdatedFlag(state) {
+    resetProfessorUpdatedFlag(state) {
       state.dataUpdated = false; 
     },
   },
@@ -126,6 +126,6 @@ const professorSlice = createSlice({
   },
 });
 
-export const { setLoading, setError } = professorSlice.actions;
+export const { setLoading, setError, resetProfessorUpdatedFlag} = professorSlice.actions;
 
 export default professorSlice.reducer;

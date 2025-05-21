@@ -57,7 +57,7 @@ const auditorySlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    resetDataUpdatedFlag(state) {
+    resetAuditoryUpdatedFlag(state) {
       state.dataUpdated = false; 
     },
   },
@@ -125,6 +125,6 @@ const auditorySlice = createSlice({
   },
 });
 
-export const { setLoading, setError } = auditorySlice.actions;
+export const { setLoading, setError, resetAuditoryUpdatedFlag } = auditorySlice.actions;
 
 export default auditorySlice.reducer;
