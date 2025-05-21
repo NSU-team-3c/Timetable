@@ -9,6 +9,7 @@
     "@mui/material": "^6.1.9",
     "@mui/x-date-pickers": "^7.22.3",
     "@reduxjs/toolkit": "^2.3.0",
+    "@stomp/stompjs": "^7.1.1",
     "@tabler/icons-react": "^3.22.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -37,6 +38,7 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.8.3",
     "react-toastify": "^10.0.6",
+    "sockjs-client": "^1.6.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "yup": "^1.4.0",
@@ -72,6 +74,7 @@
     "@types/react-helmet": "^6.1.11",
     "@types/react-modal": "^3.16.3",
     "@types/react-router-dom": "^5.3.3",
+    "@types/sockjs-client": "^1.5.4",
     "eslint-plugin-react-refresh": "^0.4.16"
   }
 }

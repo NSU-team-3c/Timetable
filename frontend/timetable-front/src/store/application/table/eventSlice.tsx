@@ -15,12 +15,14 @@ interface EventState {
   events: MyEvent[];
   loading: boolean;
   error: string | null;
+  dataUpdated: boolean;
 }
 
 const initialState: EventState = {
   events: [],
   loading: false,
   error: null,
+  dataUpdated: false,
 };
 
 export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
@@ -30,6 +32,10 @@ export const fetchEvents = createAsyncThunk('events/fetchEvents', async () => {
     return response.data.events
   }
   return [];
+});
+
+export const setEventUpdateFlag = createAsyncThunk('events/setEventUpdateFlag', () => {
+  return true; 
 });
 
 const eventSlice = createSlice({
@@ -45,6 +51,9 @@ const eventSlice = createSlice({
     setEvents(state, action: PayloadAction<MyEvent[]>) {
       state.events = action.payload;
     },
+    resetDataUpdatedFlag(state) {
+      state.dataUpdated = false; 
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -55,11 +64,16 @@ const eventSlice = createSlice({
       .addCase(fetchEvents.fulfilled, (state, action: PayloadAction<MyEvent[]>) => {
         state.events = action.payload 
         state.loading = false;
+        state.dataUpdated = false;
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch events';  
       })
+
+      .addCase(setEventUpdateFlag.fulfilled, (state) => {
+        state.dataUpdated = true; 
+      });
   },
 });
 
