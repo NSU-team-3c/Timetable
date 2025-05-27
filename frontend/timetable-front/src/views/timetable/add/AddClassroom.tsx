@@ -22,7 +22,7 @@ const AddClassroom = () => {
                 console.error('Ошибка при обновлении данных:', error);
             });
         }
-    }, [dataUpdated, , location.pathname]);
+    }, [dataUpdated, dispatch, location.pathname]);
     
 
     return (
