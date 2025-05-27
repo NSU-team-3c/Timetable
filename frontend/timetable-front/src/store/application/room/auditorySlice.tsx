@@ -13,12 +13,14 @@ interface AuditoryState {
   auditories: Auditory[];
   loading: boolean;
   error: string | null;
+  dataUpdated: boolean;
 }
 
 const initialState: AuditoryState = {
   auditories: [],
   loading: false,
   error: null,
+  dataUpdated: false,
 };
 
 export const fetchAuditories = createAsyncThunk('rooms/fetchAuditories', async () => {
@@ -41,6 +43,10 @@ export const deleteAuditory = createAsyncThunk('rooms/deleteAuditory', async (id
   return id;
 });
 
+export const setAuditoryUpdateFlag = createAsyncThunk('rooms/setAuditoryUpdateFlag', () => {
+  return true; 
+});
+
 const auditorySlice = createSlice({
   name: 'auditories',
   initialState,
@@ -50,6 +56,9 @@ const auditorySlice = createSlice({
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    resetAuditoryUpdatedFlag(state) {
+      state.dataUpdated = false; 
     },
   },
   extraReducers: (builder) => {
@@ -61,6 +70,7 @@ const auditorySlice = createSlice({
       .addCase(fetchAuditories.fulfilled, (state, action: PayloadAction<Auditory[]>) => {
         state.loading = false;
         state.auditories = action.payload;
+        state.dataUpdated = false;
       })
       .addCase(fetchAuditories.rejected, (state, action) => {
         state.loading = false;
@@ -73,6 +83,7 @@ const auditorySlice = createSlice({
       .addCase(createAuditory.fulfilled, (state, action: PayloadAction<Auditory>) => {
         state.loading = false;
         state.auditories.push(action.payload);
+        state.dataUpdated = false;
       })
       .addCase(createAuditory.rejected, (state, action) => {
         state.loading = false;
@@ -87,6 +98,7 @@ const auditorySlice = createSlice({
         const index = state.auditories.findIndex((auditory) => auditory.id === action.payload.id);
         if (index !== -1) {
           state.auditories[index] = action.payload;
+          state.dataUpdated = false;
         }
       })
       .addCase(updateAuditory.rejected, (state, action) => {
@@ -100,14 +112,19 @@ const auditorySlice = createSlice({
       .addCase(deleteAuditory.fulfilled, (state, action: PayloadAction<number>) => {
         state.loading = false;
         state.auditories = state.auditories.filter((auditory) => auditory.id !== action.payload); // Удаляем аудиторию по ID
+        state.dataUpdated = false;
       })
       .addCase(deleteAuditory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete auditory';
+      })
+
+      .addCase(setAuditoryUpdateFlag.fulfilled, (state) => {
+        state.dataUpdated = true; 
       });
   },
 });
 
-export const { setLoading, setError } = auditorySlice.actions;
+export const { setLoading, setError, resetAuditoryUpdatedFlag } = auditorySlice.actions;
 
 export default auditorySlice.reducer;
