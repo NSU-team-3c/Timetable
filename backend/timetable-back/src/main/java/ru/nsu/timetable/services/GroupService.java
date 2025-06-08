@@ -2,6 +2,7 @@ package ru.nsu.timetable.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.GroupDTO;
@@ -33,6 +34,7 @@ public class GroupService {
         return groupMapper.toGroupDTO(getGroup(id));
     }
 
+    @Transactional
     public GroupDTO saveGroup(GroupInputDTO groupInputDTO) {
         if (groupRepository.existsByNumber(groupInputDTO.number())) {
             throw new InvalidDataException("Group with number " + groupInputDTO.number() + " already exists");
@@ -41,14 +43,18 @@ public class GroupService {
         return groupMapper.toGroupDTO(groupRepository.save(group));
     }
 
-    public void deleteGroup(Long id) {
+    @Transactional
+    public String deleteGroup(Long id) {
         if (groupRepository.existsById(id)) {
+            String deletedGroupNumber = groupRepository.getReferenceById(id).getNumber();
             groupRepository.deleteById(id);
+            return deletedGroupNumber;
         } else {
             throw new ResourceNotFoundException("Group with id " + id + " not found");
         }
     }
 
+    @Transactional
     public GroupDTO updateGroup(Long id, GroupInputDTO groupInputDTO) {
         Group group = getGroup(id);
         group.setNumber(groupInputDTO.number());
@@ -58,7 +64,7 @@ public class GroupService {
         return groupMapper.toGroupDTO(groupRepository.save(group));
     }
 
-    public Group getGroup(Long id) {
+    private Group getGroup(Long id) {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isEmpty()) {
             throw new ResourceNotFoundException("Group with id " + id + " not found");

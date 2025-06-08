@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.dto.TimeSlotDTO;
 import ru.nsu.timetable.models.entities.TimeSlot;
@@ -25,6 +26,7 @@ public class TimeSlotService {
         return user.getAvailableTimeSlots();
     }
 
+    @Transactional
     public List<TimeSlot> saveTimeSlots(String email, List<TimeSlotDTO> timeSlotDTOs) {
         User user = userService.getUserByEmail(email);
         List<TimeSlot> timeSlots = timeSlotDTOs
@@ -37,6 +39,7 @@ public class TimeSlotService {
         return user.getAvailableTimeSlots();
     }
 
+    @Transactional
     public List<TimeSlot> deleteTimeSlots(String email, List<Long> ids) {
         User user = userService.getUserByEmail(email);
         for (Long id : ids) {

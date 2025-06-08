@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.timetable.exceptions.BadRequestException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.models.constants.ERole;
@@ -57,6 +58,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public UserDTO updateUserByEmail(String email, UserInputDTO userInputDTO) {
         User user = getUserByEmail(email);
         user.setPhone(userInputDTO.phone());
