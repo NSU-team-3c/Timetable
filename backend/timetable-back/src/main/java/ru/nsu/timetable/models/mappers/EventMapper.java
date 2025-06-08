@@ -12,6 +12,7 @@ public class EventMapper {
 
         String subjectName = event.getSubject() != null ? event.getSubject().getName() : "Unknown Subject";
         String roomName = event.getRoom() != null ? event.getRoom().getNumber() : "Unknown Room";
+        String audienceType = event.getAudienceType() != null ? event.getAudienceType().name() : "lecture";
 
         return new EventDTO(
                 event.getId(),
@@ -19,7 +20,8 @@ public class EventMapper {
                 event.getEndTime(),
                 teacherName,
                 subjectName,
-                roomName
+                roomName,
+                audienceType
         );
     }
 }

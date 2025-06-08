@@ -103,6 +103,7 @@ public class XmlParserService {
 
             String groupId = getElementAttribute(timeSlotElement, "group", "id");
             String subjectId = getElementAttribute(timeSlotElement, "subject", "id");
+            String typeId = getElementAttribute(timeSlotElement, "type", "id");
             String teacherId = getElementAttribute(timeSlotElement, "teacher", "id");
             String roomId = getElementAttribute(timeSlotElement, "room", "id");
 
@@ -129,6 +130,8 @@ public class XmlParserService {
             Room room = roomRepository.findById(Long.parseLong(roomId))
                     .orElseThrow(() -> new ResourceNotFoundException("Room not found: " + roomId));
 
+            Event.AudienceType audienceType= Event.AudienceType.valueOf(typeId.toLowerCase());
+
             Date[] startEndTimes = calculateTimes(dayNumber, (int) originalId);
 
             Event event = Event.builder()
@@ -138,6 +141,7 @@ public class XmlParserService {
                     .subject(subject)
                     .teacher(teacher)
                     .room(room)
+                    .audienceType(audienceType)
                     .build();
 
             events.add(event);
