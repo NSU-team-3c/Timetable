@@ -1,6 +1,9 @@
 package ru.nsu.timetable.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.timetable.models.dto.GroupDTO;
 import ru.nsu.timetable.models.dto.GroupInputDTO;
 import ru.nsu.timetable.services.GroupService;
+import ru.nsu.timetable.sockets.MessageUtils;
 
 import java.util.List;
 
@@ -22,6 +26,7 @@ import java.util.List;
 @Tag(name = "Group controller")
 public class GroupController {
     private final GroupService groupService;
+    private final MessageUtils messageUtils;
 
     @GetMapping("")
     public List<GroupDTO> getAllGroups() {
@@ -34,17 +39,25 @@ public class GroupController {
     }
 
     @PostMapping("")
-    public GroupDTO createGroup(@RequestBody GroupInputDTO groupInputDTO) {
-        return groupService.saveGroup(groupInputDTO);
+    @Operation(summary = "Create group", security = @SecurityRequirement(name = "bearerAuth"))
+    public GroupDTO createGroup(HttpServletRequest request, @RequestBody GroupInputDTO groupInputDTO) {
+        GroupDTO groupDTO = groupService.saveGroup(groupInputDTO);
+        messageUtils.sendMessage(request, "group", "group " + groupDTO.number() + " created", null);
+        return groupDTO;
     }
 
     @DeleteMapping("/{id}")
-    public void deleteGroup(@PathVariable Long id) {
-        groupService.deleteGroup(id);
+    @Operation(summary = "Delete group", security = @SecurityRequirement(name = "bearerAuth"))
+    public void deleteGroup(HttpServletRequest request, @PathVariable Long id) {
+        String deletedGroupNumber = groupService.deleteGroup(id);
+        messageUtils.sendMessage(request, "group", "group " + deletedGroupNumber + " deleted", null);
     }
 
     @PutMapping("/{id}")
-    public GroupDTO updateGroup(@PathVariable Long id, @RequestBody GroupInputDTO groupInputDTO) {
-        return groupService.updateGroup(id, groupInputDTO);
+    @Operation(summary = "Update group", security = @SecurityRequirement(name = "bearerAuth"))
+    public GroupDTO updateGroup(HttpServletRequest request, @PathVariable Long id, @RequestBody GroupInputDTO groupInputDTO) {
+        GroupDTO groupDTO = groupService.updateGroup(id, groupInputDTO);
+        messageUtils.sendMessage(request, "group", "group " + groupDTO.number() + " updated", null);
+        return groupDTO;
     }
 }

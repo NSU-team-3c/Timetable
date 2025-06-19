@@ -62,6 +62,9 @@ public class RequirementsXmlGeneratorService {
         @XmlAttribute(name = "subject")
         private long subjectId;
 
+        @XmlAttribute(name = "type")
+        private String type;
+
         @XmlAttribute(name = "teacher")
         private long teacherId;
 
@@ -152,6 +155,7 @@ public class RequirementsXmlGeneratorService {
                         int weeklyAmount = semesterDuration / weeksInSemester;
 
                         req.setAmount(weeklyAmount);
+                        req.setType(subject.getAudienceType().name());
                         reqList.add(req);
                     }
                 }

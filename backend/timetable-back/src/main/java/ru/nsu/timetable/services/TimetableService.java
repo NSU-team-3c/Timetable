@@ -5,6 +5,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.exceptions.TimetableGenerationException;
@@ -82,6 +83,7 @@ public class TimetableService {
                 .build();
     }
 
+    @Transactional
     public TimetableDTO generateAndSaveTimetable() {
         try {
             List<Group> groups = groupRepository.findAll();
