@@ -33,17 +33,30 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
+
         try {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                log.debug("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
+                log.debug("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" + username);
+
+
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.debug("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                         userDetails.getAuthorities());
+                log.debug("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                log.debug("ffffffffffffffffffffffffffffffffffffffffffffffff");
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeu");
+
             }
         } catch (Exception e) {
             log.error("Can't set user authentication: {}", e.getMessage());
@@ -53,6 +66,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private String parseJwt(HttpServletRequest request) {
+
+        String token = request.getParameter("token");
+
+        if (token != null && !token.isEmpty()) {
+            log.debug("User token: " + token);
+            return token;
+        }
+
+
         String headerAuth = request.getHeader("Authorization");
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
