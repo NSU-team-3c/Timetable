@@ -45,9 +45,11 @@ public class SubjectService {
         return subjectMapper.toSubjectDTO(subjectRepository.save(subject));
     }
 
-    public void deleteSubject(Long id) {
+    public String deleteSubject(Long id) {
         if (subjectRepository.existsById(id)) {
+            String deletedSubjectName = subjectRepository.getReferenceById(id).getName();
             subjectRepository.deleteById(id);
+            return deletedSubjectName;
         } else {
             throw new ResourceNotFoundException("Subject with id " + id + " not found");
         }

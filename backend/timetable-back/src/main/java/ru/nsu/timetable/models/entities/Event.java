@@ -38,6 +38,9 @@ public class Event {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @Enumerated(EnumType.STRING)
+    private AudienceType audienceType;
+
     @ManyToMany
     @JoinTable(
             name = "event_group",
@@ -52,4 +55,8 @@ public class Event {
     @JsonIgnore
     @JsonBackReference
     private Timetable timetable;
+
+    public enum AudienceType {
+        computer, online, lecture, common
+    }
 }
