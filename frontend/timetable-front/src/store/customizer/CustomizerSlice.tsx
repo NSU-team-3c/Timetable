@@ -22,11 +22,11 @@ const initialState: StateType = {
   activeMode: 'light', // This can be light or dark
   activeTheme: 'NSU_GREEN_THEME', // BLUE_THEME, GREEN_THEME, BLACK_THEME, PURPLE_THEME, ORANGE_THEME
   SidebarWidth: 300,
-  MiniSidebarWidth: 87,
+  MiniSidebarWidth: 0,
   TopbarHeight: 70,
   isLayout: 'boxed', // This can be full or boxed
   isCollapse: false, // to make sidebar Mini by default
-  isSidebarHover: false,
+  isSidebarHover: true,
   isMobileSidebar: false,
   isHorizontal: false,
   isLanguage: 'en',

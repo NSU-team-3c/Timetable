@@ -24,18 +24,6 @@ const Menuitems: MenuitemsType[] = [
     },
     {
         id: uniqueId(),
-        title: 'Курсы',
-        href: '/courses',
-        chipColor: 'secondary',
-    },
-    {
-        id: uniqueId(),
-        title: 'Дисциплины',
-        href: '/disciplines',
-        chipColor: 'secondary',
-    },
-    {
-        id: uniqueId(),
         title: 'О нас',
         href: '/about',
         chipColor: 'secondary',

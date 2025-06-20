@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import ErrorImg from '../../assets/images/background/errorimg.svg';
+import ErrorImg from '../../assets/images/backgrounds/errorimg.svg';
 
 const Error = () => (
   <Box

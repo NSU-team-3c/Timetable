@@ -8,6 +8,9 @@ import GuestGuard from '../guards/guestGuard'
 import AuthGuard from '../guards/authGuard';
 import TimetableSettings from '../components/timetable/Timetable';
 import TimetableSettingsPage from '../views/timetable/TimetableSettingsPage';
+import { Help } from '@mui/icons-material';
+import AboutUs from '../views/aboutus/AboutUs';
+import Faq from '../views/help/Help';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -49,6 +52,8 @@ const Router = [
     children: [
       { path: '/',                      element: <Navigate to="/auth/login" /> },
       { path: '/auth/login',            element: <Login /> },
+      { path: '/auth/faq',              element: <Faq /> },
+      { path: '/auth/about',          element: <AboutUs /> },
       { path: '/auth/register',         element: <Register /> },
       { path: '/auth/forgot-password',  element: <ForgotPassword /> },
     ],
@@ -64,6 +69,8 @@ const Router = [
       { path: '/profile',                         element: <Profile /> },
       { path: '/profile/profile-edit',            element: <ProfileEdit /> },
       { path: '/profile/timetable',               element: <Timetable /> },
+      { path: '/profile/faq',              element: <Faq /> },
+      { path: '/profile/about',          element: <AboutUs /> },
       { path: '/profile/change-password',         element: <ChangePassword /> },
       { path: '/profile/professor',               element: <ProfessorProfile /> },
       { path: '/profile/professor/course',        element: <CreateCourse /> },
