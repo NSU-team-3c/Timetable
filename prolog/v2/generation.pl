@@ -80,6 +80,20 @@ print_missing([event(Group, Lesson, _, Teacher, _, _) | Rest]) :-
     format(" - Группа: ~s, Предмет: ~s, Преподаватель: ~s~n", [Group, Lesson, Teacher]),
     print_missing(Rest).
 
+print_expl(List) :-
+    open('expl.xml', write, Stream),
+    xml_write_expl(Stream, List),
+    close(Stream).
+
+xml_write_expl(Stream, []).
+xml_write_expl(Stream, [event(Group, Lesson, _, Teacher, _, _) | Rest]) :-
+    phrase_to_stream(phrase(" <unplaced>\n"), Stream),
+    phrase_to_stream(format_("\t <group id=\"~s\"/>\n", [Group]), Stream),
+    phrase_to_stream(format_("\t <subject id=\"~s\"/>\n", [Lesson]), Stream),
+    phrase_to_stream(format_("\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
+    phrase_to_stream(phrase(" </unplaced>\n"), Stream),
+    xml_write_expl(Stream, Rest).
+
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -184,13 +198,13 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     LastTimeToStartTheLesson #= End + 1,
     between(Start, LastTimeToStartTheLesson, Slot),
     
-    write('Slot: '), write(Slot), nl,     
-    write('Group: '), write(Group), nl,    
-    write('Teacher: '), write(Teacher), nl,
-    write('Room: '), write(RoomID), nl,     
-    write('Lesson: '), write(Lesson), nl,  
-    write('Day: '), write(Day), nl,  
-    write('State:'), write(State), nl,
+    %write('Slot: '), write(Slot), nl,     
+    %write('Group: '), write(Group), nl,    
+    %write('Teacher: '), write(Teacher), nl,
+    %write('Room: '), write(RoomID), nl,     
+    %write('Lesson: '), write(Lesson), nl,  
+    %write('Day: '), write(Day), nl,  
+    %write('State:'), write(State), nl,
     %between(1, SPD, Slot),
     NewState = [event(Group, Lesson, RoomID, Teacher, Day, Slot)|State],
     NewLength #= Length + 1.
@@ -201,11 +215,11 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
 
 ucs_traverse([], _) :-
     partition_schedule(Schedule, Length),
-    format("\nНе удалось построить расписание. Лучшее частичное длины ~d:~n", [Length]),
-    pretty_print(schedule(Schedule)),
+    %format("\nНе удалось построить расписание. Лучшее частичное длины ~d:~n", [Length]),
+    %pretty_print(schedule(Schedule)),
     missing_lessons(Schedule, Missing),
-    format("\nНевыполнимые требования:~n", []),
-    print_missing(Missing).
+    %format("\nНевыполнимые требования:~n", []),
+    print_expl(Missing).
 
 ucs_traverse([node(State, Goal, Cost)| _], Goal) :-
     format("\nTotal penalty: ~d\n\n\nSCHEDULE\n", [Cost]),

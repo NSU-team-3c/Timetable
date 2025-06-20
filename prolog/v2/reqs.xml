@@ -5,6 +5,7 @@
 	<group id="22215" amount="20">
         <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
 		<req subject="dpas" teacher="Куталев А. В." amount="2"/>
+		<req subject="math" teacher="Васкевич В. Л." amount="2"/>
 
 	</group>
 
@@ -14,6 +15,10 @@
 
 	<availableTeacherSlots teacher="Иртегов Д.В.">
 		<slot day="1" start="1" end="3"/>
+	</availableTeacherSlots>
+
+	<availableTeacherSlots teacher="Васкевич В. Л.">
+		<slot day="4" start="1" end="7"/>
 	</availableTeacherSlots>
 
 </requirements>
