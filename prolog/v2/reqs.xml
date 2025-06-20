@@ -1,35 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <requirements>
-    <global slotsperweek="42" slotsperday="7"/>
-    <group id="1" amount="12">
-        <req subject="1" teacher="2" amount="5"/>
-        <req subject="2" teacher="3" amount="4"/>
-    </group>
-    <room id="1" capacity="40">
-        <allocate day="1" start="1" end="7"/>
-        <allocate day="2" start="1" end="7"/>
-        <allocate day="3" start="1" end="7"/>
-        <allocate day="4" start="1" end="7"/>
-        <allocate day="5" start="1" end="7"/>
-        <allocate day="6" start="1" end="7"/>
-        <allocate day="7" start="1" end="7"/>
-    </room>
-    <room id="2" capacity="100">
-        <allocate day="1" start="1" end="7"/>
-        <allocate day="2" start="1" end="7"/>
-        <allocate day="3" start="1" end="7"/>
-        <allocate day="4" start="1" end="7"/>
-        <allocate day="5" start="1" end="7"/>
-        <allocate day="6" start="1" end="7"/>
-        <allocate day="7" start="1" end="7"/>
-    </room>
-    <room id="3" capacity="30">
-        <allocate day="1" start="1" end="7"/>
-        <allocate day="2" start="1" end="7"/>
-        <allocate day="3" start="1" end="7"/>
-        <allocate day="4" start="1" end="7"/>
-        <allocate day="5" start="1" end="7"/>
-        <allocate day="6" start="1" end="7"/>
-        <allocate day="7" start="1" end="7"/>
-    </room>
+	<global slotsperweek="42" slotsperday="7"/>
+	
+	<group id="22215" amount="20">
+        <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
+		<req subject="dpas" teacher="Куталев А. В." amount="2"/>
+
+	</group>
+
+	<room id="r1" capacity="20">
+		<allocate day="1" start="1" end="7"/>
+	</room>
+
+	<availableTeacherSlots teacher="Иртегов Д.В.">
+		<slot day="1" start="1" end="3"/>
+	</availableTeacherSlots>
+
 </requirements>
