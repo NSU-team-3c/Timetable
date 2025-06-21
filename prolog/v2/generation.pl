@@ -56,12 +56,12 @@ init_partition_schedule :-
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 all_required_lessons(Lessons) :-
-    findall(event(Group, Lesson, _, Teacher, _, _),
-            (group_subject_teacher_times(Group, Lesson, Teacher, Times),
+    findall(event(Group, Lesson, Type, _, Teacher, _, _),
+            (group_subject_type_teacher_times(Group, Lesson, Type, Teacher, Times),
             between(1, Times, _)), Lessons).
 
 scheduled_lessons(Schedule, Scheduled) :-
-    findall(event(Group, Lesson, _, Teacher, _, _), member(event(Group, Lesson, _, Teacher, _, _), Schedule), ScheduledList),
+    findall(event(Group, Lesson, Type, _, Teacher, _, _), member(event(Group, Lesson, Type, _, Teacher, _, _), Schedule), ScheduledList),
     sort(ScheduledList, Scheduled).
 
 diff([], _, []).
@@ -77,20 +77,20 @@ missing_lessons(Schedule, Missing) :-
     diff(All, Scheduled, Missing).
 
 print_missing([]).
-print_missing([event(Group, Lesson, _, Teacher, _, _) | Rest]) :-
-    format(" - Группа: ~s, Предмет: ~s, Преподаватель: ~s~n", [Group, Lesson, Teacher]),
+print_missing([event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
+    format(" - Группа: ~s, Предмет: ~s, Тип: ~s, Преподаватель: ~s~n", [Group, Lesson, Type, Teacher]),
     print_missing(Rest).
 
 print_expl(List) :-
-    open('expl.xml', write, Stream),
+    open('timetable.xml', write, Stream),
     xml_write_expl(Stream, List),
     close(Stream).
 
 xml_write_expl(Stream, []).
-xml_write_expl(Stream, [event(Group, Lesson, _, Teacher, _, _) | Rest]) :-
+xml_write_expl(Stream, [event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
     phrase_to_stream(phrase(" <unplaced>\n"), Stream),
     phrase_to_stream(format_("\t <group id=\"~s\"/>\n", [Group]), Stream),
-    phrase_to_stream(format_("\t <subject id=\"~s\"/>\n", [Lesson]), Stream),
+    phrase_to_stream(format_("\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
     phrase_to_stream(format_("\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
     phrase_to_stream(phrase(" </unplaced>\n"), Stream),
     xml_write_expl(Stream, Rest).
@@ -249,7 +249,6 @@ count([X1|T],X,Z):- X1\=X,count(T,X,Z).
 % getting neighbor--------------------------------------------------------
 
 neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :- 
-
     save_if_longer(State, Length),
     group_subject_type_teacher_times(Group, Lesson, Type, Teacher, Times),
     findall(event(Group, Lesson, _,  _, Teacher, _, _), member(event(Group, Lesson, _, _, Teacher, _, _),State), Result),
