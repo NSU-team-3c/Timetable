@@ -85,7 +85,7 @@ const UpdateProfile = ({setUpdateProfile} : {setUpdateProfile: (value: React.Set
      };
    
      return (
-       <Box sx={{ width: 800, margin: '0 auto', padding: 2, position: 'relative' }}>
+       <Box sx={{ width: "100%", margin: '0 auto', padding: 2, position: 'relative' }}>
          <form onSubmit={formik.handleSubmit}>
            {/* Поле для загрузки фотографии */}
            <Box

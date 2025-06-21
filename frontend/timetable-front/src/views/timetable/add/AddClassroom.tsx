@@ -29,9 +29,9 @@ const AddClassroom = () => {
         <PageContainer title="Профиль" description="this is Profile page">
             <Box
                 p={2}
+                mt={2}
                 sx={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: 0,
+                    backgroundColor: '#FFFFFF'
                 }}
             >
                 <ClassroomList />
