@@ -2,6 +2,8 @@
 // @ts-ignore
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from "../../../store/Store";
+import { AppState } from "../../../store/Store";
 import {
   Box,
   Menu,
@@ -21,6 +23,9 @@ import unlimitedImg from "../../../assets/images/backgrounds/unlimited-bg.png"
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const {profile} = useSelector((state: AppState) => state.profile);
+        const role = profile?.role.split(', ');
+
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
   };
@@ -75,10 +80,10 @@ const Profile = () => {
           <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              Mathew Anderson
+              {profile ? profile.name : ''}  {profile ? profile.surname : ''}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-            Designer
+            {role}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -88,7 +93,7 @@ const Profile = () => {
               gap={1}
             >
               <IconMail width={15} height={15} />
-              info@modernize.com
+              {profile ? profile.email : ''}
             </Typography>
           </Box>
         </Stack>

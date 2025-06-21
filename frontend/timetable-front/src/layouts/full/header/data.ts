@@ -110,7 +110,7 @@ interface ProfileType {
 }
 const profile: ProfileType[] = [
   {
-    href: '/user-profile',
+    href: '/profile/',
     title: 'Мой аккаунт',
     subtitle: 'Настройки',
     icon: icon1,

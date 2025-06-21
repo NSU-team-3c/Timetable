@@ -25,13 +25,13 @@ const Menuitems: MenuitemsType[] = [
     {
         id: uniqueId(),
         title: 'О нас',
-        href: '/about',
+        href: '/auth/about',
         chipColor: 'secondary',
     },
     {
         id: uniqueId(),
         title: 'Поддержка',
-        href: '/faq',
+        href: '/auth/faq',
         chipColor: 'secondary',
     },
 ];

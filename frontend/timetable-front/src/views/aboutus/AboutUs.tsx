@@ -1,9 +1,10 @@
 import { Box, Grid, Typography } from '@mui/material';
 import PageContainer from "../../components/container/PageContainer";
 import DashboardCard from '../../components/shared/DashboardCard';
-import img1 from "../../assets/images/profile/user-1.jpg"
-import img2 from "../../assets/images/profile/user-2.jpg"
-import img3 from "../../assets/images/profile/user-3.jpg"
+import nastya from "../../assets/images/developers/Nastya.jpg"
+import daria from "../../assets/images/developers/Daria.jpg"
+import mikhail from "../../assets/images/developers/Mihail.jpg"
+import vova from  "../../assets/images/developers/Vova.jpg"
 
 
 const AboutUs = () => {
@@ -17,32 +18,37 @@ const AboutUs = () => {
               <Box display={"flex"} m={1}>
                   <DashboardCard>
                     <>
-                        <img src={img1} alt="attach" width="200px" />
+                        <img src={nastya} alt="attach" width="200px" />
                         <Typography fontWeight={600} mt={2} fontSize={20} textAlign={"center"}>Мещерякова Анастасия</Typography>
+                        <Typography fontWeight={400} mt={2} fontSize={18} textAlign={"center"}>Backend developer</Typography>
                     </>
                   </DashboardCard>
               </Box>
               <Box display={"flex"} m={1}>
                   <DashboardCard>
                     <>
-                        <img src={img2} alt="attach" width="200px" />
+                        <img src={vova} alt="attach" width="200px" />
                         <Typography fontWeight={600} mt={2} fontSize={20} textAlign={"center"}>Петров Владимир</Typography>
+                        <Typography fontWeight={400} mt={2} fontSize={18} textAlign={"center"}>Teamlead</Typography>
+                        <Typography fontWeight={400} mt={2} fontSize={18} textAlign={"center"}>Frontend / Timetable generation</Typography>
                     </>
                   </DashboardCard>
                   </Box>
               <Box display={"flex"} m={1}>
                   <DashboardCard>
                     <>
-                        <img src={img3} alt="attach" width="200px"/>
+                        <img src={daria} alt="attach" width="200px"/>
                       <Typography fontWeight={600} mt={2} fontSize={20} textAlign={"center"}>Барсукова Дарья</Typography>
+                      <Typography fontWeight={400} mt={2} fontSize={18} textAlign={"center"}>Backend developer</Typography>
                       </>
                   </DashboardCard>
                 </Box>
                 <Box display={"flex"} m={1}>
                   <DashboardCard>
                     <>
-                        <img src={img3} alt="attach" width="200px"/>
+                        <img src={mikhail} alt="attach" width="200px"/>
                       <Typography fontWeight={600} mt={2} fontSize={20} textAlign={"center"}>Диза Михаил</Typography>
+                       <Typography fontWeight={400} mt={2} fontSize={18} textAlign={"center"}>Frontend / Timetable generation</Typography>
                       </>
                   </DashboardCard>
                 </Box>
