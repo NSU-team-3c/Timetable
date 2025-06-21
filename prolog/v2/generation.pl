@@ -13,7 +13,7 @@
 :- use_module(library(random)).
 :- use_module(library(between)).
 
-:- dynamic(group_subject_teacher_times/4).
+:- dynamic(group_subject_type_teacher_times/5).
 :- dynamic(classroom_available/4).
 :- dynamic(teacher_available/4).
 :- dynamic(classroom_capacity/2).
@@ -22,27 +22,90 @@
 :- dynamic(slots_per_day/1).
 :- dynamic(slots_per_week/1).
 
-:- discontiguous(group_subject_teacher_times/4).
+:- discontiguous(group_subject_type_teacher_times/5).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Основная логика составления расписаний.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 find_lenght(NewLength, [Lesson | Lessons]) :- 
-    group_subject_teacher_times(_, Lesson, _, T),
+    group_subject_type_teacher_times(_, Lesson, _, _, T),
     NewLength #= Length + T,
     find_lenght(Length, Lessons).
 find_lenght(T, [Lesson]) :-
-    group_subject_teacher_times(_, Lesson, _, T).
+    group_subject_type_teacher_times(_, Lesson, _, _, T).
 
 main :-
-    findall(Lesson, group_subject_teacher_times(_, Lesson, _, _), AllLessons),
+    findall(Lesson, group_subject_type_teacher_times(_, Lesson, _, _, _), AllLessons),
     find_lenght(Length, AllLessons),
     ucs_traverse([node([], 0, 0)], Length).
 
 % checking strict conditions ------------------------------------------
-check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1)) :- false.
-check_strict_conditions_of_any_two_lessons(event(Group1, _, RoomID1, Teacher1, Day1, Slot1), event(Group2, _, RoomID2, Teacher2, Day2, Slot2)) :-
+check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, Type1, RoomID1, Teacher1, Day1, Slot1), event(Group1, Lesson1, Type1, RoomID1, Teacher1, Day1, Slot1)) :- false.
+check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, Type1, RoomID1, Teacher1, Day1, Slot1), event(Group2, Lesson1, Type1, RoomID2, Teacher2, Day2, Slot2)) :- 
+    (
+        (
+        (
+                Group1 == Group2
+            ),
+            (
+                (
+                    Day1 #\= Day2;
+                    Slot1 #\= Slot2
+                )
+            )
+    );
+     (
+        Group1 \= Group2,
+        (
+            RoomID1 == RoomID2,
+            (
+                Day1 == Day2;
+                Slot1 == Slot2
+            )
+        )
+    )
+    ),
+    Teacher1 == Teacher2, !.
+
+check_strict_conditions_of_any_two_lessons(event(Group1, Lesson1, Type1, RoomID1, Teacher1, Day1, Slot1), event(Group2, Lesson2, Type2, RoomID2, Teacher2, Day2, Slot2)) :-
+    (
+    (
+            (
+                Group1 == Group2
+            ),
+            (
+                (
+                    Day1 #\= Day2;
+                    Slot1 #\= Slot2
+                )
+            )
+    );
+    (
+        Group1 \= Group2,
+        (
+            RoomID1 \= RoomID2;
+            (
+                Day1 #\= Day2;
+                Slot1 #\= Slot2
+            )
+        )
+    )
+    ),
+    (
+    (
+        (
+            Teacher1 == Teacher2
+        ),
+        (
+            (
+                Day1 #\= Day2;
+                Slot1 #\= Slot2
+            )
+        )
+    );
+    Teacher1 \= Teacher2).
+check_strict_conditions_of_any_two_lessons(event(Group1, _, Type1, RoomID1, Teacher1, Day1, Slot1), event(Group2, _, Type2, RoomID2, Teacher2, Day2, Slot2)) :-
     (
     (
             (
@@ -80,12 +143,12 @@ check_strict_conditions_of_any_two_lessons(event(Group1, _, RoomID1, Teacher1, D
     );
     Teacher1 \= Teacher2).
 
-check_capacity_condition_of_lesson(event(Group1, LessonID, RoomID, _, _, _)) :-
+check_capacity_condition_of_lesson(event(Group1, LessonID, _, RoomID, _, _, _)) :-
     group_cap(Group1, Amt),
     classroom_capacity(RoomID, Capacity),
     Amt #> Capacity.
 
-check_teacher_availability(event(_, _, _, Teacher, Day, Slot)) :-
+check_teacher_availability(event(_, _, _, _, Teacher, Day, Slot)) :-
     teacher_available(Teacher, Day, Start, End),
     between(Start, End, Slot).
 
@@ -111,8 +174,8 @@ count([X1|T],X,Z):- X1\=X,count(T,X,Z).
 % getting neighbor--------------------------------------------------------
 
 neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :- 
-    group_subject_teacher_times(Group, Lesson, Teacher, Times),
-    findall(event(Group, Lesson, _, Teacher, _, _), member(event(Group, Lesson, _, Teacher, _, _),State), Result),
+    group_subject_type_teacher_times(Group, Lesson, Type, Teacher, Times),
+    findall(event(Group, Lesson, _,  _, Teacher, _, _), member(event(Group, Lesson, _, _, Teacher, _, _),State), Result),
     length(Result, Val),
     Val #< Times,
     slots_per_week(SPW),
@@ -131,7 +194,7 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     % write('Day: '), write(Day), nl,  
     % write('State:'), write(State), nl,
     %between(1, SPD, Slot),
-    NewState = [event(Group, Lesson, RoomID, Teacher, Day, Slot)|State],
+    NewState = [event(Group, Lesson, Type, RoomID, Teacher, Day, Slot)|State],
     NewLength #= Length + 1.
     % cost(schedule(NewState), NewCost).
 
@@ -182,7 +245,7 @@ schedule_violates_constraint(Schedule, Violated) :- cost(Schedule, _, Violated).
 
 cost(Schedule, Cost, Violated) :-
 	findall(G, group_cap(G, _), Groups),
-	findall(T, group_subject_teacher_times(_, _, T, _), Teachers),
+	findall(T, group_subject_type_teacher_times(_, _, _, T, _), Teachers),
 	teacher_loop(Teacher, Events, Buffer, Violated),
 	length(Teachers, Len),
 	Cost #= Buffer / Len.
@@ -203,7 +266,7 @@ teacher_loop([P | Ps], Events, Cost0, Violated0, Cost, Violated) :-
 event_loop(P, Events, Cost, Violated) :- event_loop(P, Events, 0, [], Cost, Violated).
 
 event_loop(_, [], Cost, Violated, Cost, Violated).
-event_loop(Teacher, [event(Group, Lesson, RoomID, Teacher, Day, Slot) | Evs], Cost0, Violated0, Cost, Violated) :-
+event_loop(Teacher, [event(Group, Lesson, Type, RoomID, Teacher, Day, Slot) | Evs], Cost0, Violated0, Cost, Violated) :-
 	no_exam_in_period(P, event(Ex, Room, Day, Time), Cost1, Violated1),
 	lunch_break(P, event(Ex, Room, Day, Time), Cost2, Violated2),
 	not_in_period(P, event(Ex, Room, Day, Time), Cost3, Violated3),
@@ -283,15 +346,31 @@ pretty_print(schedule(Events)) :-
 	findall(_, print_day(Events), _),
     format("~n ------------ ~s ---------- ~n", ["End"]).
 
+include(_, [], []).
+include(Pred, [X|Xs], [X|Ys]) :-
+    call(Pred, X),
+    include(Pred, Xs, Ys).
+include(Pred, [_|Xs], Ys) :-
+    include(Pred, Xs, Ys).
 
 print_day(Events) :-
-	setof(event(Group, Lesson, RoomID, Teacher, _, Slot), RoomID^Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
-	format("~n ~n*** DAY ~d *** ~n ~n", [Day]),
-	findall(_, print_event(Result), _).
+    findall(Day,
+        member(event(_, _, _, _, _, Day, _), Events),
+        Days0),
+    sort(Days0, Days),
+    forall(member(Day, Days),
+        (
+            format("~n ~n*** DAY ~d *** ~n ~n", [Day]),
+            include(has_day(Day), Events, DayEvents),
+            print_event(DayEvents)
+        )
+    ).
+
+has_day(Day, event(_, _, _, _, _, Day0, _)) :- Day == Day0.
 
 
 print_event(Events) :-
-	setof(event(Group, Lesson, _, Teacher, Day, Slot), Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
+	setof(event(Group, Lesson, _, _, Teacher, Day, Slot), Slot^member(event(Group, Lesson, Type, RoomID, Teacher, Day, Slot),Events), Result),
 	format("~s:~n", [RoomID]),
 	quicksort_events_by_time(Result, Sorted),
 	print(Sorted).
@@ -305,7 +384,7 @@ quicksort_events_by_time([X | Tail], Sorted):-
     concatenate(SortedSmall, [X| SortedBig], Sorted).
 
 split2(X, [], [], []).
-split2(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), [event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2)| Tail], [event(Group2, Lesson2, RoomID2, Teacher2, Day2, Slot2) | Small], Big):-
+split2(event(Group1, Lesson1,Type1, RoomID1, Teacher1, Day1, Slot1), [event(Group2, Lesson2,Type2, RoomID2, Teacher2, Day2, Slot2)| Tail], [event(Group2, Lesson2,Type2, RoomID2, Teacher2, Day2, Slot2) | Small], Big):-
     (Day1 #> Day2;
         (
             Day1 == Day2,
@@ -313,7 +392,7 @@ split2(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), [event(Group2, Le
         )
     ),
     !,
-    split2(event(Group1, Lesson1, RoomID1, Teacher1, Day1, Slot1), Tail, Small, Big).
+    split2(event(Group1, Lesson1,Type1, RoomID1, Teacher1, Day1, Slot1), Tail, Small, Big).
 split2(X, [Y| Tail], Small, [Y | Big]):-
     split2(X, Tail, Small, Big).
 
@@ -321,10 +400,10 @@ split2(X, [Y| Tail], Small, [Y | Big]):-
 
 print([]).
 
-print([event(Group, Lesson, _, Teacher, _, Slot)|RestEvents]) :-
+print([event(Group, Lesson, Type, _, Teacher, _, Slot)|RestEvents]) :-
 	format("\tSlot: ~d | ", [Slot]),
     format("Group: ~s | ", [Group]),
-	format("Lesson: ~s | ", [Lesson]),
+	format("Lesson: ~s ~s| ", [Lesson, Type]),
 	format("Teacher: ~s~n", [Teacher]),
 	print(RestEvents).
 
@@ -379,8 +458,8 @@ process_nodes(What, R, Goal) -->
 
 
 process_req(GroupId, Node) -->
-        { attrs_values(Node, [subject,teacher,amount], [Subject,Teacher,Amount]) },
-        [group_subject_teacher_times(GroupId,Subject,Teacher,Amount)].
+        { attrs_values(Node, [subject,type,teacher,amount], [Subject,Type,Teacher,Amount]) },
+        [group_subject_type_teacher_times(GroupId,Subject,Type,Teacher,Amount)].
 
 
 process_coupling(GroupId, Node) -->
@@ -454,17 +533,17 @@ xml_write(Stream, schedule(Events)) :-
 
 
 write_day(Stream, Events) :-
-    setof(event(Group, Lesson, RoomID, Teacher, _, Slot), RoomID^Slot^member(event(Group, Lesson, RoomID, Teacher, Day, Slot),Events), Result),
+    setof(event(Group, Lesson, Type, RoomID, Teacher, _, Slot), RoomID^Slot^member(event(Group, Lesson, Type, RoomID, Teacher, Day, Slot),Events), Result),
     phrase_to_stream(format_("\t <day number=\"~w\">\n", [Day]), Stream),
     write_event(Stream, Result),
     phrase_to_stream(phrase("\t </day>\n"), Stream).
 
 write_event(Stream, []).
-write_event(Stream, [event(Group, Lesson, RoomID, Teacher, Day, Slot)|Rest]) :-
+write_event(Stream, [event(Group, Lesson,Type, RoomID, Teacher, Day, Slot)|Rest]) :-
     phrase_to_stream(phrase("\t\t <timeSlots>\n"), Stream),
     phrase_to_stream(format_("\t\t\t\t <id>~d</id>\n", [Slot]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <group id=\"~s\"/>\n", [Group]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~s\"/>\n", [Lesson]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <room id=\"~s\"/>\n", [RoomID]), Stream),
     phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream),
