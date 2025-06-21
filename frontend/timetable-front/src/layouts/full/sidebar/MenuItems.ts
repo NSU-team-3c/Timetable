@@ -88,7 +88,7 @@ export const AdminMenuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Обновления в данных',
     icon: IconSettings,
-    href: "/admin/updates",
+    href: "/admin/timetable/updates",
   }
 ];
 

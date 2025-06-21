@@ -1,7 +1,7 @@
-import img1 from "../../../assets/images/profile/user-1.jpg";
-import img2 from "../../../assets/images/profile/user-1.jpg";
-import img3 from "../../../assets/images/profile/user-1.jpg";
-import img4 from "../../../assets/images/profile/user-1.jpg";
+import img1 from "../../../assets/images/profile/1.png";
+import img2 from "../../../assets/images/profile/1.png";
+import img3 from "../../../assets/images/profile/1.png";
+import img4 from "../../../assets/images/profile/1.png";
 
 import icon1 from "../../../assets/images/svgs/icon-account.svg"
 import icon2 from "../../../assets/images/svgs/icon-inbox.svg"

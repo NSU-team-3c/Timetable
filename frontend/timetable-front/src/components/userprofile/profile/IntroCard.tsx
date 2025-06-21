@@ -7,9 +7,10 @@ import { useDispatch, useSelector } from "../../../store/Store";
 import UpdateProfile from './UpdateProfile';
 import { AppState, dispatch } from "../../../store/Store";
 import { format } from 'date-fns';
+import { fetchProfile } from '../../../store/profile/profileSlice';
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -28,6 +29,7 @@ const IntroCard  = () => {
     const {profile} = useSelector((state: AppState) => state.profile);
   
     useEffect(() => {
+      dispatch(fetchProfile())
     }, [dispatch]);
   
     console.log(profile)
@@ -57,28 +59,40 @@ const IntroCard  = () => {
     
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconBriefcase size="21" />
+      <Typography variant="h6">Дата рождения:  </Typography>
        <Typography fontWeight={600} variant="body1" gutterBottom>
-                      Дата рождения: {profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : ''}
+                      {profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
+       <Typography variant="h6">Почта:  </Typography>
       <Typography fontWeight={600} variant="body1" gutterBottom>
-                    email: {profile ? profile.email : ''}
+                    {profile ? profile.email : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
+       <Typography variant="h6">Номер телефона: </Typography>
      <Typography fontWeight={600} variant="body1" gutterBottom>
-                    Номер телефона: {profile ? profile.phone : ''}
+                    {profile ? profile.phone : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
+      <Typography variant="h6">Дата рождения: </Typography>
       <Typography fontWeight={600} variant="body1" gutterBottom>
-                    О себе: {profile ? profile.about : ''}
+                    {profile ? profile.birthday : ''}
                 </Typography>
     </Stack>
+    <Stack direction="row" gap={2} alignItems="center" mb={3}>
+      <IconAccessible size="21" />
+      <Typography variant="h6">О себе: </Typography>
+      <Typography fontWeight={600} variant="body1" gutterBottom>
+                    {profile ? profile.about : ''}
+                </Typography>
+    </Stack>
+    
 
     <Button onClick={() => setUpdateProfile(true)}>
                 <IconUpload />

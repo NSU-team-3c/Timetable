@@ -14,6 +14,7 @@ import Faq from '../views/help/Help';
 import ProfileTab from '../components/userprofile/profile/ProfileTab';
 import Schedule from '../views/schedule/Schedule';
 import UserProfile from '../views/user-profile/UserProfile';
+import TimetableUpdatesPage from '../views/notifications/TimetableUpdatePage';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -93,7 +94,8 @@ const Router = [
       { path: '/admin/timetable/add-subject',     element: <AddSubject /> },
       { path: '/admin/timetable/add-classroom',   element: <AddClassroom /> },
       { path: '/admin/timetable/add-group',       element: <AddGroup /> },
-      { path: '/admin/timetable',       element: <TimetableSettingsPage /> }
+      { path: '/admin/timetable',       element: <TimetableSettingsPage /> },
+      { path: '/admin/timetable/updates',       element: <TimetableUpdatesPage /> }
     ],
   },
   {

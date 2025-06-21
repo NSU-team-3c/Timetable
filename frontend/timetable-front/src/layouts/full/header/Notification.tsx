@@ -18,6 +18,7 @@ import * as dropdownData from './data';
 import { IconBellRinging } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import Scrollbar from '../../../components/custom-scroll/Scrollbar';
+import TimetableNotifications from '../../../components/timetable/TimetableNotification';
 
 const Notifications = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
@@ -110,6 +111,7 @@ const Notifications = () => {
           ))}
         </Scrollbar>
         <Box p={3} pb={1}>
+          <TimetableNotifications />
           <Button to="/apps/email" variant="outlined" component={Link} color="primary" fullWidth>
             Посмотреть все обновления
           </Button>
