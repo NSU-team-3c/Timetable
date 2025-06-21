@@ -103,9 +103,7 @@ public class TimetableService {
                 throw new TimetableGenerationException("Failed to generate timetable. No output file returned");
             }
 
-            //тут надо поменять
-            /*GeneratedTimetable generatedTimetable = xmlParserService.parseTimetable(outputFilePath);*/
-            GeneratedTimetable generatedTimetable = null; //затычка
+            GeneratedTimetable generatedTimetable = xmlParserService.parseTimetable(outputFilePath);
 
             if (generatedTimetable == null) {
                 throw new TimetableParsingException("Failed to parse generated timetable");
