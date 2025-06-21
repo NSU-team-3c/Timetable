@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,7 @@ import ru.nsu.timetable.payload.response.MessageResponse;
 import ru.nsu.timetable.services.UserService;
 
 import jakarta.validation.Valid;
+import ru.nsu.timetable.sockets.MessageUtils;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -35,7 +36,7 @@ public class AdminController {
 
     private final UserService userService;
     private final UserMapper userMapper;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageUtils messageUtils;
 
     @Operation(summary = "Registration of new student account in system")
     @ApiResponses({
@@ -50,7 +51,7 @@ public class AdminController {
     @Tag(name = "Student Registration")
     public UserRegisterDTO registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
         User user = registerUser(registrationRequest, "STUDENT");
-        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый студент зарегистрирован: " + user.getEmail());
+        messageUtils.sendMessage(null, "registration", "New student " + user.getEmail() + " registered", null);
         return userMapper.toUserRegisterDTO(user);
     }
 
@@ -66,9 +67,9 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
     @Tag(name = "Teacher Registration")
-    public UserRegisterDTO registerNewTeacher(@Valid @RequestBody RegistrationRequest registrationRequest) {
+    public UserRegisterDTO registerNewTeacher(HttpServletRequest request,  @Valid @RequestBody RegistrationRequest registrationRequest) {
         User user = registerUser(registrationRequest, "TEACHER");
-        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый преподаватель зарегистрирован: " + user.getEmail());
+        messageUtils.sendMessage(request, "registration", "New teacher " + user.getEmail() + " registered", null);
         return userMapper.toUserRegisterDTO(user);
     }
 
@@ -84,9 +85,9 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Transactional
     @Tag(name = "Admin Registration")
-    public UserRegisterDTO registerNewAdmin(@Valid @RequestBody RegistrationRequest registrationRequest) {
+    public UserRegisterDTO registerNewAdmin(HttpServletRequest request, @Valid @RequestBody RegistrationRequest registrationRequest) {
         User user = registerUser(registrationRequest, "ADMINISTRATOR");
-        simpMessagingTemplate.convertAndSend("/websockets/notifications/newLog", "Новый администратор зарегистрирован: " + user.getEmail());
+        messageUtils.sendMessage(request, "registration", "New admin " + user.getEmail() + " registered", null);
         return userMapper.toUserRegisterDTO(user);
     }
 

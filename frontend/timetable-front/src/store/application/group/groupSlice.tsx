@@ -14,12 +14,14 @@ interface GroupState {
   groups: Group[];
   loading: boolean;
   error: string | null;
+  dataUpdated: boolean;
 }
 
 const initialState: GroupState = {
   groups: [],
   loading: false,
   error: null,
+  dataUpdated: false,
 };
 
 export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
@@ -42,6 +44,10 @@ export const deleteGroup = createAsyncThunk('groups/deleteGroup', async (id: num
   return id; 
 });
 
+export const setGroupUpdateFlag = createAsyncThunk('groups/setGroupUpdateFlag', () => {
+  return true; 
+});
+
 const groupSlice = createSlice({
   name: 'groups',
   initialState,
@@ -51,6 +57,9 @@ const groupSlice = createSlice({
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    resetGroupUpdatedFlag(state) {
+      state.dataUpdated = false; 
     },
   },
   extraReducers: (builder) => {
@@ -62,6 +71,7 @@ const groupSlice = createSlice({
       .addCase(fetchGroups.fulfilled, (state, action: PayloadAction<Group[]>) => {
         state.loading = false;
         state.groups = action.payload;
+        state.dataUpdated = false;
       })
       .addCase(fetchGroups.rejected, (state, action) => {
         state.loading = false;
@@ -75,6 +85,7 @@ const groupSlice = createSlice({
       .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
         state.loading = false;
         state.groups.push(action.payload); 
+        state.dataUpdated = false;
       })
       .addCase(createGroup.rejected, (state, action) => {
         state.loading = false;
@@ -91,6 +102,7 @@ const groupSlice = createSlice({
         if (index !== -1) {
           state.groups[index] = action.payload; 
         }
+        state.dataUpdated = false;
       })
       .addCase(updateGroup.rejected, (state, action) => {
         state.loading = false;
@@ -105,14 +117,19 @@ const groupSlice = createSlice({
       .addCase(deleteGroup.fulfilled, (state, action: PayloadAction<number>) => {
         state.loading = false;
         state.groups = state.groups.filter((group) => group.id !== action.payload); // Удаляем группу по ID
+        state.dataUpdated = false;
       })
       .addCase(deleteGroup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete group';
+      })
+
+      .addCase(setGroupUpdateFlag.fulfilled, (state) => {
+        state.dataUpdated = true; 
       });
   },
 });
 
-export const { setLoading, setError } = groupSlice.actions;
+export const { setLoading, setError, resetGroupUpdatedFlag } = groupSlice.actions;
 
 export default groupSlice.reducer;

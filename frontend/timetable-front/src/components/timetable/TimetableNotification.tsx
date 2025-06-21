@@ -5,7 +5,7 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 
 
 const TimetableNotifications: React.FC = () => {
-  const { messages, sendMessage, isConnected } = useWebSocket('ws://localhost:8080/ws');
+  const { messages, sendMessage, isConnected } = useWebSocket('http://localhost:8080/websockets', sessionStorage.getItem('authToken'));
   const [input, setInput] = useState('');
 
   const handleSend = () => {

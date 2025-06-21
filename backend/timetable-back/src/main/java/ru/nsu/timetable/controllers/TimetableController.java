@@ -8,12 +8,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
 import ru.nsu.timetable.exceptions.GenerationInProgressException;
 import ru.nsu.timetable.models.dto.*;
 import ru.nsu.timetable.services.TimetableService;
+import ru.nsu.timetable.sockets.MessageUtils;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,7 +27,7 @@ public class TimetableController {
 
     private final TimetableService timetableService;
     private final JwtUtils jwtUtils;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final MessageUtils messageUtils;
 
     @GetMapping("")
     @Operation(summary = "Get timetable for particular user", security = @SecurityRequirement(name = "bearerAuth"))
@@ -36,20 +37,24 @@ public class TimetableController {
     }
 
     @GetMapping("/generate")
-    public ResponseEntity<TimetableDTO> generateAndSaveTimetable() {
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    @Operation(summary = "Generate timetable", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<GeneratedTimetableDTO> generateAndSaveTimetable(HttpServletRequest request) {
         synchronized (lock) {
             if (isGenerating) {
                 throw new GenerationInProgressException("The generation is already running. Try again later.");
             }
             isGenerating = true;
         }
+        messageUtils.sendMessage(request, "generation", "started", null);
         try {
             lastStartGenerationTime = Instant.now();
-            TimetableDTO timetableDTO = timetableService.generateAndSaveTimetable();
-            messagingTemplate.convertAndSend("/websockets/notifications/newLog", "Расписание обновлено");
-            return ResponseEntity.ok(timetableDTO);
+            GeneratedTimetableDTO generatedTimetableDTO = timetableService.generateAndSaveTimetable();
+            return ResponseEntity.ok(generatedTimetableDTO );
         } finally {
             isGenerating = false;
+            //todo: тут вернуть в subMessage минимальное неудовлетворяемое множество, если есть
+            messageUtils.sendMessage(request, "generation", "finished", null);
         }
     }
 

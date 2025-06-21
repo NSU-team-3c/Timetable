@@ -44,7 +44,7 @@ public class XmlParserService {
 
     private final UserRepository userRepository;
 
-    public Timetable parseTimetable(String filePath) {
+    public GeneratedTimetable parseTimetable(String filePath) {
         try {
             System.out.println("Starting to parse timetable from file: " + filePath);
 
@@ -62,6 +62,16 @@ public class XmlParserService {
 
             System.out.println("XML file parsed successfully. Normalizing document...");
 
+            NodeList unplacedNodes = doc.getElementsByTagName("unplaced");
+            if (unplacedNodes.getLength() > 0) {
+                System.out.println("Found " + unplacedNodes.getLength() + " unplaced subjects");
+                List<UnplacedSubject> unplacedSubjects = parseUnplacedSubjects(doc);
+                return GeneratedTimetable.builder()
+                        .isGeneratedSuccessfully(false)
+                        .unplacedSubject(unplacedSubjects)
+                        .build();
+            }
+
             List<Event> events = new ArrayList<>();
             NodeList dayNodes = doc.getElementsByTagName("day");
 
@@ -70,8 +80,6 @@ public class XmlParserService {
             for (int i = 0; i < dayNodes.getLength(); i++) {
                 Element dayElement = (Element) dayNodes.item(i);
                 int dayNumber = Integer.parseInt(dayElement.getAttribute("number"));
-                System.out.println("Parsing events for day " + dayNumber);
-
                 events.addAll(parseEvents(dayElement, dayNumber));
             }
 
@@ -84,7 +92,11 @@ public class XmlParserService {
 
             timetable = timetableRepository.save(timetable);
 
-            return timetable;
+            return GeneratedTimetable.builder()
+                    .isGeneratedSuccessfully(true)
+                    .timetable(timetable)
+                    .build();
+
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new ParsingException("Failed to parse XML file", e);
         } catch (Exception e) {
@@ -103,6 +115,7 @@ public class XmlParserService {
 
             String groupId = getElementAttribute(timeSlotElement, "group", "id");
             String subjectId = getElementAttribute(timeSlotElement, "subject", "id");
+            String typeId = getElementAttribute(timeSlotElement, "type", "id");
             String teacherId = getElementAttribute(timeSlotElement, "teacher", "id");
             String roomId = getElementAttribute(timeSlotElement, "room", "id");
 
@@ -129,6 +142,8 @@ public class XmlParserService {
             Room room = roomRepository.findById(Long.parseLong(roomId))
                     .orElseThrow(() -> new ResourceNotFoundException("Room not found: " + roomId));
 
+            Event.AudienceType audienceType= Event.AudienceType.valueOf(typeId.toLowerCase());
+
             Date[] startEndTimes = calculateTimes(dayNumber, (int) originalId);
 
             Event event = Event.builder()
@@ -138,12 +153,44 @@ public class XmlParserService {
                     .subject(subject)
                     .teacher(teacher)
                     .room(room)
+                    .audienceType(audienceType)
                     .build();
 
             events.add(event);
         }
 
         return eventRepository.saveAll(events);
+    }
+
+    private List<UnplacedSubject> parseUnplacedSubjects(Document doc) {
+        List<UnplacedSubject> unplacedSubjects = new ArrayList<>();
+        NodeList unplacedNodes = doc.getElementsByTagName("unplaced");
+
+        for (int i = 0; i < unplacedNodes.getLength(); i++) {
+            Element unplacedElement = (Element) unplacedNodes.item(i);
+
+            String groupId = getElementAttribute(unplacedElement, "group", "id");
+
+            String subjectId = getElementAttribute(unplacedElement, "subject", "id");
+            String teacherId = getElementTextContent(unplacedElement, "teacher");
+
+            Group group = groupRepository.findById(Long.parseLong(groupId))
+                    .orElseThrow(() -> new ResourceNotFoundException("Group not found: " + groupId));
+            Subject subject = subjectRepository.findById(Long.parseLong(subjectId))
+                    .orElseThrow(() -> new ResourceNotFoundException("Subject not found: " + subjectId));
+            User teacher = userRepository.findById(Long.parseLong(teacherId))
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
+
+            UnplacedSubject unplacedSubject = UnplacedSubject.builder()
+                    .group(group)
+                    .subject(subject)
+                    .teacher(teacher)
+                    .build();
+
+            unplacedSubjects.add(unplacedSubject);
+        }
+
+        return unplacedSubjects;
     }
 
     private String getElementAttribute(Element parent, String tagName, String attributeName) {

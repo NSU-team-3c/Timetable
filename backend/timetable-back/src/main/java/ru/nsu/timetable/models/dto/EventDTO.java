@@ -8,5 +8,6 @@ public record EventDTO(
         Date endTime,
         String teacherName,
         String subjectName,
-        String roomName) {
-}
+        String roomName,
+        String audienceType
+) {}

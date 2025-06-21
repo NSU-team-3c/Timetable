@@ -5,11 +5,13 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.timetable.exceptions.InvalidDataException;
 import ru.nsu.timetable.exceptions.ResourceNotFoundException;
 import ru.nsu.timetable.exceptions.TimetableGenerationException;
 import ru.nsu.timetable.exceptions.TimetableParsingException;
 import ru.nsu.timetable.models.constants.ERole;
+import ru.nsu.timetable.models.dto.GeneratedTimetableDTO;
 import ru.nsu.timetable.models.dto.TimetableDTO;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.models.mappers.TimetableMapper;
@@ -82,7 +84,8 @@ public class TimetableService {
                 .build();
     }
 
-    public TimetableDTO generateAndSaveTimetable() {
+    @Transactional
+    public GeneratedTimetableDTO generateAndSaveTimetable() {
         try {
             List<Group> groups = groupRepository.findAll();
             List<Room> rooms = roomRepository.findAll();
@@ -100,21 +103,29 @@ public class TimetableService {
                 throw new TimetableGenerationException("Failed to generate timetable. No output file returned");
             }
 
-            Timetable timetable = xmlParserService.parseTimetable(outputFilePath);
+            GeneratedTimetable generatedTimetable = xmlParserService.parseTimetable(outputFilePath);
 
-            if (timetable == null) {
-                throw new TimetableParsingException("Failed to parse timetable");
+            if (generatedTimetable == null) {
+                throw new TimetableParsingException("Failed to parse generated timetable");
             }
 
-            Timetable savedTimetable = timetableRepository.save(timetable);
-
-            for (Event event : timetable.getEvents()) {
-                event.setTimetable(savedTimetable);
+            if (generatedTimetable.isGeneratedSuccessfully()) {
+                Timetable timetable = generatedTimetable.getTimetable();
+                if (generatedTimetable.getTimetable() == null) {
+                    throw new TimetableParsingException("Failed to parse timetable");
+                }
+                Timetable savedTimetable = timetableRepository.save(timetable);
+                for (Event event : timetable.getEvents()) {
+                    event.setTimetable(savedTimetable);
+                }
+                eventRepository.saveAll(timetable.getEvents());
+                return timetableMapper.toSuccessfullyGeneratedTimetableDTO(savedTimetable);
+            } else {
+                if (generatedTimetable.getUnplacedSubject() == null) {
+                    throw new TimetableParsingException("Failed to parse unplaced subjects");
+                }
+                return timetableMapper.toUnsuccessfullyGeneratedTimetableDTO(generatedTimetable.getUnplacedSubject());
             }
-            eventRepository.saveAll(timetable.getEvents());
-
-            return timetableMapper.toTimetableDTO(savedTimetable);
-
         } catch (IOException | InterruptedException e) {
             throw new TimetableGenerationException("Error occurred during timetable generation", e);
         }
