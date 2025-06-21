@@ -11,6 +11,9 @@ import TimetableSettingsPage from '../views/timetable/TimetableSettingsPage';
 import { Help } from '@mui/icons-material';
 import AboutUs from '../views/aboutus/AboutUs';
 import Faq from '../views/help/Help';
+import ProfileTab from '../components/userprofile/profile/ProfileTab';
+import Schedule from '../views/schedule/Schedule';
+import UserProfile from '../views/user-profile/UserProfile';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -66,9 +69,9 @@ const Router = [
       </AuthGuard>
     ),
     children: [
-      { path: '/profile',                         element: <Profile /> },
+      { path: '/profile',                         element: <UserProfile /> },
       { path: '/profile/profile-edit',            element: <ProfileEdit /> },
-      { path: '/profile/timetable',               element: <Timetable /> },
+      { path: '/profile/timetable',               element: <Schedule /> },
       { path: '/profile/faq',              element: <Faq /> },
       { path: '/profile/about',          element: <AboutUs /> },
       { path: '/profile/change-password',         element: <ChangePassword /> },
