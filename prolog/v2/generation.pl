@@ -346,11 +346,27 @@ pretty_print(schedule(Events)) :-
 	findall(_, print_day(Events), _),
     format("~n ------------ ~s ---------- ~n", ["End"]).
 
+include(_, [], []).
+include(Pred, [X|Xs], [X|Ys]) :-
+    call(Pred, X),
+    include(Pred, Xs, Ys).
+include(Pred, [_|Xs], Ys) :-
+    include(Pred, Xs, Ys).
 
 print_day(Events) :-
-	setof(event(Group, Lesson, Type, RoomID, Teacher, _, Slot), RoomID^Slot^member(event(Group, Lesson,Type, RoomID, Teacher, Day, Slot),Events), Result),
-	format("~n ~n*** DAY ~d *** ~n ~n", [Day]),
-	findall(_, print_event(Result), _).
+    findall(Day,
+        member(event(_, _, _, _, _, Day, _), Events),
+        Days0),
+    sort(Days0, Days),
+    forall(member(Day, Days),
+        (
+            format("~n ~n*** DAY ~d *** ~n ~n", [Day]),
+            include(has_day(Day), Events, DayEvents),
+            print_event(DayEvents)
+        )
+    ).
+
+has_day(Day, event(_, _, _, _, _, Day0, _)) :- Day == Day0.
 
 
 print_event(Events) :-
@@ -387,7 +403,7 @@ print([]).
 print([event(Group, Lesson, Type, _, Teacher, _, Slot)|RestEvents]) :-
 	format("\tSlot: ~d | ", [Slot]),
     format("Group: ~s | ", [Group]),
-	format("Lesson: ~s ~s| ", [Lesson], [Type]),
+	format("Lesson: ~s ~s| ", [Lesson, Type]),
 	format("Teacher: ~s~n", [Teacher]),
 	print(RestEvents).
 
@@ -527,7 +543,7 @@ write_event(Stream, [event(Group, Lesson,Type, RoomID, Teacher, Day, Slot)|Rest]
     phrase_to_stream(phrase("\t\t <timeSlots>\n"), Stream),
     phrase_to_stream(format_("\t\t\t\t <id>~d</id>\n", [Slot]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <group id=\"~s\"/>\n", [Group]), Stream),
-    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson], [Type]), Stream),
+    phrase_to_stream(format_("\t\t\t\t\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
     phrase_to_stream(format_("\t\t\t\t\t <room id=\"~s\"/>\n", [RoomID]), Stream),
     phrase_to_stream(phrase("\t\t </timeSlots>\n"), Stream),
