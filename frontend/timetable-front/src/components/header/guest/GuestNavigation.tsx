@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const ButtonSx = {
@@ -9,20 +9,12 @@ const ButtonSx = {
 const GuestLinks = () => {
     return (
         <>
+            <Box textAlign={'center'}>
+           
             <Button sx={ButtonSx} color="primary" variant="text" to="/auth/login" 
                 component={Link}
             >
                 ЛИЧНЫЙ КАБИНЕТ
-            </Button>
-            <Button sx={ButtonSx} color="primary" variant="text" to="/auth/courses"
-                component={Link}
-            >
-                КУРСЫ
-            </Button>
-            <Button sx={ButtonSx} color="primary" variant="text" to="/auth/disciplines"
-                component={Link}
-            >
-                ДИСЦИПЛИНЫ
             </Button>
             <Button sx={ButtonSx} color="primary" variant="text" to="/auth/about" 
                 component={Link}
@@ -34,6 +26,7 @@ const GuestLinks = () => {
                 >
                 ПОМОЩЬ
             </Button>
+            </Box>
         </>
     );
 };
