@@ -25,12 +25,7 @@ const ProfileTab = () => {
       label: 'Профиль',
       icon: <IconUserCircle size="20" />,
       to: '/user-profile',
-    },
-    {
-      label: 'Галерея',
-      icon: <IconPhoto size="20" />,
-      to: '/gallery',
-    },
+    }
   ];
 
   return (

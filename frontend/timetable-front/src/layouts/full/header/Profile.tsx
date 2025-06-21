@@ -18,7 +18,7 @@ import * as dropdownData from './data';
 
 import { IconMail } from '@tabler/icons-react';
 
-import ProfileImg from "../../../assets/images/profile/user-1.jpg";
+import ProfileImg from "../../../assets/images/profile/1.png";
 import unlimitedImg from "../../../assets/images/backgrounds/unlimited-bg.png"
 
 const Profile = () => {

@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { Typography, ImageList, ImageListItem, Skeleton, Box } from '@mui/material';
 
-import img1 from "../../assets/images/products/document.jpg";
+import img1 from "../../../assets/images/products/document.jpg";
 import ChildCard from "../../shared/ChildCard";
 
 interface photoType {
@@ -23,31 +23,7 @@ const photos: photoType[] = [
   {
     img: img1,
     id: 3,
-  },
-  {
-    img: img1,
-    id: 4,
-  },
-  {
-    img: img1,
-    id: 5,
-  },
-  {
-    img: img1,
-    id: 6,
-  },
-  {
-    img: img1,
-    id: 7,
-  },
-  {
-    img: img1,
-    id: 8,
-  },
-  {
-    img: img1,
-    id: 9,
-  },
+  }
 ];
 
 const PhotosCard = () => {
@@ -64,10 +40,8 @@ const PhotosCard = () => {
 
   return (
     <ChildCard>
-      <Typography mb={2} variant="h4">Глобальный контекст</Typography>
-      <Typography >Если хотите, чтобы каждый чат с медицинским 
-        ассистентом знал что-то о вас -
-        добавьте это сюда
+      <Typography mb={2} variant="h4">Документы</Typography>
+      <Typography >Здесь находятся документы, подтверждающие квалификацию преподавателя
       </Typography>
       <ImageList cols={3} gap={20}>
         {photos.map((photo) => (

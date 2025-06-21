@@ -8,8 +8,8 @@ import {
   styled,
   Typography
 } from '@mui/material';
-import profilecover from 'src/assets/images/backgrounds/profile.png';
-import userimg from 'src/assets/images/profile/1.png';
+import profilecover from "../../../assets/images/backgrounds/profile.jpeg";
+import userimg from "../../../assets/images/profile/1.png";
 import { useSelector, useDispatch, AppState } from "../../../store/Store";
 import BlankCard from "../../shared/BlankCard";
 import ProfileTab from './ProfileTab';

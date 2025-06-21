@@ -16,7 +16,7 @@ const UserProfile = () => {
 
   return (
     <PageContainer title="User Profile" description="this is User Profile page">
-      <Box>
+      <Box mt={2}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <ProfileBanner />
