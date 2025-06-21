@@ -5,7 +5,7 @@
 	<group id="22215" amount="20">
         <req subject="teamPr" teacher="Иртегов Д.В." amount="2"/>
 		<req subject="dpas" teacher="Куталев А. В." amount="2"/>
-		<req subject="math" teacher="Васкевич В. Л." amount="2"/>
+		<req subject="math" teacher="Васкевич В. Л." amount="3"/>
 
 	</group>
 

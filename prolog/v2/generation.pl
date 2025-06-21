@@ -56,8 +56,9 @@ init_partition_schedule :-
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 all_required_lessons(Lessons) :-
-    findall(event(Group, Lesson, _, Teacher, _, _), group_subject_teacher_times(Group, Lesson, Teacher, _), LessonsList),
-    sort(LessonsList, Lessons).
+    findall(event(Group, Lesson, _, Teacher, _, _),
+            (group_subject_teacher_times(Group, Lesson, Teacher, Times),
+            between(1, Times, _)), Lessons).
 
 scheduled_lessons(Schedule, Scheduled) :-
     findall(event(Group, Lesson, _, Teacher, _, _), member(event(Group, Lesson, _, Teacher, _, _), Schedule), ScheduledList),
