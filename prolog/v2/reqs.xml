@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <requirements>
+
     <global slotsperweek="42" slotsperday="7"/>
 
 	<group id="22215" amount="20">
         <req subject="teamPr" teacher="Иртегов Д.В." amount="2" type="lecture"/>
+        <req subject="math" teacher="Володин Д.В." amount="2" type="lecture"/>
 	</group>
 
 	<room id="r1" capacity="20">

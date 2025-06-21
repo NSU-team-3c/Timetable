@@ -22,7 +22,80 @@
 :- dynamic(slots_per_day/1).
 :- dynamic(slots_per_week/1).
 
+
+:- dynamic(partition_schedule/2). 
+
 :- discontiguous(group_subject_type_teacher_times/5).
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Логика сохранения лучшего частичного расписания.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+save_if_longer(NewSchedule, NewLen) :-
+    partition_schedule(_, OldLen),
+    NewLen > OldLen,
+    retractall(partition_schedule(_, _)),
+    assertz(partition_schedule(NewSchedule, NewLen)).
+save_if_longer(NewSchedule, NewLen) :-
+    partition_schedule(_, OldLen),
+    NewLen =< OldLen.
+
+init_partition_schedule :-
+    retractall(partition_schedule(_, _)),   
+    assertz(partition_schedule([], 0)).   
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Логика для анализа лучшего частичного расписания.
+  Анализирую частичное расписание и проверяю, каким требованиям оно удовлетворяет,
+    невыполненные требования вывожу.
+В этом блоке полагаю, что расписание может неудовлетворять требования только
+    в контексте размещения уроков. Считаю, что все остальные требования проверяются во
+    время составления.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+all_required_lessons(Lessons) :-
+    findall(event(Group, Lesson, Type, _, Teacher, _, _),
+            (group_subject_type_teacher_times(Group, Lesson, Type, Teacher, Times),
+            between(1, Times, _)), Lessons).
+
+scheduled_lessons(Schedule, Scheduled) :-
+    findall(event(Group, Lesson, Type, _, Teacher, _, _), member(event(Group, Lesson, Type, _, Teacher, _, _), Schedule), ScheduledList),
+    sort(ScheduledList, Scheduled).
+
+diff([], _, []).
+diff([Head|Tail], List, Result) :-
+    member(Head, List), !,
+    diff(Tail, List, Result).
+diff([Head|Tail], List, [Head|Result]) :-
+    diff(Tail, List, Result).    
+
+missing_lessons(Schedule, Missing) :-
+    all_required_lessons(All),
+    scheduled_lessons(Schedule, Scheduled),
+    diff(All, Scheduled, Missing).
+
+print_missing([]).
+print_missing([event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
+    format(" - Группа: ~s, Предмет: ~s, Тип: ~s, Преподаватель: ~s~n", [Group, Lesson, Type, Teacher]),
+    print_missing(Rest).
+
+print_expl(List) :-
+    open('timetable.xml', write, Stream),
+    xml_write_expl(Stream, List),
+    close(Stream).
+
+xml_write_expl(Stream, []).
+xml_write_expl(Stream, [event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
+    phrase_to_stream(phrase(" <unplaced>\n"), Stream),
+    phrase_to_stream(format_("\t <group id=\"~s\"/>\n", [Group]), Stream),
+    phrase_to_stream(format_("\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
+    phrase_to_stream(format_("\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
+    phrase_to_stream(phrase(" </unplaced>\n"), Stream),
+    xml_write_expl(Stream, Rest).
+
+
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Основная логика составления расписаний.
@@ -33,9 +106,11 @@ find_lenght(NewLength, [Lesson | Lessons]) :-
     NewLength #= Length + T,
     find_lenght(Length, Lessons).
 find_lenght(T, [Lesson]) :-
+
     group_subject_type_teacher_times(_, Lesson, _, _, T).
 
 main :-
+    init_partition_schedule,
     findall(Lesson, group_subject_type_teacher_times(_, Lesson, _, _, _), AllLessons),
     find_lenght(Length, AllLessons),
     ucs_traverse([node([], 0, 0)], Length).
@@ -174,6 +249,7 @@ count([X1|T],X,Z):- X1\=X,count(T,X,Z).
 % getting neighbor--------------------------------------------------------
 
 neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :- 
+    save_if_longer(State, Length),
     group_subject_type_teacher_times(Group, Lesson, Type, Teacher, Times),
     findall(event(Group, Lesson, _,  _, Teacher, _, _), member(event(Group, Lesson, _, _, Teacher, _, _),State), Result),
     length(Result, Val),
@@ -186,19 +262,28 @@ neighbor(node(State, Length, _), node(NewState, NewLength, 0)) :-
     LastTimeToStartTheLesson #= End + 1,
     between(Start, LastTimeToStartTheLesson, Slot),
     
-    % write('Slot: '), write(Slot), nl,     
-    % write('Group: '), write(Group), nl,    
-    % write('Teacher: '), write(Teacher), nl,
-    % write('Room: '), write(RoomID), nl,     
-    % write('Lesson: '), write(Lesson), nl,  
-    % write('Day: '), write(Day), nl,  
-    % write('State:'), write(State), nl,
+    %write('Slot: '), write(Slot), nl,     
+    %write('Group: '), write(Group), nl,    
+    %write('Teacher: '), write(Teacher), nl,
+    %write('Room: '), write(RoomID), nl,     
+    %write('Lesson: '), write(Lesson), nl,  
+    %write('Day: '), write(Day), nl,  
+    %write('State:'), write(State), nl,
     %between(1, SPD, Slot),
     NewState = [event(Group, Lesson, Type, RoomID, Teacher, Day, Slot)|State],
     NewLength #= Length + 1.
     % cost(schedule(NewState), NewCost).
 
 % ------------------------------------------------------------------------
+
+
+ucs_traverse([], _) :-
+    partition_schedule(Schedule, Length),
+    %format("\nНе удалось построить расписание. Лучшее частичное длины ~d:~n", [Length]),
+    %pretty_print(schedule(Schedule)),
+    missing_lessons(Schedule, Missing),
+    %format("\nНевыполнимые требования:~n", []),
+    print_expl(Missing).
 
 ucs_traverse([node(State, Goal, Cost)| _], Goal) :-
     format("\nTotal penalty: ~d\n\n\nSCHEDULE\n", [Cost]),
@@ -553,7 +638,6 @@ write_event(Stream, [event(Group, Lesson,Type, RoomID, Teacher, Day, Slot)|Rest]
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Входная точка прораммы, на вход подается имя файла с требованиями.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 timetable(FileName) :-
         phrase(requirementsXML(file(FileName)), Reqs),
         setup_call_cleanup(
