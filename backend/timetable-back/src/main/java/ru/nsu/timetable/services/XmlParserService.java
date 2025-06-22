@@ -172,7 +172,8 @@ public class XmlParserService {
             String groupId = getElementAttribute(unplacedElement, "group", "id");
 
             String subjectId = getElementAttribute(unplacedElement, "subject", "id");
-            String teacherId = getElementTextContent(unplacedElement, "teacher");
+            String subjectType = getElementAttribute(unplacedElement, "subject", "type");
+            String teacherId = getElementAttribute(unplacedElement, "teacher", "id");
 
             Group group = groupRepository.findById(Long.parseLong(groupId))
                     .orElseThrow(() -> new ResourceNotFoundException("Group not found: " + groupId));
@@ -181,10 +182,16 @@ public class XmlParserService {
             User teacher = userRepository.findById(Long.parseLong(teacherId))
                     .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
 
+            Event.AudienceType audienceType = null;
+            if (!subjectType.isEmpty()) {
+                audienceType = Event.AudienceType.valueOf(subjectType.toLowerCase());
+            }
+
             UnplacedSubject unplacedSubject = UnplacedSubject.builder()
                     .group(group)
                     .subject(subject)
                     .teacher(teacher)
+                    .audienceType(audienceType)
                     .build();
 
             unplacedSubjects.add(unplacedSubject);

@@ -1,4 +1,8 @@
 package ru.nsu.timetable.models.dto;
 
-public record UnplacedSubjectDTO(String groupNumber, String subjectName, String teacherName) {
-}
+public record UnplacedSubjectDTO(
+        String groupNumber,
+        String subjectName,
+        String teacherName,
+        String audienceType
+) {}
