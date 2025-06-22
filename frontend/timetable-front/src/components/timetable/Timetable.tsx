@@ -60,14 +60,6 @@ const TimetableSettings: React.FC = () => {
         </Box>
       )
     }
-
-    if (role?.includes('teacher')) {
-      return (
-        <Link to="/profile/professor/availability" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Указать предпочтительное время работы {'>'} </Typography>
-        </Link>
-      )
-    }
   }
 
   if (!profile) {
