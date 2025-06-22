@@ -8,6 +8,14 @@ import GuestGuard from '../guards/guestGuard'
 import AuthGuard from '../guards/authGuard';
 import TimetableSettings from '../components/timetable/Timetable';
 import TimetableSettingsPage from '../views/timetable/TimetableSettingsPage';
+import { Help } from '@mui/icons-material';
+import AboutUs from '../views/aboutus/AboutUs';
+import Faq from '../views/help/Help';
+import ProfileTab from '../components/userprofile/profile/ProfileTab';
+import Schedule from '../views/schedule/Schedule';
+import UserProfile from '../views/user-profile/UserProfile';
+import TimetableUpdatesPage from '../views/notifications/TimetableUpdatePage';
+import AvailableTime from '../views/table/AvailableTime';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -49,6 +57,8 @@ const Router = [
     children: [
       { path: '/',                      element: <Navigate to="/auth/login" /> },
       { path: '/auth/login',            element: <Login /> },
+      { path: '/auth/faq',              element: <Faq /> },
+      { path: '/auth/about',          element: <AboutUs /> },
       { path: '/auth/register',         element: <Register /> },
       { path: '/auth/forgot-password',  element: <ForgotPassword /> },
     ],
@@ -61,13 +71,16 @@ const Router = [
       </AuthGuard>
     ),
     children: [
-      { path: '/profile',                         element: <Profile /> },
+      { path: '/profile',                         element: <UserProfile /> },
       { path: '/profile/profile-edit',            element: <ProfileEdit /> },
-      { path: '/profile/timetable',               element: <Timetable /> },
+      { path: '/profile/timetable',               element: <Schedule /> },
+      { path: '/profile/faq',              element: <Faq /> },
+      { path: '/profile/about',          element: <AboutUs /> },
       { path: '/profile/change-password',         element: <ChangePassword /> },
       { path: '/profile/professor',               element: <ProfessorProfile /> },
       { path: '/profile/professor/course',        element: <CreateCourse /> },
-      { path: '/profile/professor/availability',  element: <AvaliabilityTime /> }
+      { path: '/profile/professor/availability',  element: <AvailableTime /> },
+      { path: '/profile/notifications',       element: <TimetableUpdatesPage /> }
     ],
   },
 
@@ -83,7 +96,8 @@ const Router = [
       { path: '/admin/timetable/add-subject',     element: <AddSubject /> },
       { path: '/admin/timetable/add-classroom',   element: <AddClassroom /> },
       { path: '/admin/timetable/add-group',       element: <AddGroup /> },
-      { path: '/admin/timetable',       element: <TimetableSettingsPage /> }
+      { path: '/admin/timetable',       element: <TimetableSettingsPage /> },
+      { path: '/admin/timetable/updates',       element: <TimetableUpdatesPage /> }
     ],
   },
   {

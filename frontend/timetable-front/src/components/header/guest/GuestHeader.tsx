@@ -27,15 +27,10 @@ const Header = () => {
         >
             <AppBarStyled position="sticky" color="default">
                 <ToolbarStyled>
-                    <Typography
-                        sx={{
-                            width: '15%',
-                            fontSize: 20,
-                            color: 'primary.main',
-                        }}
-                    >
-                        TimeTable
-                    </Typography>
+                   <Box  px={3}>
+              <Typography color='primary' fontWeight={600} fontSize={20}>University</Typography>
+               <Typography fontSize={20}>Timetable</Typography>
+            </Box>
 
                     <>
                         <Navigation />

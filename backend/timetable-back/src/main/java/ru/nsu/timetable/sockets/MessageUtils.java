@@ -16,7 +16,7 @@ import ru.nsu.timetable.configuration.security.jwt.JwtUtils;
 @RequiredArgsConstructor
 public class MessageUtils {
     private static final Logger logger = LoggerFactory.getLogger(MessageUtils.class);
-    private static final String DESTINATION_URL = "/websockets/notifications/newLog";
+    private static final String DESTINATION_URL = "/notifications/newLog";
     private final JwtUtils jwtUtils;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -31,6 +31,7 @@ public class MessageUtils {
                             LocalDateTime.now(),
                             subMessage
                     ));
+            logger.debug("Сообщение отправлено!");
         } catch (MessagingException e) {
             logger.error("Cannot send message to url " + DESTINATION_URL, e);
         }

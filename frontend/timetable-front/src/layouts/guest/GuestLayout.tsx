@@ -2,6 +2,7 @@ import { Box, styled } from '@mui/material';
 import { FC } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../../components/header/guest/GuestHeader';
+import Header2 from '../full/header/Header';
 
 const MainWrapper = styled('div')(() => ({
     top: '0',

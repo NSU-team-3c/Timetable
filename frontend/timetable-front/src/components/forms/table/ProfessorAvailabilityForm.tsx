@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addDays, addMinutes } from 'date-fns';
 import { ru } from 'date-fns/locale'; // Локализация на русском
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, DialogContentText } from '@mui/material';
 import { AppState, dispatch } from '../../../store/Store';
 import { addTimeslot, deleteTimeslot, fetchTimeslots, removeTimeslot, updateTimeslot } from '../../../store/professor/avaliabilitySlice';
@@ -98,7 +97,7 @@ const TeacherAvailabilityForm: React.FC = () => {
     if (timeslots.some(e => isTimeConflict(e, event))) {
       return {
         style: {
-          backgroundColor: '#ff7043', 
+          backgroundColor: '#72C81F', 
           color: '#fff',              
           borderRadius: '5px',       
         },
@@ -109,9 +108,20 @@ const TeacherAvailabilityForm: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom align="center">
+
+       <Box
+            p={24}
+            mt={2}
+            sx={{
+                backgroundColor: '#FFFFFF',
+                padding: '5%',
+            }}
+        >
+      <Box mb={3}>
+      <Typography variant="h4" gutterBottom>
         Управление временем доступным для преподавания
       </Typography>
+      </Box>
 
       <Calendar
         localizer={localizer}
@@ -133,10 +143,20 @@ const TeacherAvailabilityForm: React.FC = () => {
           },
         }}
       />
+      </Box>
 
       {/* Список сохранённых интервалов */}
-      <Box>
-        <Typography variant="h6">Сохранённые интервалы</Typography>
+       <Box
+            p={24}
+            mt={3}
+            sx={{
+                backgroundColor: '#FFFFFF',
+                padding: '5%',
+            }}
+        >
+        <Box mb={3}>
+          <Typography variant="h4" gutterBottom>Сохранённые интервалы</Typography>
+        </Box>
         {timeslots.length === 0 ? (
           <Typography variant="body2" color="textSecondary">
             Нет сохранённых интервалов.

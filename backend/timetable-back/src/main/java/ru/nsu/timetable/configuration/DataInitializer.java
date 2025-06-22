@@ -43,11 +43,22 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             roleRepository.save(newRole);
         }
-        if (userRepository.findByEmail("admin@example.com").isEmpty()) {
+        if (userRepository.findByEmail("admin1@example.com").isEmpty()) {
             Role adminRole = roleRepository.findByName(ROLE_ADMINISTRATOR)
                     .orElseThrow(() -> new IllegalStateException("Role ADMINISTRATOR not found"));
             User admin = User.builder()
-                    .email("admin@example.com")
+                    .email("admin1@example.com")
+                    .password(new BCryptPasswordEncoder().encode("password"))
+                    .dateOfCreation(new Date())
+                    .roles(Set.of(adminRole))
+                    .build();
+            userRepository.save(admin);
+        }
+        if (userRepository.findByEmail("admin2@example.com").isEmpty()) {
+            Role adminRole = roleRepository.findByName(ROLE_ADMINISTRATOR)
+                    .orElseThrow(() -> new IllegalStateException("Role ADMINISTRATOR not found"));
+            User admin = User.builder()
+                    .email("admin2@example.com")
                     .password(new BCryptPasswordEncoder().encode("password"))
                     .dateOfCreation(new Date())
                     .roles(Set.of(adminRole))

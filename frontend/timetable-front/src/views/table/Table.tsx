@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import PageContainer from '../../components/container/PageContainer';
 import Table from '../../components/table/Table';
 
-const ChangePassword = () => (
+const Schedule = () => (
     <PageContainer title="Расписание" description="this is timetable view page">
         <Box
             p={24}
@@ -19,4 +19,4 @@ const ChangePassword = () => (
     </PageContainer>
 );
 
-export default ChangePassword;
+export default Schedule;

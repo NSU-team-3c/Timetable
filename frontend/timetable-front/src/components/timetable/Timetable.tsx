@@ -22,8 +22,8 @@ const TimetableSettings: React.FC = () => {
     if (role?.includes('administrator', 0)) {
       console.log(0);
       return (
-        <Box mt={2} sx={{boxShadow: 15}} p={3} mb={2}>
-          <Typography color={"secondary"} mt={2} fontSize={24} mb={3} textAlign={'center'} fontWeight={600}>Генерация расписания </Typography>
+        <Box mt={2} sx={{boxShadow: 15, backgroundColor: 'white'}} p={4} mb={2}>
+          <Typography mt={2} fontSize={24} mb={3} textAlign={'center'} fontWeight={600}>Генерация расписания </Typography>
 
         <Grid2 container mt={2}>
         
@@ -58,14 +58,6 @@ const TimetableSettings: React.FC = () => {
             </Button>
           </Box>
         </Box>
-      )
-    }
-
-    if (role?.includes('teacher')) {
-      return (
-        <Link to="/profile/professor/availability" style={{ textDecoration: 'none', display: 'block', marginTop: 8 }}>
-            <Typography color="primary">Указать предпочтительное время работы {'>'} </Typography>
-        </Link>
       )
     }
   }
