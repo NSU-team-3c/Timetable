@@ -14,14 +14,18 @@ import {
   Stack
 } from '@mui/material';
 import * as dropdownData from './data';
+import img1 from "../../../assets/images/profile/1.png";
 
 import { IconBellRinging } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import Scrollbar from '../../../components/custom-scroll/Scrollbar';
 import TimetableNotifications from '../../../components/timetable/TimetableNotification';
+import { AppState, useSelector } from '../../../store/Store';
+import { Notification } from '../../../types/notifications/notifications';
 
 const Notifications = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const notifications : Notification[] | undefined = useSelector((state: AppState) => state.notifications.notifications);
 
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
@@ -67,16 +71,16 @@ const Notifications = () => {
       >
         <Stack direction="row" py={2} px={4} justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Обновления</Typography>
-          <Chip label="5 new" color="primary" size="small" />
+          <Chip label={notifications.length + " новых"} color="primary" size="small" />
         </Stack>
         <Scrollbar sx={{ height: '385px' }}>
-          {dropdownData.notifications.map((notification, index) => (
+          {notifications.map((notification : Notification, index : number) => (
             <Box key={index}>
               <MenuItem sx={{ py: 2, px: 4 }}>
                 <Stack direction="row" spacing={2}>
                   <Avatar
-                    src={notification.avatar}
-                    alt={notification.avatar}
+                    src={img1}
+                    alt={img1}
                     sx={{
                       width: 48,
                       height: 48,
@@ -92,7 +96,7 @@ const Notifications = () => {
                         width: '240px',
                       }}
                     >
-                      {notification.title}
+                      {notification ? notification.updatedBy : ''}
                     </Typography>
                     <Typography
                       color="textSecondary"
@@ -102,7 +106,7 @@ const Notifications = () => {
                       }}
                       noWrap
                     >
-                      {notification.subtitle}
+                       {notification ? notification.message : ''}
                     </Typography>
                   </Box>
                 </Stack>
@@ -111,8 +115,7 @@ const Notifications = () => {
           ))}
         </Scrollbar>
         <Box p={3} pb={1}>
-          <TimetableNotifications />
-          <Button to="/apps/email" variant="outlined" component={Link} color="primary" fullWidth>
+          <Button to="/profile/notifications" variant="outlined" component={Link} color="primary" fullWidth>
             Посмотреть все обновления
           </Button>
         </Box>

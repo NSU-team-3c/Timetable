@@ -78,7 +78,8 @@ const Router = [
       { path: '/profile/change-password',         element: <ChangePassword /> },
       { path: '/profile/professor',               element: <ProfessorProfile /> },
       { path: '/profile/professor/course',        element: <CreateCourse /> },
-      { path: '/profile/professor/availability',  element: <AvaliabilityTime /> }
+      { path: '/profile/professor/availability',  element: <AvaliabilityTime /> },
+      { path: '/profile/notifications',       element: <TimetableUpdatesPage /> }
     ],
   },
 

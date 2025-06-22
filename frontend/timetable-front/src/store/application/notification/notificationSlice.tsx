@@ -1,15 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
-import axiosInstance from '../../../utils/axios';
-
-interface Notification {
-    id?: number;
-    object: string;
-    message: string;
-    updatedBy: string;
-    updatedAt: string;
-    subMessage?: string;
-}
+import { Notification } from '../../../types/notifications/notifications';
 
 interface NotificationsState {
   notifications: Notification[];

@@ -109,13 +109,19 @@ export const TeacherMenuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Свободное время',
     icon: IconSettings,
-    href: "/profile/professor/availability",
+    href: "/admin/timetable",
   },
   {
     id: uniqueId(),
     title: 'Моё расписание',
     icon: IconSettings,
     href: "/profile/timetable",
+  },
+  {
+    id: uniqueId(),
+    title: 'Обновления',
+    icon: IconSettings,
+    href: "/profile/notifications",
   },
   {
     navlabel: true,
@@ -155,6 +161,12 @@ export const StudentMenuitems: MenuitemsType[] = [
     title: 'Мое расписание',
     icon: IconSettings,
     href: "/profile/timetable",
+  },
+  {
+    id: uniqueId(),
+    title: 'Обновления',
+    icon: IconSettings,
+    href: "/profile/notifications",
   },
   {
     navlabel: true,

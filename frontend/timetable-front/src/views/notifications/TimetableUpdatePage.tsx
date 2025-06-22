@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import TimetableNotifications from '../../components/timetable/TimetableNotification';
+import NotificationsList from "../../components/notifications/NotificationList";
 
 const TimetableUpdatesPage = () => {
     return (
@@ -11,7 +12,7 @@ const TimetableUpdatesPage = () => {
                         mt={2}
                         sx={{backgroundColor: 'white'}}
                     >
-            <TimetableNotifications />
+                    <NotificationsList />
             </Box>
         </PageContainer>
     );

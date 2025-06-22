@@ -8,13 +8,15 @@ import AuthReducer from './auth/authSlice';
 import AvailabilityReducer from './professor/avaliabilitySlice';
 import GroupReducer from './application/group/groupSlice';
 import EventReducer from './application/table/eventSlice';
-import SubjectReducer from './application/subject/subjectSlice'
+import SubjectReducer from './application/subject/subjectSlice';
+import NotificationReducer from './application/notification/notificationSlice';
 
 import {
   useDispatch as useAppDispatch,
   useSelector as useAppSelector,
   TypedUseSelectorHook,
 } from 'react-redux';
+import { notifications } from '../layouts/full/header/data';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +26,7 @@ export const store = configureStore({
     professors: ProfessorsReducer,
     rooms: AuditoryReducer,
     availability: AvailabilityReducer,
+    notifications: NotificationReducer,
     groups: GroupReducer,
     events: EventReducer,
     subjects: SubjectReducer,
@@ -37,6 +40,7 @@ const rootReducer = combineReducers({
   professors: ProfessorsReducer,
   rooms: AuditoryReducer,
   availability: AvailabilityReducer,
+  notifications: NotificationReducer,
   groups: GroupReducer,
   events: EventReducer,
   subjects: SubjectReducer,

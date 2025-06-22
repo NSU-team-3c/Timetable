@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import { useDispatch } from '../store/Store';
 import { setGroupUpdateFlag } from '../store/application/group/groupSlice';
+import { addNotification } from '../store/application/notification/notificationSlice';
 
 export function useWebSocket(baseUrl: string, token: string | null) {
   const socketRef = useRef<Client | null>(null);
@@ -28,6 +29,8 @@ export function useWebSocket(baseUrl: string, token: string | null) {
 
         client.subscribe('/notifications/newLog', (message) => {
           const body = JSON.parse(message.body);
+
+          dispatch(addNotification(body))
           setMessages((prev) => [...prev, JSON.stringify(body)]);
           console.log(body);
           dispatch(setGroupUpdateFlag());
