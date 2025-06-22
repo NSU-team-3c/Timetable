@@ -26,7 +26,7 @@ export function useWebSocket(baseUrl: string, token: string | null) {
         console.log('STOMP connected');
         setIsConnected(true);
 
-        client.subscribe('/websockets/notifications/newLog', (message) => {
+        client.subscribe('/notifications/newLog', (message) => {
           const body = JSON.parse(message.body);
           setMessages((prev) => [...prev, JSON.stringify(body)]);
           console.log(body);
