@@ -15,4 +15,5 @@ public class UnplacedSubject {
     private Group group;
     private Subject subject;
     private User teacher;
+    private Event.AudienceType audienceType;
 }

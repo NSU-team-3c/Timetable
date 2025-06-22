@@ -50,14 +50,18 @@ public class TimetableMapper {
     }
 
     private UnplacedSubjectDTO toUnplacedSubjectDTO(UnplacedSubject unplacedSubject) {
-        String teacherName = unplacedSubject.getTeacher().getSurname() + unplacedSubject.getTeacher().getName();
+        String teacherName = unplacedSubject.getTeacher().getSurname() + " " + unplacedSubject.getTeacher().getName();
         String groupNumber = unplacedSubject.getGroup().getNumber();
         String subjectName = unplacedSubject.getSubject().getName();
+        String audienceType = unplacedSubject.getAudienceType() != null
+                ? unplacedSubject.getAudienceType().name().toLowerCase()
+                : null;
 
         return new UnplacedSubjectDTO(
                 groupNumber,
                 subjectName,
-                teacherName
+                teacherName,
+                audienceType
         );
     }
 }
