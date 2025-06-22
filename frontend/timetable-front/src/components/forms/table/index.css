@@ -25,24 +25,3 @@
   background-color: white;
   border-radius: 10;
 }
-
-/*Event Styles*/
-.rbc-event,
-.rbc-background-event {
-  z-index: 2;
-  padding: 4px !important;
-  border: none !important;
-  background-color: #a6a5a5a6;
-}
-
-.rbc-events-container {
-  width: 100% !important;
-}
-
-/*Timeslots Customization*/
-.rbc-day-slot .rbc-time-slot:after {
-  content: "";
-  width: 100%;
-  border-top: 1px solid #fbb3ec;
-  display: block;
-}

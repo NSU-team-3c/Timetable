@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addDays, addMinutes } from 'date-fns';
 import { ru } from 'date-fns/locale'; // Локализация на русском
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, DialogContentText } from '@mui/material';
 import { AppState, dispatch } from '../../../store/Store';
 import { addTimeslot, deleteTimeslot, fetchTimeslots, removeTimeslot, updateTimeslot } from '../../../store/professor/avaliabilitySlice';

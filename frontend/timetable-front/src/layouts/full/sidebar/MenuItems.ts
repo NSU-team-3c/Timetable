@@ -109,7 +109,7 @@ export const TeacherMenuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: 'Свободное время',
     icon: IconSettings,
-    href: "/admin/timetable",
+    href: "/profile/professor/availability",
   },
   {
     id: uniqueId(),

@@ -15,6 +15,7 @@ import ProfileTab from '../components/userprofile/profile/ProfileTab';
 import Schedule from '../views/schedule/Schedule';
 import UserProfile from '../views/user-profile/UserProfile';
 import TimetableUpdatesPage from '../views/notifications/TimetableUpdatePage';
+import AvailableTime from '../views/table/AvailableTime';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -78,7 +79,7 @@ const Router = [
       { path: '/profile/change-password',         element: <ChangePassword /> },
       { path: '/profile/professor',               element: <ProfessorProfile /> },
       { path: '/profile/professor/course',        element: <CreateCourse /> },
-      { path: '/profile/professor/availability',  element: <AvaliabilityTime /> },
+      { path: '/profile/professor/availability',  element: <AvailableTime /> },
       { path: '/profile/notifications',       element: <TimetableUpdatesPage /> }
     ],
   },
