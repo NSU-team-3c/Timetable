@@ -116,7 +116,7 @@ const profile: ProfileType[] = [
     icon: icon1,
   },
   {
-    href: '/apps/email',
+    href: '/profile/notifications',
     title: 'Страница обновлений',
     subtitle: 'Расписания',
     icon: icon2,

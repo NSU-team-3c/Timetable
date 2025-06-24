@@ -1,19 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, ButtonBase, Grid, Grid2, Typography} from '@mui/material';
+import { Backdrop, Box, Button, ButtonBase, Fade, Grid, Grid2, Modal, Typography} from '@mui/material';
 import { Link } from 'react-router-dom'; 
 import Spinner from '../../views/spinner/Spinner';
 import { AppState, dispatch, useSelector } from '../../store/Store';
 import { fetchProfile } from '../../store/profile/profileSlice';
 import axiosInstance from '../../utils/axios';
 import { format } from 'date-fns';
+import Result from './Result';
+import {  ResultType } from '../../types/timetable/timetable';
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '50%',
+  height: '30%',
+  bgcolor: 'background.paper',
+  //overflowY: 'auto',
+  boxShadow: 24,
+  p: 4,
+};
 
 
 const TimetableSettings: React.FC = () => {
   const {profile} = useSelector((state: AppState) => state.profile);
   const role = profile?.role.split(', ');
+  const [wait, setWait] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const [result, setResult] = useState<ResultType>();
 
   const sendRequest = async () => {
-    await axiosInstance.get('/api/v1/timetables/generate');
+
+    let isGenerating = false
+    let response
+    try {
+      response = await axiosInstance.get('/api/v1/timetables/generating_status');
+
+      isGenerating = response.data.isGenerating
+    } catch (err) {
+      console.log(err)
+      response = false;
+    }
+
+    console.log(isGenerating)
+
+    if (!isGenerating) {
+      setWait(true)
+      setOpen(true)
+      let res: ResultType = {isGeneratedSuccessfully: true, events: [], unplacedSubjects: []}
+      try {
+      const res2 = await axiosInstance.get('/api/v1/timetables/generate');
+      res = res2.data
+    } catch (err) {
+      console.log(err)
+      res = {isGeneratedSuccessfully: false, events: [], unplacedSubjects: []}
+    }
+    console.log(res)
+    setResult(res)
+    setWait(false)
+    }
   }
 
   const additionLinkView = () => {
@@ -70,6 +117,20 @@ const TimetableSettings: React.FC = () => {
 
   return (
     <Box sx={{ width: 800, margin: '0 auto', padding: 2, position: 'relative' }}>
+      <Modal
+                          aria-labelledby="transition-modal-title"
+                          aria-describedby="transition-modal-description"
+                          open={open}
+                          onClose={() => setOpen(false)}
+                          closeAfterTransition
+                          slots={{ backdrop: Backdrop }}
+                      >
+                          <Fade in={open}>
+                              <Box sx={style}>
+                                <Result setOpen={setOpen} wait={wait} result={result}/>
+                              </Box>
+                          </Fade>
+                    </Modal>
           {additionLinkView()}
     </Box>
   );

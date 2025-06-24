@@ -60,35 +60,28 @@ const IntroCard  = () => {
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconBriefcase size="21" />
       <Typography variant="h6">Дата рождения:  </Typography>
-       <Typography fontWeight={600} variant="body1" gutterBottom>
+       <Typography fontWeight={400} variant="h6">
                       {profile?.birthday ? format(new Date(profile.birthday), 'dd.MM.yy') : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
        <Typography variant="h6">Почта:  </Typography>
-      <Typography fontWeight={600} variant="body1" gutterBottom>
+      <Typography fontWeight={400} variant="h6">
                     {profile ? profile.email : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
        <Typography variant="h6">Номер телефона: </Typography>
-     <Typography fontWeight={600} variant="body1" gutterBottom>
+     <Typography fontWeight={400} variant="h6">
                     {profile ? profile.phone : ''}
                 </Typography>
     </Stack>
     <Stack direction="row" gap={2} alignItems="center" mb={3}>
       <IconAccessible size="21" />
-      <Typography variant="h6">Дата рождения: </Typography>
-      <Typography fontWeight={600} variant="body1" gutterBottom>
-                    {profile ? profile.birthday : ''}
-                </Typography>
-    </Stack>
-    <Stack direction="row" gap={2} alignItems="center" mb={3}>
-      <IconAccessible size="21" />
       <Typography variant="h6">О себе: </Typography>
-      <Typography fontWeight={600} variant="body1" gutterBottom>
+      <Typography fontWeight={400} variant="h6">
                     {profile ? profile.about : ''}
                 </Typography>
     </Stack>

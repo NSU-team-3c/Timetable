@@ -13,6 +13,9 @@ const Header2 = () => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
 
+   const {profile} = useSelector((state: AppState) => state.profile);
+      const role = profile?.role.split(', ');
+
   // drawer
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
@@ -58,10 +61,8 @@ const Header2 = () => {
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
          
+         {role && role.includes('administrator') &&  <Notifications />}
          
-          <Notifications />
-         
-        
           <Profile />
         </Stack>
       </ToolbarStyled>

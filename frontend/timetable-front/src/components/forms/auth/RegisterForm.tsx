@@ -5,10 +5,11 @@ import { Button, TextField, Box, Typography } from '@mui/material';
 import { Register } from '../../../types/auth/auth';
 import { dispatch } from '../../../store/Store';
 import { register } from '../../../store/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 
 const RegisterForm: React.FC = () => {
-
+  const navigate = useNavigate();
   const formik = useFormik<Register>({
     initialValues: {
       email: '',
@@ -23,8 +24,21 @@ const RegisterForm: React.FC = () => {
       confirmPassword: yup.string().oneOf([yup.ref('password')], 'Пароли не совпадают')
                     .required('Подтверждение пароля обязательно'),
     }),
-    onSubmit: (values: Register) => {
-      dispatch(register(values));
+    onSubmit: async (values: Register) => {
+
+      const resultAction = await dispatch(register(values)); 
+      
+            if (register.fulfilled.match(resultAction)) {
+              const result = resultAction.payload;  
+              if (result.access_token) {
+                sessionStorage.setItem('authToken', result.access_token);
+                
+                navigate('/profile');
+              }
+      
+            } else {
+              formik.setErrors({ email: 'Не получилось' });
+            }
     },
   });
 
