@@ -53,7 +53,6 @@ public class TimetableController {
             return ResponseEntity.ok(generatedTimetableDTO );
         } finally {
             isGenerating = false;
-            //todo: тут вернуть в subMessage минимальное неудовлетворяемое множество, если есть
             messageUtils.sendMessage(request, "generation", "finished", null);
         }
     }
