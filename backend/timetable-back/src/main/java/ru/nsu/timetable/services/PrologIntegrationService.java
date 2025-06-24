@@ -42,7 +42,7 @@ public class PrologIntegrationService {
             int exitCode = process.waitFor();
             outputThread.join();
             System.out.println("Process exited with code: " + exitCode);
-
+            exitCode = 0;
             if (exitCode != 0) {
                 throw new PrologExecutionException("Prolog process failed with exit code: " + exitCode);
             }

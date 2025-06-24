@@ -21,7 +21,7 @@ import java.util.*;
 @Service
 public class XmlParserService {
 
-    private static final String BASE_DATE = "2024-12-16";
+    private static final String BASE_DATE = "2025-05-16";
     private static final Map<Integer, String> PAIR_TIMES = Map.of(
             1, "09:00-10:35",
             2, "10:50-12:25",
@@ -115,7 +115,7 @@ public class XmlParserService {
 
             String groupId = getElementAttribute(timeSlotElement, "group", "id");
             String subjectId = getElementAttribute(timeSlotElement, "subject", "id");
-            String typeId = getElementAttribute(timeSlotElement, "type", "id");
+            String typeId = getElementAttribute(timeSlotElement, "subject", "type");
             String teacherId = getElementAttribute(timeSlotElement, "teacher", "id");
             String roomId = getElementAttribute(timeSlotElement, "room", "id");
 
@@ -124,11 +124,15 @@ public class XmlParserService {
                     ", Subject ID = " + subjectId +
                     ", Teacher ID = " + teacherId +
                     ", Room ID = " + roomId);
+            System.out.println("3333333333333333333333333333333333333333333");
 
             if (groupId.isEmpty() || subjectId.isEmpty() || teacherId.isEmpty() || roomId.isEmpty()) {
                 System.err.println("Empty field detected: Group ID = " + groupId + ", Subject ID = " + subjectId + ", Teacher ID = " + teacherId + ", Room ID = " + roomId);
                 throw new BadRequestException("One or more required fields are missing: " + groupId + ", " + subjectId + ", " + teacherId + ", " + roomId);
             }
+
+            System.out.println("444444444444444444444444444444444444444");
+
 
             List<Group> groups = new ArrayList<>();
             Group group = groupRepository.findById(Long.parseLong(groupId))
@@ -142,9 +146,11 @@ public class XmlParserService {
             Room room = roomRepository.findById(Long.parseLong(roomId))
                     .orElseThrow(() -> new ResourceNotFoundException("Room not found: " + roomId));
 
+            System.out.println("---------------------------------------" + typeId.toLowerCase());
             Event.AudienceType audienceType= Event.AudienceType.valueOf(typeId.toLowerCase());
-
+            System.out.println("lalalalala");
             Date[] startEndTimes = calculateTimes(dayNumber, (int) originalId);
+            System.out.println("vavavavavavavavvavavavavavava");
 
             Event event = Event.builder()
                     .startTime(startEndTimes[0])
@@ -155,9 +161,12 @@ public class XmlParserService {
                     .room(room)
                     .audienceType(audienceType)
                     .build();
+            System.out.println("kakakakakakakakakakakakaka");
 
             events.add(event);
         }
+
+        System.out.println("rararararararararara");
 
         return eventRepository.saveAll(events);
     }

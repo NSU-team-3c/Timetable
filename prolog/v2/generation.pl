@@ -86,14 +86,19 @@ print_expl(List) :-
     xml_write_expl(Stream, List),
     close(Stream).
 
-xml_write_expl(Stream, []).
-xml_write_expl(Stream, [event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
-    phrase_to_stream(phrase(" <unplaced>\n"), Stream),
-    phrase_to_stream(format_("\t <group id=\"~s\"/>\n", [Group]), Stream),
-    phrase_to_stream(format_("\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
-    phrase_to_stream(format_("\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
-    phrase_to_stream(phrase(" </unplaced>\n"), Stream),
-    xml_write_expl(Stream, Rest).
+xml_write_expl(Stream, Events) :-
+    phrase_to_stream(phrase("<timetable>\n"), Stream),
+    findall(_, xml_write_expl_(Stream, Events), _),
+    phrase_to_stream(phrase("</timetable>\n"), Stream).
+
+xml_write_expl_(Stream, []).
+xml_write_expl_(Stream, [event(Group, Lesson, Type, _, Teacher, _, _) | Rest]) :-
+    phrase_to_stream(phrase("\t<unplaced>\n"), Stream),
+    phrase_to_stream(format_("\t\t <group id=\"~s\"/>\n", [Group]), Stream),
+    phrase_to_stream(format_("\t\t <subject id=\"~s\" type=\"~s\" />\n", [Lesson, Type]), Stream),
+    phrase_to_stream(format_("\t\t <teacher id=\"~s\"/>\n", [Teacher]), Stream),
+    phrase_to_stream(phrase("\t</unplaced>\n"), Stream),
+    xml_write_expl_(Stream, Rest).
 
 
 
