@@ -18,7 +18,9 @@ import ru.nsu.timetable.models.dto.UserRegisterDTO;
 import ru.nsu.timetable.models.entities.User;
 import ru.nsu.timetable.models.mappers.UserMapper;
 import ru.nsu.timetable.payload.requests.*;
+import ru.nsu.timetable.payload.response.JwtAuthResponse;
 import ru.nsu.timetable.payload.response.MessageResponse;
+import ru.nsu.timetable.services.AuthService;
 import ru.nsu.timetable.services.UserService;
 
 import jakarta.validation.Valid;
@@ -37,6 +39,7 @@ public class AdminController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final MessageUtils messageUtils;
+    private final AuthService authService;
 
     @Operation(summary = "Registration of new student account in system")
     @ApiResponses({
@@ -49,10 +52,10 @@ public class AdminController {
     @PostMapping("/register_student")
     @Transactional
     @Tag(name = "Student Registration")
-    public UserRegisterDTO registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
+    public JwtAuthResponse registerNewStudent(@Valid @RequestBody RegistrationRequest registrationRequest) {
         User user = registerUser(registrationRequest, "STUDENT");
         messageUtils.sendMessage(null, "registration", "New student " + user.getEmail() + " registered", null);
-        return userMapper.toUserRegisterDTO(user);
+        return authService.authenticate(new AuthRequest(registrationRequest.getEmail(), registrationRequest.getPassword()));
     }
 
     @Operation(summary = "Registration of new teacher account in system", security = @SecurityRequirement(name = "bearerAuth"))
