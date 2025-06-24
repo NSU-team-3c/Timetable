@@ -3,6 +3,7 @@ package ru.nsu.timetable.services;
 import java.io.IOException;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import ru.nsu.timetable.models.dto.TimetableDTO;
 import ru.nsu.timetable.models.entities.*;
 import ru.nsu.timetable.models.mappers.TimetableMapper;
 import ru.nsu.timetable.repositories.*;
+import ru.nsu.timetable.sockets.MessageUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -30,6 +32,7 @@ public class TimetableService {
     private final EventRepository eventRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final MessageUtils messageUtils;
 
     public TimetableDTO getTimetableForUser(String email) {
         User user = userService.getUserByEmail(email);
@@ -85,7 +88,7 @@ public class TimetableService {
     }
 
     @Transactional
-    public GeneratedTimetableDTO generateAndSaveTimetable() {
+    public GeneratedTimetableDTO generateAndSaveTimetable(HttpServletRequest request) {
         try {
             List<Group> groups = groupRepository.findAll();
             List<Room> rooms = roomRepository.findAll();
@@ -119,11 +122,13 @@ public class TimetableService {
                     event.setTimetable(savedTimetable);
                 }
                 eventRepository.saveAll(timetable.getEvents());
+                messageUtils.sendMessage(request, "generation", "finished successfully", null);
                 return timetableMapper.toSuccessfullyGeneratedTimetableDTO(savedTimetable);
             } else {
                 if (generatedTimetable.getUnplacedSubject() == null) {
                     throw new TimetableParsingException("Failed to parse unplaced subjects");
                 }
+                messageUtils.sendMessage(request, "generation", "finished unsuccessfully", generatedTimetable.getUnplacedSubject());
                 return timetableMapper.toUnsuccessfullyGeneratedTimetableDTO(generatedTimetable.getUnplacedSubject());
             }
         } catch (IOException | InterruptedException e) {

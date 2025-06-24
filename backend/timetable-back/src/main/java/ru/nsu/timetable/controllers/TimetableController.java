@@ -49,12 +49,10 @@ public class TimetableController {
         messageUtils.sendMessage(request, "generation", "started", null);
         try {
             lastStartGenerationTime = Instant.now();
-            GeneratedTimetableDTO generatedTimetableDTO = timetableService.generateAndSaveTimetable();
+            GeneratedTimetableDTO generatedTimetableDTO = timetableService.generateAndSaveTimetable(request);
             return ResponseEntity.ok(generatedTimetableDTO );
         } finally {
             isGenerating = false;
-            //todo: тут вернуть в subMessage минимальное неудовлетворяемое множество, если есть
-            messageUtils.sendMessage(request, "generation", "finished", null);
         }
     }
 
